@@ -142,6 +142,39 @@ function decorateButtons(main) {
   });
 }
 
+const IMAGE_EXT_RE = /\.(png|jpe?g|webp|gif|svg)(\?.*)?$/i;
+const HEX_RE = /#[0-9a-f]{3,8}/gi;
+
+function hexLuminance(hex) {
+  const h = hex.replace('#', '');
+  const full = h.length === 3 ? h.replace(/./g, '$&$&') : h;
+  const [r, g, b] = [0, 2, 4].map((i) => parseInt(full.slice(i, i + 2), 16));
+  return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+}
+
+function isDarkBackground(color) {
+  const hexes = String(color).match(HEX_RE);
+  if (!hexes) return false;
+  return hexes.reduce((sum, h) => sum + hexLuminance(h), 0) / hexes.length < 0.5;
+}
+
+function decorateSectionBackgrounds(main) {
+  main.querySelectorAll('.section[data-background]').forEach((section) => {
+    const { background } = section.dataset;
+    if (!background) return;
+    if (IMAGE_EXT_RE.test(background)) {
+      const { pathname } = new URL(background, window.location.href);
+      section.style.backgroundImage = `url('${pathname}?width=2000&format=webply&optimize=medium')`;
+      section.style.backgroundSize = 'cover';
+      section.style.backgroundPosition = 'center';
+    } else {
+      section.style.background = background;
+    }
+    section.classList.add('colored-background');
+    section.classList.add(isDarkBackground(background) ? 'dark-background' : 'light-background');
+  });
+}
+
 /**
  * Decorates the main element.
  * @param {Element} main The main element
@@ -151,6 +184,7 @@ export function decorateMain(main) {
   decorateIcons(main);
   buildAutoBlocks(main);
   decorateSections(main);
+  decorateSectionBackgrounds(main);
   decorateBlocks(main);
   decorateButtons(main);
 }

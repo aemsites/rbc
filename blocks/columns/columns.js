@@ -1,6 +1,7 @@
 export default function decorate(block) {
   const cols = [...block.firstElementChild.children];
   block.classList.add(`columns-${cols.length}-cols`);
+  block.style.setProperty('--columns-count', cols.length);
 
   // setup image columns
   [...block.children].forEach((row) => {

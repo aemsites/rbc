@@ -1,6 +1,7 @@
 .columns > div {
   display: flex;
   flex-direction: column;
+  gap: var(--space-l);
 }
 
 .columns img {
@@ -19,15 +20,20 @@
   display: block;
 }
 
-@media (width >= 900px) {
+@media (width >= 768px) {
   .columns > div {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
     align-items: center;
-    flex-direction: unset;
-    gap: 24px;
   }
 
   .columns > div > div {
-    flex: 1;
     order: unset;
+  }
+}
+
+@media (width >= 1024px) {
+  .columns > div {
+    grid-template-columns: repeat(var(--columns-count, 2), 1fr);
   }
 }
