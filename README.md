@@ -1,9 +1,9 @@
-# Your Project's Title...
-Your project's description...
+# RBC Royal Bank on EDS
+Edge Delivery Services implementation for rbcroyalbank.com
 
 ## Environments
-- Preview: https://main--{repo}--{owner}.aem.page/
-- Live: https://main--{repo}--{owner}.aem.live/
+- Preview: https://main--rbc--aemsites.aem.page
+- Live: https://main--rbc--aemsites.aem.live
 
 ## Documentation
 
