@@ -13,11 +13,11 @@ header nav {
     'hamburger brand tools' var(--nav-height)
     'sections sections sections' 1fr / auto 1fr auto;
   align-items: center;
-  gap: 0 24px;
+  gap: 0 var(--space-l);
   margin: auto;
   max-width: 1248px;
   height: var(--nav-height);
-  padding: 0 24px;
+  padding: 0 var(--space-l);
   font-family: var(--body-font-family);
 }
 
@@ -30,7 +30,7 @@ header nav[aria-expanded='true'] {
   min-height: 100dvh;
 }
 
-@media (width >= 900px) {
+@media (width >= 768px) {
   header .nav-wrapper {
     position: relative;
   }
@@ -38,9 +38,9 @@ header nav[aria-expanded='true'] {
   header nav {
     display: flex;
     justify-content: space-between;
-    gap: 0 32px;
+    gap: 0 var(--space-xl);
     max-width: 1264px;
-    padding: 0 32px;
+    padding: 0 var(--space-xl);
   }
 
   header nav[aria-expanded='true'] {
@@ -132,7 +132,7 @@ header nav[aria-expanded='true'] .nav-hamburger-icon::after {
   transform: rotate(-45deg);
 }
 
-@media (width >= 900px) {
+@media (width >= 768px) {
   header nav .nav-hamburger {
     display: none;
     visibility: hidden;
@@ -185,7 +185,7 @@ header nav .nav-sections ul > li > ul > li {
   font-weight: 400;
 }
 
-@media (width >= 900px) {
+@media (width >= 768px) {
   header nav .nav-sections {
     display: block;
     visibility: visible;
@@ -198,7 +198,7 @@ header nav .nav-sections ul > li > ul > li {
 
   header nav .nav-sections .nav-drop {
     position: relative;
-    padding-right: 16px;
+    padding-right: var(--space-s);
     cursor: pointer;
   }
 
@@ -224,7 +224,7 @@ header nav .nav-sections ul > li > ul > li {
 
   header nav .nav-sections ul {
     display: flex;
-    gap: 24px;
+    gap: var(--space-l);
     margin: 0;
   }
 
@@ -244,8 +244,8 @@ header nav .nav-sections ul > li > ul > li {
     left: -24px;
     width: 200px;
     top: 150%;
-    padding: 16px;
-    background-color: var(--light-color);
+    padding: var(--space-s);
+    background-color: var(--rbc-cool-white);
     white-space: initial;
   }
 
@@ -258,11 +258,11 @@ header nav .nav-sections ul > li > ul > li {
     height: 0;
     border-left: 8px solid transparent;
     border-right: 8px solid transparent;
-    border-bottom: 8px solid var(--light-color);
+    border-bottom: 8px solid var(--rbc-cool-white);
   }
 
   header nav .nav-sections .default-content-wrapper > ul > li > ul > li {
-    padding: 8px 0;
+    padding: var(--space-2xs) 0;
   }
 }
 
