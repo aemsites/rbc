@@ -18,6 +18,7 @@
   --rbc-light-blue: #edf7fc;
   --rbc-yellow: #fedf01;
   --rbc-yellow-dark: #e8cf00;
+  --rbc-yellow-light: #fae487;
   --rbc-yellow-darker: #b5a80c;
   --rbc-red: #bd0000;
 
@@ -43,6 +44,7 @@
   --heading-font-family: rbc-display, rbc-display-fallback, arial, sans-serif;
 
   /* body sizes */
+  --body-font-size-l: 18px;
   --body-font-size-m: 16px;
   --body-font-size-s: 14px;
   --body-font-size-xs: 12px;
@@ -113,7 +115,7 @@ body.appear {
 }
 
 header {
-  height: var(--nav-height);
+  min-height: var(--nav-height);
 }
 
 header .header,
@@ -320,7 +322,8 @@ main img {
   width: 24px;
 }
 
-.icon img {
+.icon img,
+.icon svg {
   height: 100%;
   width: 100%;
 }
