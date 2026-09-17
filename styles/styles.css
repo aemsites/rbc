@@ -217,6 +217,9 @@ a:hover {
 
 /* buttons */
 p.button-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
   margin: var(--space-xs) 0;
 }
 

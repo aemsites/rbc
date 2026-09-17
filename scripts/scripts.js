@@ -110,35 +110,47 @@ function buildAutoBlocks(main) {
 function decorateButtons(main) {
   main.querySelectorAll('p a[href]').forEach((a) => {
     a.title = a.title || a.textContent;
-    const p = a.closest('p');
-    const text = a.textContent.trim();
+  });
 
-    // quick structural checks
-    if (a.querySelector('img') || p.textContent.trim() !== text) return;
+  main.querySelectorAll('p').forEach((p) => {
+    const links = [...p.querySelectorAll('a[href]')];
+    if (!links.length) return;
 
-    // skip URL display links
-    try {
-      if (new URL(a.href).href === new URL(text, window.location).href) return;
-    } catch { /* continue */ }
+    // nothing but links may share the paragraph
+    const probe = p.cloneNode(true);
+    probe.querySelectorAll('a[href]').forEach((a) => a.remove());
+    if (probe.textContent.trim()) return;
 
-    // require authored formatting for buttonization
-    const strong = a.closest('strong');
-    const em = a.closest('em');
-    if (!strong && !em) return;
+    const buttons = links.filter((a) => {
+      if (a.querySelector('img')) return false;
+      const text = a.textContent.trim();
+      // skip URL display links
+      try {
+        if (new URL(a.href).href === new URL(text, window.location).href) return false;
+      } catch { /* continue */ }
+      // require authored formatting, wrapping this link and nothing else
+      const wrapper = a.closest('em, strong');
+      return !!wrapper && wrapper.textContent.trim() === text;
+    });
+    if (buttons.length !== links.length) return;
 
     p.className = 'button-wrapper';
-    a.className = 'button';
-    if (strong && em) { // high-impact call-to-action
-      a.classList.add('accent');
-      const outer = strong.contains(em) ? strong : em;
-      outer.replaceWith(a);
-    } else if (strong) {
-      a.classList.add('primary');
-      strong.replaceWith(a);
-    } else {
-      a.classList.add('secondary');
-      em.replaceWith(a);
-    }
+    buttons.forEach((a) => {
+      a.className = 'button';
+      const strong = a.closest('strong');
+      const em = a.closest('em');
+      if (strong && em) { // high-impact call-to-action
+        a.classList.add('accent');
+        const outer = strong.contains(em) ? strong : em;
+        outer.replaceWith(a);
+      } else if (strong) {
+        a.classList.add('primary');
+        strong.replaceWith(a);
+      } else {
+        a.classList.add('secondary');
+        em.replaceWith(a);
+      }
+    });
   });
 }
 
