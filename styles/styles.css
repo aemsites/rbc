@@ -183,13 +183,13 @@ blockquote {
 blockquote p:first-child { margin-top: 0; }
 blockquote p:last-child { margin-bottom: 0; }
 
-blockquote cite {
+blockquote p em:last-child {
   display: block;
   margin-top: var(--space-xs);
   color: var(--rbc-grey-600);
   font-family: var(--body-font-family);
-  font-size: var(--body-font-size-s);
-  font-style: normal;
+  font-size: var(--body-font-size-m);
+  font-style: italic;
 }
 
 main > div {
