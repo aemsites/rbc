@@ -1,4 +1,5 @@
 import {
+  getMetadata,
   loadHeader,
   loadFooter,
   decorateIcons,
@@ -116,7 +117,6 @@ function decorateButtons(main) {
     const links = [...p.querySelectorAll('a[href]')];
     if (!links.length) return;
 
-    // nothing but links may share the paragraph
     const probe = p.cloneNode(true);
     probe.querySelectorAll('a[href]').forEach((a) => a.remove());
     if (probe.textContent.trim()) return;
@@ -124,33 +124,28 @@ function decorateButtons(main) {
     const buttons = links.filter((a) => {
       if (a.querySelector('img')) return false;
       const text = a.textContent.trim();
-      // skip URL display links
       try {
         if (new URL(a.href).href === new URL(text, window.location).href) return false;
       } catch { /* continue */ }
-      // require authored formatting, wrapping this link and nothing else
+
       const wrapper = a.closest('em, strong');
-      return !!wrapper && wrapper.textContent.trim() === text;
+      if (!wrapper) return false;
+      const inner = wrapper.cloneNode(true);
+      inner.querySelectorAll('a[href]').forEach((link) => link.remove());
+      return !inner.textContent.trim();
     });
     if (buttons.length !== links.length) return;
 
-    p.className = 'button-wrapper';
-    buttons.forEach((a) => {
-      a.className = 'button';
+    const variants = new Map(buttons.map((a) => {
       const strong = a.closest('strong');
       const em = a.closest('em');
-      if (strong && em) { // high-impact call-to-action
-        a.classList.add('accent');
-        const outer = strong.contains(em) ? strong : em;
-        outer.replaceWith(a);
-      } else if (strong) {
-        a.classList.add('primary');
-        strong.replaceWith(a);
-      } else {
-        a.classList.add('secondary');
-        em.replaceWith(a);
-      }
-    });
+      if (strong && em) return [a, 'accent'];
+      return [a, strong ? 'primary' : 'secondary'];
+    }));
+
+    p.className = 'button-wrapper';
+    buttons.forEach((a) => { a.className = `button ${variants.get(a)}`; });
+    p.querySelectorAll('em, strong').forEach((w) => w.replaceWith(...w.childNodes));
   });
 }
 
@@ -191,9 +186,49 @@ function decorateSectionBackgrounds(main) {
  * Decorates the main element.
  * @param {Element} main The main element
  */
+const iconCache = new Map();
+
+/**
+ * Replaces the <img> the boilerplate inserts with an inline <svg>, so icons can take their
+ * colour from CSS. aem.js is vendored, so this runs as a second pass over the same spans.
+ * @param {Element} span The span.icon holding the image
+ */
+async function inlineIcon(span) {
+  const img = span.querySelector(':scope > img');
+  if (!img) return;
+  const { src } = img;
+  if (!iconCache.has(src)) {
+    iconCache.set(src, fetch(src)
+      .then((resp) => (resp.ok ? resp.text() : ''))
+      .catch(() => ''));
+  }
+  const markup = await iconCache.get(src);
+  if (!markup || !span.contains(img)) return;
+  const svg = new DOMParser().parseFromString(markup, 'image/svg+xml').querySelector('svg');
+  if (!svg || svg.querySelector('parsererror')) return;
+  svg.querySelectorAll('script').forEach((node) => node.remove());
+  svg.querySelectorAll('*').forEach((node) => {
+    [...node.attributes]
+      .filter((attr) => attr.name.toLowerCase().startsWith('on'))
+      .forEach((attr) => node.removeAttribute(attr.name));
+  });
+  svg.setAttribute('aria-hidden', 'true');
+  svg.setAttribute('focusable', 'false');
+  img.replaceWith(svg);
+}
+
+/**
+ * Inlines every authored icon in the element.
+ * @param {Element} element The container element
+ */
+function inlineIcons(element) {
+  element.querySelectorAll('span.icon').forEach(inlineIcon);
+}
+
 // eslint-disable-next-line import/prefer-default-export
 export function decorateMain(main) {
   decorateIcons(main);
+  inlineIcons(main);
   buildAutoBlocks(main);
   decorateSections(main);
   decorateSectionBackgrounds(main);
@@ -206,7 +241,7 @@ export function decorateMain(main) {
  * @param {Element} doc The container element
  */
 async function loadEager(doc) {
-  document.documentElement.lang = 'en';
+  document.documentElement.lang = getMetadata('lang') || 'en-CA';
   decorateTemplateAndTheme();
   const main = doc.querySelector('main');
   if (main) {
