@@ -175,6 +175,12 @@ header .nav-main {
   color: var(--rbc-white);
 }
 
+header .nav-search-brand,
+header .nav-search-close,
+header .nav-search-scrim {
+  display: none;
+}
+
 header .brand {
   flex: 0 0 auto;
   font-family: var(--heading-font-family);
@@ -1260,6 +1266,7 @@ header .nav-drawer a.nav-action:focus-visible {
 
   header #nav {
     display: flex;
+    position: relative;
     flex-direction: column;
   }
 
@@ -1281,6 +1288,98 @@ header .nav-drawer a.nav-action:focus-visible {
 
   header .nav-search {
     display: block;
+    position: static;
+  }
+
+  header .nav-search-toggle[aria-expanded="true"] + .nav-search-form {
+    display: flex;
+    position: fixed;
+    z-index: 1000;
+    top: 0;
+    left: 0;
+    right: 0;
+    gap: var(--space-l);
+    align-items: center;
+    padding: var(--space-l) max(var(--space-xl), (100% - var(--content-width)) / 2);
+    background-color: var(--rbc-white);
+    box-shadow: rgb(0 0 0 / 12%) 0 2px 6px;
+  }
+
+  header .nav-search-toggle[aria-expanded="true"] ~ .nav-search-scrim {
+    display: block;
+    position: fixed;
+    z-index: 990;
+    inset: 0;
+    background-color: rgb(0 0 0 / 45%);
+  }
+
+  header .nav-search-toggle[aria-expanded="true"] + .nav-search-form .nav-search-brand {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+  }
+
+  header .nav-search-brand .icon {
+    width: 56px;
+    height: 56px;
+  }
+
+  header .nav-search-field {
+    display: flex;
+    position: relative;
+    flex: 1 1 auto;
+    align-items: center;
+  }
+
+  header .nav-search-field::before {
+    content: "";
+    position: absolute;
+    left: var(--space-m);
+    width: 22px;
+    height: 22px;
+    background-color: var(--rbc-grey-900);
+    mask: url("../../icons/search.svg") center / contain no-repeat;
+    pointer-events: none;
+  }
+
+  header .nav-search-toggle[aria-expanded="true"] + .nav-search-form input[type="search"] {
+    box-sizing: border-box;
+    width: 100%;
+    padding: var(--space-s) var(--space-m) var(--space-s) calc(var(--space-m) * 2 + 22px);
+    border: 1px solid var(--rbc-blue);
+    border-radius: 4px;
+    color: var(--rbc-grey-900);
+    font: inherit;
+    font-size: var(--body-font-size-m);
+  }
+
+  header .nav-search-close {
+    display: block;
+    position: relative;
+    flex: 0 0 auto;
+    width: 28px;
+    height: 28px;
+    background: none;
+    color: var(--rbc-blue);
+  }
+
+  header .nav-search-close::before,
+  header .nav-search-close::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 24px;
+    height: 2px;
+    background-color: currentcolor;
+  }
+
+  header .nav-search-close::before {
+    transform: translate(-50%, -50%) rotate(45deg);
+  }
+
+  header .nav-search-close::after {
+    transform: translate(-50%, -50%) rotate(-45deg);
   }
 
   header .nav-utility-band,

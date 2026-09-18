@@ -14,6 +14,7 @@ const ph = {
   searchAction: 'https://www.rbcroyalbank.com/search-public/index.html',
   searchLabel: 'Ask your question',
   searchToggle: 'Search RBC',
+  closeSearch: 'Close search',
   selectLanguage: 'Select language',
   menu: 'Menu',
   closeMenu: 'Close menu',
@@ -119,7 +120,14 @@ function buildSearch() {
     autocomplete: 'off',
   });
 
-  form.append(type, label, input);
+  const searchBrand = el('span', { class: 'nav-search-brand' });
+  const field = el('div', { class: 'nav-search-field' }, input);
+  const close = el('button', {
+    class: 'nav-search-close',
+    type: 'button',
+    'aria-label': ph.closeSearch,
+  });
+  form.append(type, label, searchBrand, field, close);
 
   const wrapper = el('div', { class: 'nav-search' });
   const toggle = el('button', {
@@ -128,12 +136,19 @@ function buildSearch() {
     'aria-label': ph.searchToggle,
     'aria-expanded': 'false',
   });
-  toggle.addEventListener('click', () => {
-    const open = toggle.getAttribute('aria-expanded') === 'true';
-    toggle.setAttribute('aria-expanded', open ? 'false' : 'true');
-    if (!open) input.focus();
+  const setOpen = (open) => {
+    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    if (open) input.focus();
+    else toggle.focus();
+  };
+  const scrim = el('div', { class: 'nav-search-scrim' });
+  scrim.addEventListener('click', () => setOpen(false));
+  toggle.addEventListener('click', () => setOpen(toggle.getAttribute('aria-expanded') !== 'true'));
+  close.addEventListener('click', () => setOpen(false));
+  form.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') setOpen(false);
   });
-  wrapper.append(toggle, form);
+  wrapper.append(toggle, form, scrim);
   return wrapper;
 }
 
@@ -502,6 +517,8 @@ export default async function decorate(block) {
 
   const tools = pick('tools') || el('div', { class: 'tools' });
   tools.prepend(buildSearch());
+  const shield = brand?.querySelector('.icon');
+  if (shield) tools.querySelector('.nav-search-brand')?.append(shield.cloneNode(true));
   main.append(tools);
 
   const hamburger = el('button', { class: 'nav-hamburger', type: 'button' });
