@@ -290,6 +290,39 @@ header .nav-search-form input[type="search"] {
   font: inherit;
 }
 
+header .nav-search-field {
+  position: relative;
+}
+
+header .nav-search-suggest {
+  position: absolute;
+  z-index: 5;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin: var(--space-3xs) 0 0;
+  padding: var(--space-2xs) 0;
+  list-style: none;
+  background-color: var(--rbc-white);
+  border: 1px solid var(--rbc-grey-300);
+  border-radius: 4px;
+  box-shadow: rgb(0 0 0 / 12%) 0 4px 10px;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+header .nav-search-option {
+  padding: var(--space-xs) var(--space-m);
+  color: var(--rbc-grey-900);
+  cursor: pointer;
+}
+
+header .nav-search-option:hover,
+header .nav-search-option[aria-selected="true"] {
+  background-color: var(--nav-surface-tint);
+  color: var(--rbc-blue);
+}
+
 header .nav-section {
   display: none;
   position: relative;

@@ -3,6 +3,56 @@ import { loadFragment } from '../fragment/fragment.js';
 import { createElement as el } from '../../utils/dom.js';
 import { fetchPlaceholders } from '../../scripts/placeholders.js';
 
+let searchConfig;
+function loadSearchConfig() {
+  if (!searchConfig) {
+    searchConfig = fetch('/config.json')
+      .then((r) => (r.ok ? r.json() : {}))
+      .then((j) => j.public?.searchConfig || {})
+      .catch(() => ({}));
+  }
+  return searchConfig;
+}
+
+// until cors is fixed, use jsonp to fetch. replace with a plain fetch() once that happens
+function jsonp(url) {
+  return new Promise((resolve, reject) => {
+    const cb = `irSuggest${Date.now()}${Math.floor(Math.random() * 1e6)}`;
+    const script = el('script');
+    const cleanup = () => {
+      delete window[cb];
+      script.remove();
+    };
+    window[cb] = (data) => {
+      cleanup();
+      resolve(data);
+    };
+    script.onerror = () => {
+      cleanup();
+      reject(new Error('suggest request failed'));
+    };
+    script.src = `${url}${url.includes('?') ? '&' : '?'}callback=${cb}`;
+    document.head.append(script);
+  });
+}
+
+async function fetchSuggestions(term) {
+  const cfg = await loadSearchConfig();
+  if (!cfg.searchSuggestEndpoint || term.length < 2) return [];
+  const params = new URLSearchParams({
+    term,
+    SESSIONID: '',
+    interfaceID: cfg.searchSuggestInterfaceId || '5',
+    _: Date.now(),
+  });
+  try {
+    const data = await jsonp(`${cfg.searchSuggestEndpoint}?${params}`);
+    return Array.isArray(data) ? data : [];
+  } catch {
+    return [];
+  }
+}
+
 const PLACEHOLDER_PREFIX = {
   'fr-CA': '/fr',
   'zh-Hans': '/sc',
@@ -120,14 +170,89 @@ function buildSearch() {
     autocomplete: 'off',
   });
 
+  input.setAttribute('role', 'combobox');
+  input.setAttribute('aria-autocomplete', 'list');
+  input.setAttribute('aria-expanded', 'false');
+  input.setAttribute('aria-controls', 'nav-search-suggest');
+
+  const suggest = el('ul', { class: 'nav-search-suggest', role: 'listbox', id: 'nav-search-suggest' });
+  suggest.hidden = true;
+
   const searchBrand = el('span', { class: 'nav-search-brand' });
-  const field = el('div', { class: 'nav-search-field' }, input);
+  const field = el('div', { class: 'nav-search-field' }, [input, suggest]);
   const close = el('button', {
     class: 'nav-search-close',
     type: 'button',
     'aria-label': ph.closeSearch,
   });
   form.append(type, label, searchBrand, field, close);
+
+  let active = -1;
+  const closeSuggest = () => {
+    suggest.replaceChildren();
+    suggest.hidden = true;
+    active = -1;
+    input.setAttribute('aria-expanded', 'false');
+    input.removeAttribute('aria-activedescendant');
+  };
+  const renderSuggest = (items) => {
+    suggest.replaceChildren();
+    if (!items.length) {
+      closeSuggest();
+      return;
+    }
+    items.forEach((item, i) => {
+      const option = el('li', {
+        class: 'nav-search-option',
+        role: 'option',
+        id: `nav-search-opt-${i}`,
+        'aria-selected': 'false',
+      }, item.label);
+      option.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        input.value = item.value;
+        form.submit();
+      });
+      suggest.append(option);
+    });
+    suggest.hidden = false;
+    input.setAttribute('aria-expanded', 'true');
+  };
+  const highlight = () => {
+    [...suggest.children].forEach((option, i) => option.setAttribute('aria-selected', i === active ? 'true' : 'false'));
+    if (active >= 0) input.setAttribute('aria-activedescendant', suggest.children[active].id);
+    else input.removeAttribute('aria-activedescendant');
+  };
+
+  let debounce;
+  input.addEventListener('input', () => {
+    clearTimeout(debounce);
+    const term = input.value.trim();
+    if (term.length < 2) {
+      closeSuggest();
+      return;
+    }
+    debounce = setTimeout(async () => {
+      const items = await fetchSuggestions(term);
+      if (input.value.trim() === term) renderSuggest(items);
+    }, 200);
+  });
+  input.addEventListener('keydown', (e) => {
+    const options = [...suggest.children];
+    if (e.key === 'ArrowDown' && options.length) {
+      e.preventDefault();
+      active = (active + 1) % options.length;
+      highlight();
+    } else if (e.key === 'ArrowUp' && options.length) {
+      e.preventDefault();
+      active = (active - 1 + options.length) % options.length;
+      highlight();
+    } else if (e.key === 'Enter' && active >= 0) {
+      e.preventDefault();
+      input.value = options[active].textContent;
+      form.submit();
+    }
+  });
 
   const wrapper = el('div', { class: 'nav-search' });
   const toggle = el('button', {
@@ -138,8 +263,13 @@ function buildSearch() {
   });
   const setOpen = (open) => {
     toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-    if (open) input.focus();
-    else toggle.focus();
+    if (open) {
+      input.focus();
+    } else {
+      closeSuggest();
+      input.value = '';
+      toggle.focus();
+    }
   };
   const scrim = el('div', { class: 'nav-search-scrim' });
   scrim.addEventListener('click', () => setOpen(false));
