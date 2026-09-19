@@ -146,10 +146,18 @@ function buildLanguage() {
     ul.append(li);
   });
 
-  const details = el('details', { class: 'nav-language' });
-  const summary = el('summary', { 'aria-label': ph.selectLanguage }, (document.documentElement.lang || 'en').slice(0, 2).toUpperCase());
-  details.append(summary, ul);
-  return details;
+  const wrapper = el('div', { class: 'nav-language' });
+  const toggle = el('button', {
+    class: 'nav-language-toggle',
+    type: 'button',
+    'aria-label': ph.selectLanguage,
+    'aria-expanded': 'false',
+  }, (document.documentElement.lang || 'en').slice(0, 2).toUpperCase());
+  toggle.addEventListener('click', () => {
+    toggle.setAttribute('aria-expanded', toggle.getAttribute('aria-expanded') === 'true' ? 'false' : 'true');
+  });
+  wrapper.append(toggle, ul);
+  return wrapper;
 }
 
 function buildSearch() {
