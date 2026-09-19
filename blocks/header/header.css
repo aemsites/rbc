@@ -80,7 +80,8 @@ header .nav-language-list {
 
 header .nav-utility-band a,
 header .nav-utility-band button {
-  display: inline-block;
+  display: flex;
+  align-items: center;
   padding: var(--space-2xs) 0;
   white-space: nowrap;
   text-decoration: none;
@@ -90,6 +91,12 @@ header .nav-utility-band button {
       box-shadow: inset 0 -2px 0 var(--rbc-yellow);
     }
   }
+}
+
+header .nav-utility-band .icon {
+  width: 14px;
+  height: 14px;
+  padding-right: var(--space-3xs);
 }
 
 header .nav-lob-list>li>a[aria-current="page"] {
@@ -1050,8 +1057,6 @@ header .nav-drawer button.nav-action {
 
 header .nav-drawer a.nav-action:hover,
 header .nav-drawer a.nav-action:focus-visible {
-    background-color: var(--rbc-yellow-light);
-    color: var(--rbc-grey-900);
     text-decoration: none;
     border-radius: 0;
   }
@@ -1120,12 +1125,11 @@ header .nav-drawer a.nav-action:focus-visible {
   }
 
   header .nav-drawer .utility .nav-utility-promo {
-    display: block;
+    display: flex;
     width: auto;
     margin: var(--space-m) var(--space-l);
-    padding: var(--space-m);
     border: 1px solid rgb(255 255 255 / 40%);
-    text-align: center;
+    justify-content: center;
   }
 
   header .nav-drawer .nav-mega .icon,
