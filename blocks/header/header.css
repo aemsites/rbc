@@ -480,6 +480,10 @@ header .nav-dd-links a {
   padding: var(--space-2xs);
   border-radius: 8px;
   color: var(--rbc-grey-900);
+
+  &:hover {
+    box-shadow: none;
+  }
 }
 
 header .nav-lob-panel a {
