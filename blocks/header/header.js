@@ -606,7 +606,18 @@ function buildBreadcrumbs() {
   const title = getMetadata('breadcrumb-title') || getMetadata('og:title') || document.title;
   list.append(el('li', { 'aria-current': 'page' }, title));
 
-  return el('nav', { class: 'nav-breadcrumb', 'aria-label': ph.breadcrumbLabel }, list);
+  const crumbs = el('nav', { class: 'nav-breadcrumb', 'aria-label': ph.breadcrumbLabel }, list);
+
+  const showEdges = () => {
+    const scrollable = list.scrollWidth - list.clientWidth;
+    crumbs.classList.toggle('nav-breadcrumb-more-start', list.scrollLeft > 1);
+    crumbs.classList.toggle('nav-breadcrumb-more-end', list.scrollLeft < scrollable - 1);
+  };
+  list.addEventListener('scroll', showEdges, { passive: true });
+  window.addEventListener('resize', showEdges);
+  requestAnimationFrame(showEdges);
+
+  return crumbs;
 }
 
 export default async function decorate(block) {
