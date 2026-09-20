@@ -592,19 +592,28 @@ function wireDrawer(nav, drawer, hamburger, mega, main, tabs) {
 }
 
 function buildBreadcrumbs() {
-  const trail = getMetadata('breadcrumb');
-  if (!trail) return null;
+  const meta = getMetadata('breadcrumb');
+  if (!meta) return null;
 
   const here = window.location.pathname.replace(/\/$/, '');
-  const list = el('ol', { class: 'nav-breadcrumb-list' });
-  trail.split(',')
+  const leaf = getMetadata('breadcrumb-title')
+    || document.querySelector('main h1')?.textContent.trim()
+    || document.title;
+
+  const trail = meta.split(',')
     .map((crumb) => crumb.split('|').map((part) => part.trim()))
     .filter(([label, url]) => label && url
       && new URL(url, window.location).pathname.replace(/\/$/, '') !== here)
-    .forEach(([label, url]) => list.append(el('li', {}, el('a', { href: url }, label))));
+    .map(([label, url]) => ({ label, url }));
+  trail.push({ label: leaf, url: window.location.href });
 
-  const title = getMetadata('breadcrumb-title') || getMetadata('og:title') || document.title;
-  list.append(el('li', { 'aria-current': 'page' }, title));
+  const list = el('ol', { class: 'nav-breadcrumb-list' });
+  trail.forEach(({ label, url }, i) => {
+    const last = i === trail.length - 1;
+    list.append(last
+      ? el('li', { 'aria-current': 'page' }, label)
+      : el('li', {}, el('a', { href: url }, label)));
+  });
 
   const crumbs = el('nav', { class: 'nav-breadcrumb', 'aria-label': ph.breadcrumbLabel }, list);
 
