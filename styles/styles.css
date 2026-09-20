@@ -115,7 +115,29 @@ body.appear {
 }
 
 header {
-  min-height: var(--nav-height);
+  --header-nav: var(--nav-height);
+  --header-section: 0px;
+  --header-breadcrumb: 0px;
+
+  min-height: calc(var(--header-nav) + var(--header-section) + var(--header-breadcrumb));
+}
+
+header.nav-has-breadcrumb {
+  --header-breadcrumb: 35px;
+}
+
+header.nav-none {
+  --header-nav: 0px;
+}
+
+@media (width >= 769px) {
+  header:not(.nav-campaign, .nav-none) {
+    --header-nav: 98px;
+  }
+
+  header.nav-has-section {
+    --header-section: 64px;
+  }
 }
 
 header .header,

@@ -236,6 +236,15 @@ export function decorateMain(main) {
   decorateButtons(main);
 }
 
+function reserveHeaderHeight(header) {
+  if (!header) return;
+  const mode = getMetadata('header');
+  if (mode === 'none') header.classList.add('nav-none');
+  else if (mode === 'campaign') header.classList.add('nav-campaign');
+  else if (getMetadata('section-nav')) header.classList.add('nav-has-section');
+  if (mode !== 'none' && getMetadata('breadcrumb')) header.classList.add('nav-has-breadcrumb');
+}
+
 /**
  * Loads everything needed to get to LCP.
  * @param {Element} doc The container element
@@ -243,6 +252,7 @@ export function decorateMain(main) {
 async function loadEager(doc) {
   document.documentElement.lang = getMetadata('lang') || 'en-CA';
   decorateTemplateAndTheme();
+  reserveHeaderHeight(doc.querySelector('body > header'));
   const main = doc.querySelector('main');
   if (main) {
     decorateMain(main);

@@ -76,6 +76,7 @@ const ph = {
   sectionLabel: 'Section',
   languageLabel: 'Language',
   promotions: 'Promotions',
+  breadcrumbLabel: 'Breadcrumb',
   youAreIn: 'You are in',
 };
 
@@ -590,6 +591,24 @@ function wireDrawer(nav, drawer, hamburger, mega, main, tabs) {
   });
 }
 
+function buildBreadcrumbs() {
+  const trail = getMetadata('breadcrumb');
+  if (!trail) return null;
+
+  const here = window.location.pathname.replace(/\/$/, '');
+  const list = el('ol', { class: 'nav-breadcrumb-list' });
+  trail.split(',')
+    .map((crumb) => crumb.split('|').map((part) => part.trim()))
+    .filter(([label, url]) => label && url
+      && new URL(url, window.location).pathname.replace(/\/$/, '') !== here)
+    .forEach(([label, url]) => list.append(el('li', {}, el('a', { href: url }, label))));
+
+  const title = getMetadata('breadcrumb-title') || getMetadata('og:title') || document.title;
+  list.append(el('li', { 'aria-current': 'page' }, title));
+
+  return el('nav', { class: 'nav-breadcrumb', 'aria-label': ph.breadcrumbLabel }, list);
+}
+
 export default async function decorate(block) {
   if (getMetadata('header') === 'none') {
     block.closest('header')?.remove();
@@ -597,7 +616,6 @@ export default async function decorate(block) {
   }
 
   const sectionPath = getMetadata('section-nav');
-  if (sectionPath) block.closest('header')?.classList.add('nav-has-section');
 
   const placeholders = fetchPlaceholders(PLACEHOLDER_PREFIX[getMetadata('lang')] || 'default');
 
@@ -622,7 +640,7 @@ export default async function decorate(block) {
     if (language) main.append(language);
     nav.append(main);
     nav.classList.add('nav-campaign');
-    block.replaceChildren(nav);
+    block.replaceChildren(...[nav, buildBreadcrumbs()].filter(Boolean));
     return;
   }
 
@@ -709,5 +727,5 @@ export default async function decorate(block) {
 
   wireDrawer(nav, drawer, hamburger, mega, main, tabs);
   wireDropdowns(nav);
-  block.replaceChildren(nav);
+  block.replaceChildren(...[nav, buildBreadcrumbs()].filter(Boolean));
 }

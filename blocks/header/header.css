@@ -1299,14 +1299,6 @@ header .nav-drawer a.nav-action:focus-visible {
     order: 1;
   }
 
-  header {
-    min-height: 94px;
-  }
-
-  header.nav-has-section {
-    min-height: 158px;
-  }
-
   header .nav-hamburger {
     display: none;
   }
@@ -1463,4 +1455,62 @@ header .nav-drawer a.nav-action:focus-visible {
 
 header .nav-campaign .nav-main {
   justify-content: space-between;
+}
+
+header .nav-breadcrumb {
+  padding-block: var(--space-2xs);
+  padding-inline: max(var(--space-l), (100% - var(--content-width)) / 2);
+  border-top: 1px solid var(--rbc-grey-200);
+  font-size: var(--body-font-size-xs);
+}
+
+header .nav-breadcrumb-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  overflow-x: auto;
+  scrollbar-width: none;
+  white-space: nowrap;
+}
+
+header .nav-breadcrumb-list::-webkit-scrollbar {
+  display: none;
+}
+
+header .nav-breadcrumb-list li {
+  flex: 0 0 auto;
+}
+
+header .nav-breadcrumb-list li + li::before {
+  content: "";
+  display: inline-block;
+  width: 0.9em;
+  height: 0.9em;
+  margin-right: var(--space-2xs);
+  background-color: var(--rbc-grey-600);
+  mask: var(--nav-chevron) center / contain no-repeat;
+  rotate: -90deg;
+  vertical-align: -0.1em;
+}
+
+header .nav-breadcrumb .nav-breadcrumb-list li a {
+  color: var(--rbc-blue);
+  text-decoration: none;
+}
+
+header .nav-breadcrumb .nav-breadcrumb-list li a:hover {
+  text-decoration: underline;
+}
+
+header .nav-breadcrumb-list [aria-current="page"] {
+  color: var(--rbc-grey-600);
+}
+
+@media (width >= 768px) {
+  header .nav-breadcrumb {
+    padding-inline: max(var(--space-xl), (100% - var(--content-width)) / 2);
+  }
 }
