@@ -8,7 +8,7 @@ function loadSearchConfig() {
   if (!searchConfig) {
     searchConfig = fetch('/config.json')
       .then((r) => (r.ok ? r.json() : {}))
-      .then((j) => j.public?.searchConfig || {})
+      .then((j) => j.public?.searchSuggest || {})
       .catch(() => ({}));
   }
   return searchConfig;
@@ -38,15 +38,18 @@ function jsonp(url) {
 
 async function fetchSuggestions(term) {
   const cfg = await loadSearchConfig();
-  if (!cfg.searchSuggestEndpoint || term.length < 2) return [];
+  if (!cfg.baseEndpoint || term.length < 2) return [];
+  const lang = (document.documentElement.lang || 'en').slice(0, 2);
+  const interfaceID = cfg.interfaceId?.[lang] ?? cfg.interfaceId?.en;
+  if (interfaceID === undefined) return [];
   const params = new URLSearchParams({
     term,
     SESSIONID: '',
-    interfaceID: cfg.searchSuggestInterfaceId || '5',
+    interfaceID,
     _: Date.now(),
   });
   try {
-    const data = await jsonp(`${cfg.searchSuggestEndpoint}?${params}`);
+    const data = await jsonp(`${cfg.baseEndpoint}?${params}`);
     return Array.isArray(data) ? data : [];
   } catch {
     return [];
