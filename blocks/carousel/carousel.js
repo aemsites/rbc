@@ -1,4 +1,4 @@
-import { fetchPlaceholders } from '../../scripts/placeholders.js';
+import fetchLocalPlaceholders from '../../utils/placeholders.js';
 
 function updateActiveSlide(slide) {
   const block = slide.closest('.carousel');
@@ -99,7 +99,7 @@ export default async function decorate(block) {
   const rows = block.querySelectorAll(':scope > div');
   const isSingleSlide = rows.length < 2;
 
-  const placeholders = await fetchPlaceholders();
+  const placeholders = await fetchLocalPlaceholders();
 
   block.setAttribute('role', 'region');
   block.setAttribute('aria-roledescription', placeholders.carousel || 'Carousel');
