@@ -79,9 +79,9 @@
 
   /* layout */
   --content-width: 1200px;
-  --width-narrow-s: 640px;
-  --width-narrow-m: 840px;
-  --width-narrow-l: 1040px;
+  --width-s: 640px;
+  --width-m: 840px;
+  --width-l: 1040px;
   --nav-height: 64px;
 }
 
@@ -279,6 +279,7 @@ button.button {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-weight: 400;
 }
 
 a.button[aria-disabled="true"],
@@ -396,13 +397,6 @@ main > .section p a:not(.button)::after {
 }
 
 /* section metadata */
-main .section.light,
-main .section.highlight {
-  background-color: var(--rbc-cool-white);
-  margin: 0;
-  padding: var(--space-2xl) 0;
-}
-
 main > .section.colored-background {
   margin-block: 0;
   padding-block: var(--space-2xl);
@@ -476,16 +470,16 @@ main > .section[data-layout] > .default-content-wrapper:first-child {
   main > .section[data-layout="33-66"] { grid-template-columns: 1fr 2fr; }
 }
 
-main > .section.narrow-s > div {
-  max-width: var(--width-narrow-s);
+main > .section[data-width="s"] > div {
+  max-width: var(--width-s);
 }
 
-main > .section:is(.narrow, .narrow-m) > div {
-  max-width: var(--width-narrow-m);
+main > .section[data-width="m"] > div {
+  max-width: var(--width-m);
 }
 
-main > .section.narrow-l > div {
-  max-width: var(--width-narrow-l);
+main > .section[data-width="l"] > div {
+  max-width: var(--width-l);
 }
 
 main > .section.shadow {
