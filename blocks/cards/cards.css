@@ -3,13 +3,16 @@
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(257px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
   gap: var(--space-l);
 }
 
 .cards > ul > li {
-  border: 1px solid var(--border-color);
   background-color: var(--background-color);
+  
+  .cards-card-body :is(h2, h3, h4, h5, h6) {
+    font-size: var(--body-font-size-l);
+  }
 }
 
 .cards .cards-card-body {
@@ -24,4 +27,14 @@
   width: 100%;
   aspect-ratio: 4 / 3;
   object-fit: cover;
+}
+
+.cards.icons > ul > li {
+  .cards-card-image img {
+    width: initial;
+    padding-left: var(--space-s);
+    object-fit: initial;
+    max-width: 60px;
+    aspect-ratio: 1 / 1;
+  }
 }

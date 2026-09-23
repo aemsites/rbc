@@ -1,0 +1,117 @@
+.accordion .accordion-item {
+  border-bottom: 1px solid var(--rbc-grey-200);
+}
+
+.accordion > .accordion-item:first-child {
+  border-top: 1px solid var(--rbc-grey-200);
+}
+
+.accordion .accordion-item-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-s);
+  padding: var(--space-m) 0;
+  color: var(--link-color);
+  font-size: var(--body-font-size-m);
+  cursor: pointer;
+  list-style: none;
+}
+
+.accordion .accordion-item-label::-webkit-details-marker {
+  display: none;
+}
+
+.accordion .accordion-item-label > * {
+  margin: 0;
+}
+
+.accordion .accordion-item-label::after {
+  content: "";
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  background-color: currentcolor;
+  mask: url("../../icons/chevron-down.svg") center / contain no-repeat;
+  transition: transform 0.2s;
+}
+
+.accordion .accordion-item[open] .accordion-item-label::after {
+  transform: rotate(180deg);
+}
+
+.accordion .accordion-item-label:hover {
+  color: var(--link-hover-color);
+}
+
+.accordion .accordion-item-body {
+  padding-bottom: var(--space-m);
+}
+
+.accordion .accordion-item-body > *:first-child {
+  margin-top: 0;
+}
+
+.accordion .accordion-item-body > *:last-child {
+  margin-bottom: 0;
+}
+
+.accordion .accordion-more {
+  padding-top: var(--space-l);
+}
+
+.accordion .accordion-more > .accordion-item:first-child {
+  border-top: 1px solid var(--rbc-grey-200);
+}
+
+.accordion .accordion-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  margin: var(--space-l) auto 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--link-color);
+  font-size: var(--body-font-size-m);
+  cursor: pointer;
+}
+
+.accordion .accordion-toggle::before {
+  content: "+";
+  font-size: 1rem;
+  font-weight: normal;
+  line-height: 1;
+}
+
+.accordion .accordion-toggle[aria-expanded="true"]::before {
+  content: "\2212";
+}
+
+.accordion .accordion-toggle:hover {
+  color: var(--link-hover-color);
+}
+
+.accordion .accordion-toggle:hover span {
+  text-decoration: underline;
+}
+
+@media (width >= 768px) {
+  .accordion.split,
+  .accordion.split .accordion-more {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: var(--space-2xl);
+    align-items: start;
+  }
+
+  .accordion.split > .accordion-more,
+  .accordion.split > .accordion-toggle {
+    grid-column: 1 / -1;
+  }
+
+  .accordion.split > .accordion-item:nth-child(-n + 2),
+  .accordion.split .accordion-more > .accordion-item:nth-child(-n + 2) {
+    border-top: 1px solid var(--rbc-grey-200);
+  }
+}

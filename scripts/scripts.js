@@ -173,7 +173,7 @@ function decorateSectionBackgrounds(main) {
       const { pathname } = new URL(background, window.location.href);
       section.style.backgroundImage = `url('${pathname}?width=2000&format=webply&optimize=medium')`;
       section.style.backgroundSize = 'cover';
-      section.style.backgroundPosition = 'center';
+      section.style.backgroundPosition = section.dataset.backgroundPosition || 'center';
     } else {
       section.style.background = background;
     }

@@ -7,11 +7,14 @@ export default function decorate(block) {
     const li = document.createElement('li');
     while (row.firstElementChild) li.append(row.firstElementChild);
     [...li.children].forEach((div) => {
-      if (div.children.length === 1 && div.querySelector('picture')) div.className = 'cards-card-image';
+      if (div.children.length === 1 && div.querySelector('picture, img')) div.className = 'cards-card-image';
       else div.className = 'cards-card-body';
     });
     ul.append(li);
   });
-  ul.querySelectorAll('picture > img').forEach((img) => img.closest('picture').replaceWith(createOptimizedPicture(img.src, img.alt, false, [{ width: '750' }])));
+  ul.querySelectorAll('.cards-card-image img').forEach((img) => {
+    const optimized = createOptimizedPicture(img.src, img.alt, false, [{ width: '750' }]);
+    (img.closest('picture') || img).replaceWith(optimized);
+  });
   block.replaceChildren(ul);
 }

@@ -21,6 +21,7 @@
   --rbc-yellow-light: #fae487;
   --rbc-yellow-darker: #b5a80c;
   --rbc-red: #bd0000;
+  --rbc-orange: #ffba00;
 
   /* neutrals */
   --rbc-white: #fff;
@@ -70,8 +71,17 @@
   --space-3xl: 4rem;
   --space-4xl: 6rem;
 
+  /* radius */
+  --radius-s: 4px;
+  --radius-m: 8px;
+  --radius-l: 16px;
+  --radius-xl: 24px;
+
   /* layout */
   --content-width: 1200px;
+  --width-narrow-s: 640px;
+  --width-narrow-m: 840px;
+  --width-narrow-l: 1040px;
   --nav-height: 64px;
 }
 
@@ -107,6 +117,7 @@ body {
   color: var(--text-color);
   font-family: var(--body-font-family);
   font-size: var(--body-font-size-m);
+  font-weight: 300;
   line-height: var(--body-line-height);
 }
 
@@ -188,7 +199,7 @@ pre {
 
 pre {
   padding: var(--space-s);
-  border-radius: 8px;
+  border-radius: var(--radius-m);
   background-color: var(--rbc-cool-white);
   overflow-x: auto;
   white-space: pre;
@@ -232,6 +243,7 @@ a:any-link {
   color: var(--link-color);
   text-decoration: none;
   overflow-wrap: break-word;
+  font-weight: 400;
 }
 
 a:hover {
@@ -371,6 +383,18 @@ main > .section:first-of-type {
   }
 }
 
+main > .section p a:not(.button)::after {
+  content: "";
+  mask: url("/icons/chevron-down.svg") no-repeat center;
+  position: relative;
+  width: 15px;
+  height: 15px;
+  display: inline-block;
+  background-color: currentcolor;
+  transform: rotate(270deg);
+  vertical-align: middle;
+}
+
 /* section metadata */
 main .section.light,
 main .section.highlight {
@@ -416,6 +440,12 @@ main > .section.dark-background a.button.secondary:focus-visible {
   color: var(--rbc-blue);
 }
 
+main > .section > .default-content-wrapper :is(p, h2, h3, h4, h5, h6) {
+  text-align: center;
+  margin-bottom: var(--space-2xl);
+}
+
+
 /* section-metadata Layout: blocks side by side, default content full width, stacked under 768px */
 main > .section[data-layout] {
   --gutter: var(--space-l);
@@ -427,8 +457,9 @@ main > .section[data-layout] {
 
 main > .section[data-layout] > div {
   max-width: none;
-  margin-inline: 0;
+  margin: 0;
   padding-inline: 0;
+  align-self: start;
 }
 
 main > .section[data-layout] > .default-content-wrapper:first-child {
@@ -443,6 +474,37 @@ main > .section[data-layout] > .default-content-wrapper:first-child {
   main > .section[data-layout="50-50"] { grid-template-columns: 1fr 1fr; }
   main > .section[data-layout="66-33"] { grid-template-columns: 2fr 1fr; }
   main > .section[data-layout="33-66"] { grid-template-columns: 1fr 2fr; }
+}
+
+main > .section.narrow-s > div {
+  max-width: var(--width-narrow-s);
+}
+
+main > .section:is(.narrow, .narrow-m) > div {
+  max-width: var(--width-narrow-m);
+}
+
+main > .section.narrow-l > div {
+  max-width: var(--width-narrow-l);
+}
+
+main > .section.shadow {
+  box-shadow: 0 3.591px 7.847px 0 rgb(37 37 37 / 8%);
+  border-radius: var(--radius-s);
+  background: var(--rbc-white);
+  max-width: var(--content-width);
+  margin-inline: var(--space-l);
+  padding: var(--space-2xl) 0;
+
+  @media (width >= 768px) {
+    margin-inline: auto;
+  }
+}
+
+main > .section.overlap {
+  margin-top: calc(var(--space-3xl) * -1);
+  z-index: 1;
+  position: relative;
 }
 
 main > .section.spacer-top-s { margin-top: var(--space-l); }

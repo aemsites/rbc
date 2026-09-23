@@ -312,7 +312,7 @@ header .nav-search-suggest {
   list-style: none;
   background-color: var(--rbc-white);
   border: 1px solid var(--rbc-grey-300);
-  border-radius: 4px;
+  border-radius: var(--radius-s);
   box-shadow: rgb(0 0 0 / 12%) 0 4px 10px;
   max-height: 60vh;
   overflow-y: auto;
@@ -358,6 +358,7 @@ header .nav-section-list>li>button {
   font-size: var(--body-font-size-s);
   text-align: left;
   white-space: normal;
+  font-weight: 400;
 }
 
 header .nav-section-list>li>button:hover,
@@ -377,7 +378,7 @@ header .nav-section-overview>a {
   position: relative;
   align-items: center;
   padding: var(--space-2xs) 0;
-  border-radius: 8px;
+  border-radius: var(--radius-m);
   color: var(--rbc-blue);
   font-size: var(--body-font-size-s);
   font-weight: 700;
@@ -439,7 +440,7 @@ header .nav-mega-panel {
   min-width: 175px;
   padding: var(--space-s);
   border: 1px solid var(--nav-surface-border);
-  border-radius: 8px;
+  border-radius: var(--radius-m);
   background-color: var(--nav-surface);
   box-shadow: rgb(37 37 37 / 8%) 0 4px 8px, rgb(37 37 37 / 6%) 0 12px 26px;
   color: var(--rbc-grey-900);
@@ -456,7 +457,7 @@ header .nav-section-list .nav-dd-panel {
   width: min(100% - var(--space-xl), var(--content-width));
   margin-inline: auto;
   border: 1px solid var(--nav-surface-border);
-  border-radius: 8px;
+  border-radius: var(--radius-m);
   background-color: var(--nav-surface);
   box-shadow: rgb(37 37 37 / 8%) 0 4px 8px, rgb(37 37 37 / 6%) 0 12px 26px;
   color: var(--rbc-grey-900);
@@ -478,7 +479,7 @@ header .nav-dd-links a {
   gap: var(--space-2xs);
   width: 100%;
   padding: var(--space-2xs);
-  border-radius: 8px;
+  border-radius: var(--radius-m);
   color: var(--rbc-grey-900);
 
   &:hover {
@@ -562,7 +563,7 @@ header .nav-dd-featured {
   align-self: stretch;
   box-sizing: border-box;
   padding: var(--space-l);
-  border-radius: 8px 0 0 8px;
+  border-radius: var(--radius-m) 0 0 var(--radius-m);
   background-color: var(--nav-surface-tint);
 }
 
@@ -1364,7 +1365,7 @@ header .nav-drawer a.nav-action:focus-visible {
     width: 100%;
     padding: var(--space-s) var(--space-m) var(--space-s) calc(var(--space-m) * 2 + 22px);
     border: 1px solid var(--rbc-blue);
-    border-radius: 4px;
+    border-radius: var(--radius-s);
     color: var(--rbc-grey-900);
     font: inherit;
     font-size: var(--body-font-size-m);

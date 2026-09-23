@@ -1,1 +1,114 @@
 /* add global styles that can be loaded post LCP here */
+
+/* product card — shared component, rendered by cards(product) and persona-tabs */
+.product-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background-color: var(--background-color);
+}
+
+.product-card-head {
+  padding: var(--space-l) var(--space-m) var(--space-2xl);
+  text-align: center;
+}
+
+.product-card-chequing .product-card-head {
+  background-color: var(--rbc-blue);
+  color: var(--rbc-white);
+}
+
+.product-card-savings .product-card-head,
+.product-card-student .product-card-head,
+.product-card-youth .product-card-head {
+  background-color: var(--rbc-light-blue);
+}
+
+.product-card-head h3 {
+  margin: 0 0 var(--space-2xs);
+  color: inherit;
+  font-size: var(--heading-font-size-l);
+}
+
+.product-card-tagline {
+  margin: 0;
+  font-style: italic;
+}
+
+.product-card-pill {
+  width: fit-content;
+  margin: calc(var(--space-l) * -1) auto var(--space-l);
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  padding: var(--space-2xs) var(--space-m);
+  background-color: var(--background-color);
+  color: var(--rbc-blue);
+  font-weight: 500;
+}
+
+.product-card-body {
+  padding: 0 var(--space-m) var(--space-l);
+}
+
+.product-card-highlights {
+  margin: 0 0 var(--space-l);
+  padding: 0;
+  list-style: none;
+}
+
+.product-card-highlights li {
+  position: relative;
+  margin-bottom: var(--space-s);
+  padding-left: var(--space-m);
+}
+
+.product-card-highlights li::before {
+  content: "\2713";
+  position: absolute;
+  left: 0;
+  color: var(--rbc-blue);
+  font-weight: 700;
+}
+
+.product-card-price {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: center;
+  gap: var(--space-2xs);
+  margin-bottom: var(--space-m);
+  text-align: center;
+}
+
+.product-card-price strong {
+  font-size: var(--heading-font-size-xl);
+  font-weight: 500;
+}
+
+.product-card-or {
+  font-style: italic;
+}
+
+.product-card-price-note {
+  flex-basis: 100%;
+  font-size: var(--body-font-size-s);
+}
+
+.product-card-badge {
+  width: fit-content;
+  margin: 0 auto var(--space-m);
+  border-radius: 4px;
+  padding: var(--space-2xs) var(--space-s);
+  background-color: var(--rbc-yellow);
+  font-size: var(--body-font-size-s);
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.product-card-more {
+  margin-bottom: 0;
+  text-align: center;
+}
