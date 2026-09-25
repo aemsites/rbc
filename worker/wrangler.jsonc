@@ -1,0 +1,103 @@
+{
+  "name": "rbc-pzn",
+  "main": "src/index.js",
+  "compatibility_date": "2025-08-23",
+
+  // PAGES mirrors RBC's cgi-bin configs/<page>.config: one entry per personalized page, naming
+  // the Conductrics agent per segment. Which segments are live, and what content each one shows,
+  // is authored on the page itself in its `personalization` block.
+  //
+  // Wrangler does not inherit vars into named environments, which suits us: agent ids are
+  // environment-specific (web.config DEV vs PRD), so each environment states its own.
+  //
+  // The chequing-accounts ids below are from chequing-accounts.config. They currently return
+  // "No relevant commands" from Conductrics, as do the bank-accounts.config ids, so that page
+  // falls back to default until RBC confirms which agents are on the Server-Side API target.
+
+  "vars": {
+    "ORIGIN": "http://localhost:3000",
+    "PAGES": {
+      "/bank-accounts": {
+        "decisionLogic": "AGrQuIjdEunH|pIXOKGSsEcqf",
+        "agents": {
+          "senior": "a-jGrWF7XTW0",
+          "student": "a-fG3amTFdsL",
+          "newcomer": "a-mS9d54MkS9",
+          "international-student": "a-f9Sn5sja7J",
+          "mass": "a-mjFoy8t0On",
+          "prospect": "a-NYwMhjQZiMIL"
+        }
+      },
+      "/bank-accounts/chequing-accounts": {
+        "decisionLogic": "AGrQuIjdEunH|pIXOKGSsEcqf",
+        "agents": {
+          "senior": "a-FWzL0uqSJt",
+          "student": "a-eaXPPuXFck",
+          "newcomer": "a-0WwBgO4WRY",
+          "international-student": "a-R0Lz7W7Xy1OU",
+          "mass": "a-x82f0ZIyOl",
+          "prospect": "a-NYwMhjQZiMIL"
+        }
+      },
+      "/bank-accounts/savings-accounts": {
+        "agent": "a-EZTf1uvKTY",
+        "arms": { "B": "hisa", "D": "d2d", "F": "us-hisa" }
+      }
+    }
+  },
+
+  "env": {
+    "preview": {
+      "vars": {
+        "ORIGIN": "https://main--rbc--aemsites.aem.page",
+        "PAGES": {
+          "/bank-accounts": {
+            "decisionLogic": "AGrQuIjdEunH|pIXOKGSsEcqf",
+            "agents": {
+              "senior": "a-jGrWF7XTW0",
+              "student": "a-fG3amTFdsL",
+              "newcomer": "a-mS9d54MkS9",
+              "international-student": "a-f9Sn5sja7J",
+              "mass": "a-mjFoy8t0On",
+              "prospect": "a-NYwMhjQZiMIL"
+            }
+          }
+        }
+      }
+    },
+
+    "production": {
+      "vars": {
+        "ORIGIN": "https://main--rbc--aemsites.aem.live",
+        "PAGES": {
+          "/bank-accounts": {
+            "decisionLogic": "AGrQuIjdEunH|pIXOKGSsEcqf",
+            "agents": {
+              "senior": "a-OjVJktN23k",
+              "student": "a-Y94o85k24s",
+              "newcomer": "a-T3JftiVUOY",
+              "international-student": "a-V3DrqQaiu7",
+              "mass": "a-ilYCgHncQC",
+              "prospect": "a-kWJUYdN5Vq3O"
+            }
+          },
+          "/bank-accounts/chequing-accounts": {
+            "decisionLogic": "AGrQuIjdEunH|pIXOKGSsEcqf",
+            "agents": {
+              "senior": "a-M4mBcKdtHq",
+              "student": "a-NSheHciQxj",
+              "newcomer": "a-HhfSTaRyI5",
+              "international-student": "a-oaJuQhhjBf",
+              "mass": "a-aEmoT4lKSl",
+              "prospect": "a-kWJUYdN5Vq3O"
+            }
+          },
+          "/bank-accounts/savings-accounts": {
+            "agent": "a-k3uKXzolge",
+            "arms": { "B": "hisa", "D": "d2d", "F": "us-hisa" }
+          }
+        }
+      }
+    }
+  }
+}
