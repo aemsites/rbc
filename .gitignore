@@ -15,3 +15,7 @@ helix-importer-ui
 .hlx/.da-token.json
 
 content
+
+worker/.dev.vars
+worker/.wrangler
+worker/node_modules

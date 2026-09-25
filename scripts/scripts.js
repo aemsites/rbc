@@ -297,6 +297,7 @@ async function loadLazy(doc) {
 function loadDelayed() {
   import('./consent-check.js');
   import('./gtm.js');
+  import('./personalization.js').then(({ default: personalize }) => personalize());
   // load anything that can be postponed to the latest here
 }
 
