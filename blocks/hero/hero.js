@@ -1,5 +1,8 @@
+const contentImages = (block, sel) => [...block.querySelectorAll(sel)]
+  .filter((el) => !el.closest('span.icon'));
+
 function normalizeImage(block) {
-  const img = block.querySelector('img');
+  const [img] = contentImages(block, 'img');
   if (!img) return;
   img.loading = 'eager';
   if (img.closest('picture')) return;
@@ -47,7 +50,7 @@ export default function decorate(block) {
   if (row && row.children.length > 1 && !backdrop) {
     block.classList.add('hero-split');
   } else {
-    const picture = block.querySelector('picture');
+    const [picture] = contentImages(block, 'picture');
     if (picture) {
       const wrapper = picture.parentElement;
       block.prepend(picture);
