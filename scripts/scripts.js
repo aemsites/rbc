@@ -170,8 +170,8 @@ function decorateSectionBackgrounds(main) {
     const { background } = section.dataset;
     if (!background) return;
     if (IMAGE_EXT_RE.test(background)) {
-      const { pathname } = new URL(background, window.location.href);
-      section.style.backgroundImage = `url('${pathname}?width=2000&format=webply&optimize=medium')`;
+      const imageUrl = new URL(background, window.location.href);
+      section.style.backgroundImage = `url(${imageUrl.href})`;
       section.style.backgroundSize = 'cover';
       section.style.backgroundPosition = section.dataset.backgroundPosition || 'center';
     } else {
