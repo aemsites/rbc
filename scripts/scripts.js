@@ -296,6 +296,8 @@ async function loadLazy(doc) {
  */
 function loadDelayed() {
   import('./consent-check.js');
+  // ?martech=off keeps GTM out of the page entirely, for performance testing
+  if (new URLSearchParams(window.location.search).get('martech') !== 'off') import('./gtm.js');
   // load anything that can be postponed to the latest here
 }
 
