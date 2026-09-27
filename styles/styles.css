@@ -521,3 +521,15 @@ main > .section.padding-bottom-xl { padding-bottom: var(--space-4xl); }
 .library-metadata.block {
   display: none;
 }
+
+[data-personas]:not([data-personas*="default"]) {
+  display: none;
+}
+
+.persona-js [data-personas] {
+  display: revert;
+}
+
+.persona-js [data-personas].persona-hidden {
+  display: none;
+}
