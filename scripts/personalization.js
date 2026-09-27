@@ -164,16 +164,17 @@ export async function personalizeEager(main) {
 
 export default function personalize() {
   const section = document.querySelector('[data-personalization]');
-  if (!section) return;
+  if (!section && !document.querySelector('[data-personas]')) return;
 
-  const base = section.dataset.personalization;
-  section.removeAttribute('data-personalization');
+  const base = section && section.dataset.personalization;
+  if (section) section.removeAttribute('data-personalization');
 
   whenConsented(async () => {
     const name = await decide();
-    if (name && !holdExpired && await swapHero(section, base, name, document, true)) {
-      applyPersonas(name);
+    if (name && !holdExpired) {
+      // a hero authored as its own document still needs fetching; personas are already on the page
+      if (!base || await swapHero(section, base, name, document, true)) applyPersonas(name);
     }
-    section.removeAttribute(PENDING);
+    if (section) section.removeAttribute(PENDING);
   });
 }
