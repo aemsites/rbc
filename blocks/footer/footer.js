@@ -4,6 +4,21 @@ import { createElement as el } from '../../utils/dom.js';
 
 const BAR_BY_LANG = { 'fr-CA': '/fr/footer' };
 
+const SOCIAL_NAMES = {
+  linkedin: 'LinkedIn',
+  youtube: 'YouTube',
+};
+
+function nameSocialLinks(p) {
+  p.querySelectorAll('a:has(> .icon)').forEach((a) => {
+    if (a.title || a.textContent.trim()) return;
+    const icon = [...a.querySelector('.icon').classList].find((c) => c.startsWith('icon-')).slice(5);
+    const name = SOCIAL_NAMES[icon] || icon.charAt(0).toUpperCase() + icon.slice(1);
+    a.title = name;
+    a.setAttribute('aria-label', name);
+  });
+}
+
 function buildColumns(fragment) {
   const columns = el('div', { class: 'footer-columns' });
   fragment.querySelectorAll(':scope > .section').forEach((section) => {
@@ -34,6 +49,7 @@ function buildBar(fragment) {
       right.append(p);
     } else if (p.querySelector('.icon')) {
       p.className = 'footer-social';
+      nameSocialLinks(p);
       right.append(p);
     } else if (p.querySelector('a')) {
       p.className = 'footer-legal';
