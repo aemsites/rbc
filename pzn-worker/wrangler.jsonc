@@ -1,0 +1,24 @@
+{
+  "name": "rbc-pzn",
+  "main": "src/index.js",
+  "compatibility_date": "2025-08-23",
+
+  // Conductrics wiring lives in scripts/pzn-config.js, shared with the client-side fallback so the
+  // two halves cannot disagree. Which agent set is used follows from ORIGIN.
+
+  "vars": {
+    "ORIGIN": "http://localhost:3000"
+  },
+  "env": {
+    "preview": {
+      "vars": {
+        "ORIGIN": "https://main--rbc--aemsites.aem.page"
+      }
+    },
+    "production": {
+      "vars": {
+        "ORIGIN": "https://main--rbc--aemsites.aem.live"
+      }
+    }
+  }
+}

@@ -276,10 +276,18 @@ async function loadEager(doc) {
   reserveHeaderHeight(doc.querySelector('body > header'));
   const main = doc.querySelector('main');
   if (main) {
+    // resolve personalization before the hero is decorated, so the default never paints
+    if (main.querySelector('[data-personalization]')) {
+      const { personalizeEager } = await import('./personalization.js');
+      await personalizeEager(main);
+    }
     decorateMain(main);
     decoratePersonas(main);
     document.body.classList.add('appear');
-    await loadSection(main.querySelector('.section'), waitForFirstImage);
+    // a title band ahead of the hero would otherwise hand waitForFirstImage an imageless section,
+    // leaving the real LCP candidate lazy until loadLazy
+    const lead = [...main.querySelectorAll(':scope > .section')].slice(0, 2);
+    await loadSection(lead.find((s) => s.querySelector('img')) || lead[0], waitForFirstImage);
   }
 
   try {
@@ -318,9 +326,8 @@ async function loadLazy(doc) {
  */
 function loadDelayed() {
   import('./consent-check.js');
-  // ?martech=off keeps GTM out of the page entirely, for performance testing
   if (new URLSearchParams(window.location.search).get('martech') !== 'off') import('./gtm.js');
-  // load anything that can be postponed to the latest here
+  import('./personalization.js').then(({ default: personalize }) => personalize());
 }
 
 async function loadPage() {

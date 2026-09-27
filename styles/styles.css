@@ -533,3 +533,12 @@ main > .section.padding-bottom-xl { padding-bottom: var(--space-4xl); }
 .persona-js [data-personas].persona-hidden {
   display: none;
 }
+
+[data-pzn-pending] .hero {
+  min-height: 300px;
+  background-color: var(--rbc-grey-100);
+}
+
+[data-pzn-pending] .hero > * {
+  visibility: hidden;
+}

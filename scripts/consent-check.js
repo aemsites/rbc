@@ -9,6 +9,20 @@ function loadConsented() {
   import('./consented.js');
 }
 
+// consent may already be resolved from the cookie by the time a caller asks, so check both
+// eslint-disable-next-line import/prefer-default-export
+export function whenConsented(callback) {
+  if (lastState === true) {
+    callback();
+    return;
+  }
+  window.addEventListener('consent.update', function handler(event) {
+    if (!event.detail.consented) return;
+    window.removeEventListener('consent.update', handler);
+    callback();
+  });
+}
+
 function onConsentUpdate(consented) {
   if (consented === lastState) return;
   lastState = consented;

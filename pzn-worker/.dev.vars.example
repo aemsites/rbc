@@ -1,0 +1,4 @@
+# Copy to .dev.vars (gitignored) and fill from the RBC handover web.config.
+RULES_URL=https://ssgtmactivation.rbc.com/rules-engine
+RULES_KEY=
+CONDUCTRICS_URL=
