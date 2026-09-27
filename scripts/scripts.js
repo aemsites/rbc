@@ -1,3 +1,4 @@
+import { watchStuck } from '../utils/dom.js';
 import {
   getMetadata,
   loadHeader,
@@ -225,12 +226,20 @@ function inlineIcons(element) {
   element.querySelectorAll('span.icon').forEach(inlineIcon);
 }
 
+function decorateStickyTitle(main) {
+  const section = main.querySelector('.section:has(h1)');
+  if (!section || !getMetadata('sticky-title')) return;
+  section.classList.add('sticky-title');
+  watchStuck(section, (stuck) => section.classList.toggle('is-stuck', stuck));
+}
+
 // eslint-disable-next-line import/prefer-default-export
 export function decorateMain(main) {
   decorateIcons(main);
   inlineIcons(main);
   buildAutoBlocks(main);
   decorateSections(main);
+  decorateStickyTitle(main);
   decorateSectionBackgrounds(main);
   decorateBlocks(main);
   decorateButtons(main);
@@ -245,6 +254,20 @@ function reserveHeaderHeight(header) {
   if (mode !== 'none' && getMetadata('breadcrumb')) header.classList.add('nav-has-breadcrumb');
 }
 
+async function loadTemplate(main) {
+  const template = getMetadata('template');
+  if (!template || template === 'style-guide') return;
+  const base = `${window.hlx.codeBasePath}/templates/${template}/${template}`;
+  try {
+    loadCSS(`${base}.css`);
+    const mod = await import(`${base}.js`);
+    if (mod.default) await mod.default(main);
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.error(`template ${template} failed`, e);
+  }
+}
+
 /**
  * Loads everything needed to get to LCP.
  * @param {Element} doc The container element
@@ -256,6 +279,7 @@ async function loadEager(doc) {
   const main = doc.querySelector('main');
   if (main) {
     decorateMain(main);
+    await loadTemplate(main);
     document.body.classList.add('appear');
     await loadSection(main.querySelector('.section'), waitForFirstImage);
   }
@@ -270,12 +294,34 @@ async function loadEager(doc) {
   }
 }
 
+// links to a /modals/ fragment open it in the modal block
+function autolinkModals(element) {
+  element.addEventListener('click', async (e) => {
+    const origin = e.target.closest('a');
+    if (origin && origin.href && origin.href.includes('/modals/')) {
+      e.preventDefault();
+      const { openModal } = await import(`${window.hlx.codeBasePath}/blocks/modal/modal.js`);
+      openModal(origin.href);
+    }
+  });
+}
+
 /**
  * Loads everything that doesn't need to be delayed.
  * @param {Element} doc The container element
  */
+// a sticky title carries the breadcrumb with it
+function adoptBreadcrumb(doc) {
+  const title = doc.querySelector('main > .section.sticky-title > div');
+  const crumbs = doc.querySelector('header .nav-breadcrumb');
+  if (!title || !crumbs) return;
+  title.prepend(crumbs);
+  doc.querySelector('header').classList.remove('nav-has-breadcrumb');
+}
+
 async function loadLazy(doc) {
-  loadHeader(doc.querySelector('body > header'));
+  autolinkModals(doc);
+  loadHeader(doc.querySelector('body > header')).then(() => adoptBreadcrumb(doc));
 
   const main = doc.querySelector('main');
   await loadSections(main);

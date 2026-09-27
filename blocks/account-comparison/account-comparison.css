@@ -1,0 +1,120 @@
+/* stylelint-disable no-descending-specificity */
+.account-comparison {
+  overflow-x: auto;
+}
+
+.account-comparison table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--body-font-size-s);
+  text-align: center;
+}
+
+.account-comparison th,
+.account-comparison td {
+  padding: var(--space-s);
+  vertical-align: middle;
+}
+
+.account-comparison th p,
+.account-comparison td p {
+  margin: 0;
+}
+
+.account-comparison tbody th {
+  text-align: left;
+  font-weight: 500;
+}
+
+.account-comparison .account-comparison-head th {
+  background-color: var(--rbc-navy);
+  color: var(--rbc-white);
+  font-size: var(--body-font-size-xs);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.account-comparison .account-comparison-head th:first-child {
+  background-color: transparent;
+}
+
+.account-comparison .account-comparison-products td {
+  background-color: var(--rbc-light-blue);
+  padding-block: var(--space-l);
+}
+
+.account-comparison .account-comparison-products :is(h3, h4) {
+  margin: 0 0 var(--space-s);
+  font-size: var(--body-font-size-m);
+}
+
+.account-comparison .account-comparison-products strong {
+  display: block;
+  font-size: var(--heading-font-size-l);
+  font-weight: 500;
+}
+
+.account-comparison .account-comparison-products p.button-wrapper {
+  justify-content: center;
+}
+
+.account-comparison .account-comparison-products a.button {
+  border-radius: 999px;
+  padding-block: var(--space-xs);
+}
+
+.account-comparison .account-comparison-products + tr td {
+  background-color: var(--rbc-cool-white);
+  font-style: italic;
+}
+
+.account-comparison tbody tr:not(.account-comparison-group, .account-comparison-products) {
+  border-bottom: 1px solid var(--rbc-grey-200);
+}
+
+.account-comparison .account-comparison-group th {
+  padding: 0;
+  text-align: left;
+}
+
+.account-comparison .account-comparison-group button {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin: 0;
+  border: 0;
+  border-bottom: 1px solid var(--rbc-grey-200);
+  padding: var(--space-m) var(--space-s);
+  background: none;
+  color: var(--link-color);
+  font-size: var(--body-font-size-m);
+  text-align: left;
+  cursor: pointer;
+}
+
+.account-comparison .account-comparison-group button::after {
+  content: "+";
+  font-size: var(--body-font-size-l);
+}
+
+.account-comparison .account-comparison-group button[aria-expanded="true"]::after {
+  content: "\2212";
+}
+
+.account-comparison .account-comparison-head th.account-comparison-match {
+  background-color: var(--rbc-yellow);
+  color: var(--rbc-grey-900);
+}
+
+@media (width >= 768px) {
+  .account-comparison table {
+    font-size: var(--body-font-size-m);
+  }
+
+  .account-comparison th,
+  .account-comparison td {
+    padding: var(--space-m) var(--space-s);
+  }
+}

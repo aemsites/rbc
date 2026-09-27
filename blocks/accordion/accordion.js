@@ -28,6 +28,14 @@ export default function decorate(block) {
     }
   });
 
+  if (block.classList.contains('split')) {
+    [block, more].filter(Boolean).forEach((parent) => {
+      const cols = [0, 1].map(() => Object.assign(document.createElement('div'), { className: 'accordion-col' }));
+      [...parent.querySelectorAll(':scope > .accordion-item')].forEach((item, i) => cols[i % 2].append(item));
+      parent.prepend(...cols);
+    });
+  }
+
   if (!more) return;
 
   more.className = 'accordion-more';

@@ -1,0 +1,60 @@
+.account-filter .account-filter-form {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-l) var(--space-3xl);
+  margin-bottom: var(--space-xl);
+  padding-bottom: var(--space-xl);
+  border-bottom: 1px solid var(--rbc-grey-200);
+}
+
+.account-filter fieldset {
+  margin: 0;
+  border: 0;
+  padding: 0;
+  text-align: center;
+}
+
+.account-filter legend {
+  margin: 0 auto var(--space-s);
+  padding: 0;
+  font-weight: 700;
+}
+
+.account-filter label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-xs);
+  cursor: pointer;
+}
+
+.account-filter input {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  border: 1px solid var(--rbc-blue);
+  border-radius: 3px;
+  background-color: var(--rbc-white);
+  appearance: none;
+  cursor: pointer;
+}
+
+.account-filter input:checked {
+  position: relative;
+  background-color: var(--rbc-yellow);
+}
+
+.account-filter input:checked::before {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  background-color: var(--rbc-grey-900);
+  mask: url("../../icons/check.svg") center / contain no-repeat;
+}
+
+.account-filter input:focus-visible {
+  outline: 2px solid var(--rbc-blue);
+  outline-offset: 2px;
+}

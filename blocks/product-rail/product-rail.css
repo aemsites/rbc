@@ -1,0 +1,109 @@
+.product-rail {
+  font-size: var(--body-font-size-s);
+}
+
+.product-rail p {
+  margin: 0;
+}
+
+.product-rail .product-rail-image {
+  position: relative;
+  margin-bottom: var(--space-l);
+  line-height: 0;
+}
+
+.product-rail .product-rail-image img {
+  width: 100%;
+  border-radius: var(--radius-m);
+}
+
+.product-rail .product-rail-category {
+  position: absolute;
+  left: var(--space-m);
+  bottom: var(--space-m);
+  border-radius: var(--radius-s);
+  padding: var(--space-3xs) var(--space-2xs);
+  background-color: var(--rbc-white);
+  font-size: var(--body-font-size-xs);
+  font-weight: 700;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.product-rail .product-rail-offer {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-s);
+  margin-bottom: var(--space-l);
+  border: 1px solid var(--rbc-yellow);
+  border-radius: var(--radius-s);
+  padding: var(--space-l) var(--space-s) var(--space-s);
+}
+
+.product-rail .product-rail-eyebrow {
+  position: absolute;
+  top: calc(var(--space-2xs) * -1);
+  left: var(--space-s);
+  grid-column: 1 / -1;
+  padding: 0 var(--space-2xs);
+  background-color: var(--rbc-yellow);
+  font-size: var(--body-font-size-xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.product-rail .product-rail-offer picture {
+  grid-row: 2;
+  width: 56px;
+  line-height: 0;
+}
+
+.product-rail .product-rail-offer > div:last-child {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+.product-rail .product-rail-offer > div:last-child > :first-child {
+  margin-top: 0;
+}
+
+.product-rail .product-rail-offer p + p {
+  margin-top: var(--space-2xs);
+  color: var(--rbc-grey-600);
+  font-size: var(--body-font-size-xs);
+}
+
+.product-rail .product-rail-offer p:has(> a:only-child) {
+  color: inherit;
+  font-size: var(--body-font-size-s);
+}
+
+.product-rail .product-rail-fee {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-s);
+  margin-bottom: var(--space-s);
+}
+
+.product-rail .product-rail-fee > div:last-child {
+  flex: none;
+  font-weight: 500;
+  text-align: right;
+}
+
+.product-rail .product-rail-note {
+  margin: var(--space-s) 0 var(--space-l);
+  color: var(--rbc-grey-600);
+  font-size: var(--body-font-size-xs);
+}
+
+.product-rail .product-rail-cta p.button-wrapper {
+  margin: 0 0 var(--space-s);
+}
+
+.product-rail .product-rail-cta a.button {
+  width: 100%;
+}

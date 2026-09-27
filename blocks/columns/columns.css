@@ -1,11 +1,21 @@
+/* stylelint-disable no-descending-specificity */
 .columns > div {
   display: flex;
   flex-direction: column;
   gap: var(--space-l);
 }
 
-.columns img {
+.columns .columns-img-col img {
   width: 100%;
+}
+
+.columns > div > div:not(.columns-img-col) img {
+  max-width: 100%;
+  width: auto;
+}
+
+.columns > div > div > :first-child {
+  margin-top: 0;
 }
 
 .columns > div > div {
@@ -54,4 +64,27 @@
   > div > div:not(.columns-img-col) {
     padding: var(--space-2xl);
   }
+}
+
+.columns.rules > div > div + div {
+  border-top: 1px solid var(--rbc-grey-200);
+  padding-top: var(--space-l);
+}
+
+@media (width >= 768px) {
+  .columns.rules > div {
+    align-items: start;
+  }
+
+  .columns.rules > div > div + div {
+    border-top: 0;
+    border-left: 1px solid var(--rbc-grey-200);
+    padding-top: 0;
+    padding-left: var(--space-l);
+  }
+}
+
+.columns p > .icon:only-child {
+  width: 40px;
+  height: 40px;
 }

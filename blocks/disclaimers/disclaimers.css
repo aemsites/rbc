@@ -13,24 +13,26 @@
   display: none;
 }
 
-.disclaimers summary::after {
+.disclaimers summary::before {
   content: "";
+  position: relative;
   flex: 0 0 auto;
-  width: 20px;
-  height: 20px;
-  background-color: currentcolor;
-  mask: url("../../icons/chevron-down.svg") center / contain no-repeat;
-  transition: transform 0.2s;
+  width: 14px;
+  height: 14px;
+  background:
+    linear-gradient(currentcolor, currentcolor) center / 100% 2px no-repeat,
+    linear-gradient(currentcolor, currentcolor) center / 2px 100% no-repeat;
 }
 
-.disclaimers details[open] summary::after {
-  transform: rotate(180deg);
+.disclaimers details[open] summary::before {
+  background-size: 100% 2px, 0 0;
 }
 
 .disclaimers ul {
   display: flex;
   flex-direction: column;
   gap: var(--space-s);
+  overflow-wrap: anywhere;
   padding-left: 0;
   list-style: none;
   font-size: var(--body-font-size-xs);

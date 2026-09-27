@@ -1,0 +1,74 @@
+/* stylelint-disable no-descending-specificity */
+.branch-finder-container .branch-finder-wrapper {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.branch-finder {
+  width: 100%;
+  max-width: 480px;
+  padding: var(--space-xl);
+  background-color: var(--rbc-white);
+  color: var(--rbc-grey-900);
+}
+
+.branch-finder .branch-finder-copy > * {
+  margin-top: 0;
+}
+
+.branch-finder .branch-finder-copy > :first-child {
+  margin-top: 0;
+}
+
+.branch-finder .branch-finder-copy p {
+  margin-bottom: var(--space-l);
+  font-style: italic;
+}
+
+.branch-finder fieldset {
+  margin: 0 0 var(--space-l);
+  border: 0;
+  padding: 0;
+}
+
+.branch-finder legend {
+  margin-bottom: var(--space-2xs);
+  padding: 0;
+  font-weight: 700;
+}
+
+.branch-finder fieldset label {
+  margin-right: var(--space-l);
+}
+
+.branch-finder fieldset input {
+  margin-right: var(--space-2xs);
+  accent-color: var(--rbc-blue);
+}
+
+.branch-finder > form > label {
+  display: block;
+  margin-bottom: var(--space-2xs);
+  font-weight: 700;
+}
+
+.branch-finder .branch-finder-field {
+  display: flex;
+  gap: var(--space-s);
+}
+
+.branch-finder .branch-finder-field input {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--rbc-grey-300);
+  border-radius: var(--radius-s);
+  padding: 0 var(--space-s);
+}
+
+.branch-finder .branch-finder-field button {
+  padding-block: 0.75rem;
+}
+
+.branch-finder form p {
+  margin: var(--space-l) 0 0;
+}

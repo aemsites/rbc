@@ -1,9 +1,12 @@
-export default function decorate(block) {
+import fetchLocalPlaceholders from '../../utils/placeholders.js';
+
+export default async function decorate(block) {
+  const ph = await fetchLocalPlaceholders();
   const tab = block.closest('[data-tab]')?.dataset.tab.split(',')[0].trim() || 'default';
 
   const details = document.createElement('details');
   const summary = document.createElement('summary');
-  summary.textContent = 'Legal Disclaimers';
+  summary.textContent = ph.legalDisclaimers || 'Legal Disclaimers';
 
   // labels aren't sequential (they skip numbers and include symbols like * and †), so each row
   // carries its own label rather than one derived from position

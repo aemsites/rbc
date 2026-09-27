@@ -12,37 +12,41 @@
 
 import { getMetadata, toCamelCase } from '../scripts/aem.js';
 
-const PREFIX = {
-  'fr-CA': '/fr',
-  'zh-Hans': '/sc',
-  'zh-Hant': '/tc',
+// one sheet per language in /placeholders.json; the default sheet is English
+const SHEETS = {
+  'fr-CA': 'fr',
+  'zh-Hans': 'sc',
+  'zh-Hant': 'tc',
 };
 
-async function fetchPlaceholders(prefix) {
+async function fetchPlaceholders(sheet) {
   window.placeholders = window.placeholders || {};
-  if (!window.placeholders[prefix]) {
-    window.placeholders[prefix] = new Promise((resolve) => {
-      fetch(`${prefix === 'default' ? '' : prefix}/placeholders.json`)
-        .then((resp) => (resp.ok ? resp.json() : { data: [] }))
+  if (!window.placeholders[sheet]) {
+    window.placeholders[sheet] = new Promise((resolve) => {
+      fetch('/placeholders.json')
+        .then((resp) => (resp.ok ? resp.json() : {}))
         .then((json) => {
+          const rows = Array.isArray(json.data)
+            ? json.data
+            : (json[sheet] || json.data || {}).data || [];
           const placeholders = {};
-          json.data
+          rows
             .filter((placeholder) => placeholder.Key)
             .forEach((placeholder) => {
               placeholders[toCamelCase(placeholder.Key)] = placeholder.Text;
             });
-          window.placeholders[prefix] = placeholders;
+          window.placeholders[sheet] = placeholders;
           resolve(placeholders);
         })
         .catch(() => {
-          window.placeholders[prefix] = {};
-          resolve(window.placeholders[prefix]);
+          window.placeholders[sheet] = {};
+          resolve(window.placeholders[sheet]);
         });
     });
   }
-  return window.placeholders[prefix];
+  return window.placeholders[sheet];
 }
 
 export default function fetchLocalPlaceholders() {
-  return fetchPlaceholders(PREFIX[getMetadata('lang')] || 'default');
+  return fetchPlaceholders(SHEETS[getMetadata('lang')] || 'data');
 }
