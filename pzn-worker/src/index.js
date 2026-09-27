@@ -1,11 +1,45 @@
 import pages, { TRAIT_LOBS, TRAIT_SEGMENTS } from '../../scripts/pzn-config.js';
 
 const SHARED_TTL = 300;
+const PAGE_TTL = 60;
 const DECISION_TTL = 1800;
 const DECISION_COOKIE = 'pzn-decision';
 const VID_COOKIE = 'design_test_vid';
 const VID_TTL = 2592000;
 const UUID_V4 = /^[0-9a-f]{8}-[0-9a-f]{4}-[45][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+/*
+ * aem.live emits no cache tag unless asked, and names the header after the CDN: cloudflare gets
+ * x-cache-tag, akamai edge-cache-tag, fastly surrogate-key. Push invalidation is what keeps a
+ * composed page correct after its parts change - see adobe-rnd/helix-mixer's inlines.js.
+ */
+const TAG_HEADER = {
+  cloudflare: 'x-cache-tag',
+  akamai: 'edge-cache-tag',
+  fastly: 'surrogate-key',
+};
+
+const cdnType = (env) => (TAG_HEADER[env.BYO_CDN_TYPE] ? env.BYO_CDN_TYPE : 'cloudflare');
+
+const originHeaders = (url, env) => ({
+  'x-forwarded-host': url.host,
+  'x-byo-cdn-type': cdnType(env),
+  'x-push-invalidation': 'enabled',
+});
+
+// one entry per variant, so a cached page can never be served to the wrong segment
+const pageCacheKey = (url, variant) => new Request(
+  `${url.origin}${url.pathname}__pzn=${encodeURIComponent(variant)}`,
+  { method: 'GET' },
+);
+
+function unionCacheTags(...lists) {
+  const tags = new Set();
+  lists.filter(Boolean).forEach((list) => {
+    list.split(',').map((t) => t.trim()).filter(Boolean).forEach((t) => tags.add(t));
+  });
+  return [...tags].join(',');
+}
 
 const cookies = (header) => Object.fromEntries(
   (header || '').split(';').map((pair) => {
@@ -234,25 +268,29 @@ async function heroBase(origin, path) {
   return found ? found[1].trim().replace(/\/$/, '') : null;
 }
 
-async function inlineHero(origin, fragmentPath) {
+async function inlineHero(origin, fragmentPath, env) {
   const res = await fetch(`${origin}${fragmentPath}.plain.html`, {
-    headers: { 'accept-encoding': 'identity' },
+    headers: { 'accept-encoding': 'identity', ...originHeaders(new URL(origin), env) },
     cf: { cacheEverything: true, cacheTtl: SHARED_TTL },
   });
   if (!res.ok) return null;
   const html = await res.text();
-  return html.trim().replace(/^<div>/, '').replace(/<\/div>$/, '').trim();
+  return {
+    html: html.trim().replace(/^<div>/, '').replace(/<\/div>$/, '').trim(),
+    tag: res.headers.get(TAG_HEADER[cdnType(env)]) || '',
+  };
 }
 
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const url = new URL(request.url);
     const origin = env.ORIGIN || 'http://localhost:3000';
     const started = Date.now();
     const trace = {};
 
     // The page shell is the same for everyone, so fetching it does not wait on the decision.
-    const shell = fetch(new URL(url.pathname + url.search, origin), {
+    const fetchShell = () => fetch(new URL(url.pathname + url.search, origin), {
+      headers: originHeaders(url, env),
       cf: { cacheEverything: true, cacheTtl: SHARED_TTL },
     });
 
@@ -260,7 +298,7 @@ export default {
     const prod = /aem\.live|rbcroyalbank\.com/.test(env.ORIGIN || '');
     const page = pages(prod)[path];
     if (!page) {
-      const passthrough = await shell;
+      const passthrough = await fetchShell();
       const headers = new Headers(passthrough.headers);
       headers.set('x-pzn-trace', JSON.stringify({ skipped: 'path-not-personalized', path }));
       return new Response(passthrough.body, { status: passthrough.status, headers });
@@ -272,6 +310,21 @@ export default {
     const cached = preview ? null : cachedDecision(jar, key);
     const vid = visitorId(jar);
     const ssr = { design_test_vid: vid.uuid };
+
+    /*
+     * A returning visitor already carries the decision, so the whole composed page can come from
+     * cache without touching the origin. Everyone else starts the shell fetch now, in parallel
+     * with the decision.
+     */
+    if (cached) {
+      const hit = await caches.default.match(pageCacheKey(url, cached));
+      if (hit) {
+        const headers = new Headers(hit.headers);
+        headers.set('x-pzn-trace', JSON.stringify({ cache: 'page-hit', variant: cached }));
+        return new Response(hit.body, { status: hit.status, headers });
+      }
+    }
+    const shell = fetchShell();
 
     // The page's own variant list and the decision are independent, so resolve them together.
     const [base, segment] = await Promise.all([
@@ -297,7 +350,7 @@ export default {
 
     const [upstream, hero] = await Promise.all([
       shell,
-      fragmentPath ? inlineHero(origin, fragmentPath).catch(() => null) : null,
+      fragmentPath ? inlineHero(origin, fragmentPath, env).catch(() => null) : null,
     ]);
 
     const isHtml = (upstream.headers.get('content-type') || '').includes('text/html');
@@ -324,7 +377,7 @@ export default {
         element(el) {
           if (!hero || replaced) return;
           replaced = true;
-          el.replace(hero, { html: true });
+          el.replace(hero.html, { html: true });
         },
       })
       .on('[data-personalization]', {
@@ -361,15 +414,37 @@ export default {
     headers.set('x-pzn-trace', JSON.stringify(trace));
 
     // Bots and visitors without consent get the page exactly as authored, so it stays cacheable.
+    // union so a change to an inlined fragment still purges every page that inlined it
+    const tagHeader = TAG_HEADER[cdnType(env)];
+    const tags = unionCacheTags(upstream.headers.get(tagHeader), hero && hero.tag);
+    if (tags) headers.set(tagHeader, tags);
+
     const secure = url.protocol === 'https:';
     if (!trace.skipped) {
-      headers.set('cache-control', 'no-store');
-      headers.set('vary', 'cookie');
+      /*
+       * The response varies by visitor, so only this worker's per-variant cache may hold it.
+       * The origin's CDN-Cache-Control/Surrogate-Control would otherwise let the CDN in front
+       * cache one visitor's page and serve it to everyone.
+       */
+      headers.set('cache-control', 'private, no-store');
+      headers.delete('cdn-cache-control');
+      headers.delete('surrogate-control');
       if (vid.isNew && !preview) headers.append('set-cookie', visitorCookie(vid.uuid, secure));
       if (key && !cached && !preview) {
         headers.append('set-cookie', decisionCookie(key, segment || 'default', secure));
       }
     }
-    return new Response(out.body, { status: out.status, headers });
+
+    const composed = new Response(out.body, { status: out.status, headers });
+    if (!trace.skipped && !preview) {
+      const storeHeaders = new Headers(headers);
+      storeHeaders.delete('set-cookie');
+      storeHeaders.set('cache-control', `max-age=${PAGE_TTL}`);
+      ctx.waitUntil(caches.default.put(
+        pageCacheKey(url, trace.variant),
+        new Response(composed.clone().body, { status: composed.status, headers: storeHeaders }),
+      ));
+    }
+    return composed;
   },
 };
