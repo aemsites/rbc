@@ -522,14 +522,14 @@ main > .section.padding-bottom-xl { padding-bottom: var(--space-4xl); }
   display: none;
 }
 
-[data-personas]:not([data-personas*="default"]) {
+[data-tab]:not([data-tab*="default"]) {
   display: none;
 }
 
-.persona-js [data-personas] {
+.tab-js [data-tab] {
   display: revert;
 }
 
-.persona-js [data-personas].persona-hidden {
+.tab-js [data-tab].tab-hidden {
   display: none;
 }

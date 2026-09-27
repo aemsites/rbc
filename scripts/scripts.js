@@ -249,27 +249,6 @@ function reserveHeaderHeight(header) {
  * Loads everything needed to get to LCP.
  * @param {Element} doc The container element
  */
-/*
- * Sections authored for one or more personas carry a `personas` row in their Section Metadata,
- * which the pipeline emits as data-personas. The visitor picks with a hash, the way RBC's tabs do
- * today. Personalization, where it runs, resolves this first and strips the attribute, so this
- * becomes a no-op rather than fighting it.
- */
-function applyPersona() {
-  const persona = decodeURIComponent(window.location.hash.slice(1)) || 'default';
-  document.querySelectorAll('[data-personas]').forEach((section) => {
-    const allowed = section.dataset.personas.split(',').map((p) => p.trim()).filter(Boolean);
-    section.classList.toggle('persona-hidden', !allowed.includes(persona));
-  });
-}
-
-function decoratePersonas(main) {
-  if (!main.querySelector('[data-personas]')) return;
-  document.documentElement.classList.add('persona-js');
-  applyPersona();
-  window.addEventListener('hashchange', applyPersona);
-}
-
 async function loadEager(doc) {
   document.documentElement.lang = getMetadata('lang') || 'en-CA';
   decorateTemplateAndTheme();
@@ -277,7 +256,6 @@ async function loadEager(doc) {
   const main = doc.querySelector('main');
   if (main) {
     decorateMain(main);
-    decoratePersonas(main);
     document.body.classList.add('appear');
     await loadSection(main.querySelector('.section'), waitForFirstImage);
   }
