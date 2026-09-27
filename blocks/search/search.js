@@ -36,12 +36,22 @@ export default async function decorate(block) {
   const labelEl = el('label', { class: 'search-label' }, label);
   labelEl.htmlFor = id;
 
+  const submit = el('button', { class: 'search-submit', type: 'submit' }, ph.searchButton || 'Search');
+
   form.append(
     el('input', { type: 'hidden', name: 'type', value: '0' }),
     labelEl,
     el('div', { class: 'search-field' }, [input, suggest]),
-    el('button', { class: 'search-submit', type: 'submit' }, ph.searchButton || 'Search'),
+    submit,
   );
+
+  const syncSubmit = () => {
+    const filled = input.value.trim() !== '';
+    submit.classList.toggle('button', filled);
+    submit.classList.toggle('primary', filled);
+  };
+  input.addEventListener('input', syncSubmit);
+  syncSubmit();
 
   wireSuggest(input, suggest, 'search');
 
