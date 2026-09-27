@@ -302,10 +302,14 @@ export default {
 
     const isHtml = (upstream.headers.get('content-type') || '').includes('text/html');
     if (!isHtml) return upstream;
-    // Report what shipped: a declared variant with no document still renders the default.
+    /*
+     * The decision drives the variant, not the fragment: personas are authored as sections and
+     * filtered below, so a page needs no `personalization` row at all. The row remains supported
+     * for a hero that is genuinely a separate document.
+     */
     trace.inlined = Boolean(hero);
-    trace.variant = hero ? segment : 'default';
-    if (segment && !hero) trace.reason = base ? `no-document-for-${segment}` : 'page-declares-no-personalization';
+    trace.variant = segment || 'default';
+    if (segment && base && !hero) trace.reason = `no-document-for-${segment}`;
 
     ssr.variant = trace.variant;
 
