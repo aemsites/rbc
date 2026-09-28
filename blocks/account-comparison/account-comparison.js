@@ -1,4 +1,29 @@
-export default function decorate(block) {
+import { getProduct } from '../../utils/products.js';
+import fetchLocalPlaceholders from '../../utils/placeholders.js';
+
+const wrap = (html) => `<div>${html}</div>`;
+const line = (...cells) => `<div>${cells.map(wrap).join('')}</div>`;
+
+// a header row of product links becomes the tagline, product and offer rows
+async function renderProductHeader(block) {
+  const first = block.firstElementChild;
+  const links = [...first.children].slice(1).map((c) => c.querySelector('a[href*="/products/"]'));
+  if (!links.length || links.some((a) => !a || a.closest('div').textContent.trim() !== a.textContent.trim())) return;
+  const [products, ph] = await Promise.all([Promise.all(links.map((a) => getProduct(a.getAttribute('href')))), fetchLocalPlaceholders()]);
+  if (products.some((p) => !p)) return;
+  const monthlyFee = (ph.monthlyFee || 'Monthly Fee').toLowerCase();
+  const taglines = line('', ...products.map((p) => `<p>${p.tagline}</p>`));
+  const cards = line('', ...products.map((p) => {
+    const apply = p.applyUrl ? `<p class="button-wrapper"><a class="button primary" href="${p.applyUrl}">${ph.openNow || 'Open Now'}</a></p>` : '';
+    return `<h3><a href="${p.productPage}">${p.name}</a></h3><p><strong>${p.fees[0]?.displayValue || ''}</strong> ${monthlyFee}</p>${apply}`;
+  }));
+  const offers = line('', ...products.map((p) => (p.offerBadge ? `<p><a href="${p.offerDetailsUrl || p.productPage}" target="_blank" rel="noopener">${p.offerBadge.replace(/^\+\s*/, '')}</a></p>` : '')));
+  first.insertAdjacentHTML('beforebegin', taglines + cards + offers);
+  first.remove();
+}
+
+export default async function decorate(block) {
+  await renderProductHeader(block);
   const rows = [...block.children];
   const cols = Math.max(...rows.map((row) => row.children.length));
   const table = document.createElement('table');

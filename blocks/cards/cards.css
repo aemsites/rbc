@@ -366,6 +366,12 @@ main > .section[data-layout] > .cards-wrapper + .cards-wrapper {
   font-style: normal;
 }
 
+.cards.product > ul > li .cards-product-badge a:any-link {
+  color: inherit;
+  font-weight: inherit;
+  text-decoration: none;
+}
+
 .cards.product .cards-card-body p.button-wrapper {
   justify-content: center;
   margin-top: 0;

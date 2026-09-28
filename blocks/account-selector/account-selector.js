@@ -1,4 +1,5 @@
 import applyConfig from '../../scripts/config.js';
+import { getProduct, getProducts } from '../../utils/products.js';
 
 const TEMPLATE = `
 <form class="account-selector-form">
@@ -75,63 +76,11 @@ const TEMPLATE = `
 </form>
 <div class="account-selector-results" hidden>
   <h2><span data-key="result">Based on your selections, we recommend</span> <span></span></h2>
-  <ul class="account-selector-cards">
-    <li data-name="RBC Day to Day Banking">
-      <p class="account-selector-badge" data-key="badge">Recommended</p>
-      <div class="account-selector-head"><h3>RBC Day to Day Banking</h3><p>The Essentials</p></div>
-      <div class="account-selector-body">
-        <p>$4/mo</p>
-        <ul>
-          <li>12 debits of any kind, plus unlimited e-Transfers, self-serve transfers, Public Transit, and Virtual Visa Debit transactions</li>
-          <li>$0 monthly fee after Seniors Rebate</li>
-        </ul>
-        <p class="button-wrapper"><a class="button primary" href="https://public.rbcroyalbank.com/sgw1/cb/public-account-open?lang=en-CA&amp;pid1=022">Open This Account</a></p>
-        <p><a href="/bank-accounts/chequing-accounts/day-to-day-banking">View Account Details</a></p>
-      </div>
-    </li>
-    <li data-name="RBC Advantage Banking">
-      <p class="account-selector-badge" data-key="badge">Recommended</p>
-      <div class="account-selector-head"><h3>RBC Advantage Banking</h3><p>Unlimited Debits &amp; More</p></div>
-      <div class="account-selector-body">
-        <p>$12.95/mo</p>
-        <ul>
-          <li>Unlimited debit transactions in Canada</li>
-          <li>No RBC fee to use another bank's ATM in Canada</li>
-          <li>No monthly fee for students and newcomers</li>
-        </ul>
-        <p class="button-wrapper"><a class="button primary" href="https://public.rbcroyalbank.com/sgw1/cb/public-account-open?lang=en-CA&amp;pid1=099">Open This Account</a></p>
-        <p><a href="/bank-accounts/chequing-accounts/advantage-banking">View Account Details</a></p>
-      </div>
-    </li>
-    <li data-name="RBC Signature No Limit Banking">
-      <p class="account-selector-badge" data-key="badge">Recommended</p>
-      <div class="account-selector-head"><h3>RBC Signature No Limit Banking</h3><p>Unlimited Debits &amp; Even More</p></div>
-      <div class="account-selector-body">
-        <p>$16.95/mo</p>
-        <ul>
-          <li>Unlimited debit transactions in Canada</li>
-          <li>Up to $48 credit card annual fee rebate</li>
-          <li>Free overdraft protection</li>
-        </ul>
-        <p class="button-wrapper"><a class="button primary" href="https://public.rbcroyalbank.com/sgw1/cb/public-account-open?lang=en-CA&amp;pid1=004">Open This Account</a></p>
-        <p><a href="/bank-accounts/chequing-accounts/signature-no-limit-banking">View Account Details</a></p>
-      </div>
-    </li>
-    <li data-name="RBC VIP Banking">
-      <p class="account-selector-badge" data-key="badge">Recommended</p>
-      <div class="account-selector-head"><h3>RBC VIP Banking</h3><p>All-Inclusive Banking</p></div>
-      <div class="account-selector-body">
-        <p>$30/mo</p>
-        <ul>
-          <li>Unlimited debit transactions worldwide</li>
-          <li>Up to $120 credit card annual fee rebate</li>
-          <li>Up to 2 additional Canadian dollar accounts plus 1 U.S. dollar account</li>
-        </ul>
-        <p class="button-wrapper"><a class="button primary" href="https://public.rbcroyalbank.com/sgw1/cb/public-account-open?lang=en-CA&amp;pid1=020">Open This Account</a></p>
-        <p><a href="/bank-accounts/chequing-accounts/vip-banking">View Account Details</a></p>
-      </div>
-    </li>
-  </ul>
+  <span hidden data-key="badge">Recommended</span>
+  <span hidden data-key="open-this-account">Open This Account</span>
+  <span hidden data-key="view-account-details">View Account Details</span>
+  <span hidden data-key="per-month">/mo</span>
+  <ul class="account-selector-cards"></ul>
   <button type="button" class="button secondary" data-key="edit">Edit Details</button>
 </div>
 `;
@@ -186,8 +135,24 @@ async function recommend(a) {
   return guess(a);
 }
 
+// result cards come from the product records in the `products` row, or every chequing account
+function productCard(product, text) {
+  const li = document.createElement('li');
+  li.dataset.name = product.name;
+  li.innerHTML = `<p class="account-selector-badge">${text('badge')}</p>
+    <div class="account-selector-head"><h3>${product.name}</h3><p>${product.tagline}</p></div>
+    <div class="account-selector-body">
+      <p>${product.fees[0]?.displayValue || ''}${product.fees[0]?.displayValue.startsWith('$') ? text('per-month') : ''}</p>
+      <ul>${product.highlights.slice(0, 3).map((h) => `<li>${h.text}</li>`).join('')}</ul>
+      ${product.applyUrl ? `<p class="button-wrapper"><a class="button primary" href="${product.applyUrl}">${text('open-this-account')}</a></p>` : ''}
+      <p><a href="${product.productPage}">${text('view-account-details')}</a></p>
+    </div>`;
+  return li;
+}
+
 // `short`: two questions that hand off to the page in the `handoff` row
-export default function decorate(block) {
+export default async function decorate(block) {
+  const refs = [...block.querySelectorAll('a[href*="/products/"]')].map((a) => a.getAttribute('href'));
   const config = applyConfig(block, TEMPLATE);
   const short = block.classList.contains('short');
   block.querySelectorAll(short ? '[data-full]' : '[data-short]').forEach((el) => el.remove());
@@ -203,6 +168,9 @@ export default function decorate(block) {
   const cards = results.querySelector('.account-selector-cards');
   const heading = results.querySelector('h2');
   const edit = results.querySelector('.account-selector-results > button');
+  const text = (key) => results.querySelector(`[data-key="${key}"]`).textContent;
+  const products = refs.length ? await Promise.all(refs.map(getProduct)) : await getProducts({ category: 'chequing', persona: 'everyone' });
+  cards.append(...products.filter(Boolean).map((product) => productCard(product, text)));
 
   const prefill = new URLSearchParams(window.location.search);
   form.querySelectorAll('input[type=number]').forEach((input) => {
@@ -266,7 +234,7 @@ export default function decorate(block) {
     const pick = (await recommend(answers(form))).toLowerCase();
     next.disabled = false;
     cards.querySelectorAll(':scope > li').forEach((li) => {
-      const hit = li.dataset.name.toLowerCase() === pick;
+      const hit = li.dataset.name.toLowerCase().startsWith(pick);
       li.classList.toggle('recommended', hit);
       if (hit) cards.prepend(li);
     });
