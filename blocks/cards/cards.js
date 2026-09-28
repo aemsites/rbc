@@ -89,7 +89,7 @@ async function renderProductRows(block) {
     row.replaceChildren(body);
     if (variant === 'picture' && product.image) {
       const image = document.createElement('div');
-      image.innerHTML = `<picture><img src="${product.image}" alt="${product.imageAlt || ''}" loading="lazy"></picture>`;
+      image.append(createOptimizedPicture(product.image, product.imageAlt));
       row.append(image);
     }
   }));

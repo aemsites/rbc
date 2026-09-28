@@ -1,3 +1,4 @@
+import { createOptimizedPicture } from '../../scripts/aem.js';
 import { getProduct } from '../../utils/products.js';
 import fetchLocalPlaceholders from '../../utils/placeholders.js';
 import { rateSpan } from '../../utils/rates.js';
@@ -7,6 +8,7 @@ function longDate(iso) {
     .format(new Date(`${iso}T12:00:00`));
 }
 
+const picture = (src, alt) => createOptimizedPicture(src, alt, false, [{ width: '750' }]).outerHTML;
 const cell = (html) => `<div>${html}</div>`;
 const row = (...cells) => `<div>${cells.map(cell).join('')}</div>`;
 
@@ -14,10 +16,10 @@ const row = (...cells) => `<div>${cells.map(cell).join('')}</div>`;
 function railRows(product, ph) {
   const rows = [];
   if (product.cardImage) {
-    rows.push(row(`<picture><img src="${product.cardImage}" alt="${product.cardImageAlt || ''}" loading="lazy"></picture>`, `<p>${product.categoryLabel}</p>`));
+    rows.push(row(picture(product.cardImage, product.cardImageAlt), `<p>${product.categoryLabel}</p>`));
   }
   if (product.offerHeadline) {
-    const image = product.offerImage ? `<picture><img src="${product.offerImage}" alt="${product.offerImageAlt || ''}" loading="lazy"></picture>` : '';
+    const image = product.offerImage ? picture(product.offerImage, product.offerImageAlt) : '';
     const ends = product.offerEndDate ? `${ph.offerEnds || 'Offer ends'} ${longDate(product.offerEndDate)}. ` : '';
     const details = product.offerDetailsUrl ? `<p><a href="${product.offerDetailsUrl}" target="_blank" rel="noopener">${ph.viewOfferDetails || 'View Offer Details'}</a></p>` : '';
     rows.push(row(`<p>${product.offerEyebrow || ph.offer || 'Offer'}</p>`, `${image}<p>${product.offerHeadline}</p><p>${ends}${product.offerConditions || ''}</p>${details}`));
