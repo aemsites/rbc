@@ -1,7 +1,8 @@
 import { createOptimizedPicture, toClassName } from '../../scripts/aem.js';
-import decorateTile from './tiles.js';
+import decorateTile, { tileWords } from './tiles.js';
 import { getProduct, getProducts } from '../../utils/products.js';
 import fetchLocalPlaceholders from '../../utils/placeholders.js';
+import { rateSpan } from '../../utils/rates.js';
 
 function button(text, href, kind) {
   return `<p class="button-wrapper"><a class="button ${kind}" href="${href}">${text}</a></p>`;
@@ -29,7 +30,9 @@ function priceLine(fees, ph) {
 
 // the body markup an author would otherwise write by hand, built from the product record
 function productBody(product, ph, variant) {
-  const highlights = product.highlights.map((h) => `<li>${link(h.text, h.url)}</li>`).join('');
+  const rate = product.rateFallbackValue
+    ? `<li>${product.rateLabel}: ${product.rateRateCode ? rateSpan(product.rateRateCode, product.rateFallbackValue) : product.rateFallbackValue}</li>` : '';
+  const highlights = product.highlights.map((h) => `<li>${link(h.text, h.url)}</li>`).join('') + rate;
   const [fee] = product.fees;
   if (variant === 'compact') {
     return `<h3>${product.name}</h3><p>${fee?.label || ''} <strong>${fee?.displayValue || ''}</strong></p>
@@ -125,7 +128,7 @@ export default async function decorate(block) {
     const li = document.createElement('li');
     while (row.firstElementChild) li.append(row.firstElementChild);
     if (block.classList.contains('tile')) {
-      decorateTile(li);
+      decorateTile(li, tileWords(block));
       ul.append(li);
       return;
     }

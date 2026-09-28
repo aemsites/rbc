@@ -195,7 +195,7 @@ main > .section[data-layout] > .cards-wrapper + .cards-wrapper {
 }
 
 .cards.tinted .cards-card-body,
-.cards.dark .cards-card-body {
+.cards.dark:not(.tile) .cards-card-body {
   padding: var(--space-l);
 }
 
@@ -211,11 +211,11 @@ main > .section[data-layout] > .cards-wrapper + .cards-wrapper {
 }
 
 /* dark: navy tiles, for white-on-brand logos */
-.cards.dark > ul {
+.cards.dark:not(.tile) > ul {
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
 }
 
-.cards.dark > ul > li {
+.cards.dark:not(.tile) > ul > li {
   --text-color: var(--rbc-white);
   --link-color: var(--rbc-white);
 
@@ -224,7 +224,7 @@ main > .section[data-layout] > .cards-wrapper + .cards-wrapper {
   color: var(--text-color);
 }
 
-.cards.dark > ul > li > .cards-card-image img {
+.cards.dark:not(.tile) > ul > li > .cards-card-image img {
   aspect-ratio: auto;
   object-fit: contain;
   max-height: 80px;

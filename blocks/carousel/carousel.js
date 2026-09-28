@@ -1,5 +1,5 @@
 import fetchLocalPlaceholders from '../../utils/placeholders.js';
-import decorateTile from '../cards/tiles.js';
+import decorateTile, { tileWords } from '../cards/tiles.js';
 
 function updateActiveSlide(slide) {
   const block = slide.closest('.carousel');
@@ -76,7 +76,7 @@ function bindEvents(block) {
   block.querySelectorAll('.carousel-slide').forEach((slide) => slideObserver.observe(slide));
 }
 
-function createSlide(row, slideIndex, carouselId, tile) {
+function createSlide(row, slideIndex, carouselId, tile, words) {
   const slide = document.createElement('li');
   slide.dataset.slideIndex = slideIndex;
   slide.setAttribute('id', `carousel-${carouselId}-slide-${slideIndex}`);
@@ -87,7 +87,7 @@ function createSlide(row, slideIndex, carouselId, tile) {
     if (!tile) column.classList.add(`carousel-slide-${imageOnly ? 'image' : 'content'}`);
     slide.append(column);
   });
-  if (tile) decorateTile(slide);
+  if (tile) decorateTile(slide, words);
 
   const labeledBy = slide.querySelector('h1, h2, h3, h4, h5, h6, .tile-title');
   if (labeledBy) slide.setAttribute('aria-labelledby', labeledBy.getAttribute('id'));
@@ -146,7 +146,7 @@ export default async function decorate(block) {
   }
 
   rows.forEach((row, idx) => {
-    slidesWrapper.append(createSlide(row, idx, carouselId, vantage));
+    slidesWrapper.append(createSlide(row, idx, carouselId, vantage, tileWords(block)));
     if (slideIndicators) {
       const indicator = document.createElement('li');
       indicator.classList.add('carousel-slide-indicator');

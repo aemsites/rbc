@@ -1,13 +1,9 @@
 import { createElement as el } from './dom.js';
+import getPublicConfig from './config.js';
 
 let searchConfig;
 function loadSearchConfig() {
-  if (!searchConfig) {
-    searchConfig = fetch('/config.json')
-      .then((r) => (r.ok ? r.json() : {}))
-      .then((j) => j.public?.searchSuggest || {})
-      .catch(() => ({}));
-  }
+  searchConfig = searchConfig || getPublicConfig().then((c) => c.searchSuggest || {});
   return searchConfig;
 }
 

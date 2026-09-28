@@ -2,38 +2,42 @@ import { loadCSS } from '../../scripts/aem.js';
 
 const THEMES = ['white', 'cool-white', 'light-blue', 'grey', 'yellow', 'blue', 'navy', 'blue-gradient', 'light-gradient'];
 const WIDTHS = ['narrow', 'wide', 'art-center'];
+const WORDS = new Set([...THEMES, ...WIDTHS, 'light', 'dark']);
 
 loadCSS(`${window.hlx.codeBasePath}/blocks/cards/tiles.css`);
 
-// row = content | image | theme; with two cells, a bare picture is the image, words mean theme
-export default function decorateTile(item) {
-  const cells = [...item.children];
-  const [content] = cells;
-  let [, image, theme] = cells;
-  if (cells.length === 2) {
-    const words = /[a-z]/i.test(cells[1].textContent);
-    image = words ? null : cells[1];
-    theme = words ? cells[1] : null;
-  }
+export const tileWords = (block) => [...block.classList].filter((word) => WORDS.has(word));
+
+// row = content | art. A picture ending the content cell is the background; words in the
+// art cell replace the block's words for that row (the carousel's per-tile colours).
+export default function decorateTile(item, blockWords = []) {
+  const [content, ...rest] = [...item.children];
+  const isPicture = (el) => el && el.matches('p:has(> :is(picture, img):only-child), picture, img');
+  const [art] = rest.flatMap((cell) => [...cell.children].filter(isPicture));
+  const background = isPicture(content.lastElementChild) ? content.lastElementChild : null;
+  const text = rest.map((cell) => cell.textContent.toLowerCase()).join(' ');
+  const rowWords = text.split(/[^a-z-]+/).filter((w) => WORDS.has(w));
+  const words = rowWords.length ? rowWords : blockWords;
+  rest.forEach((cell) => cell.remove());
+  [[art, 'tile-image'], [background, 'tile-background']].forEach(([picture, className]) => {
+    if (!picture) return;
+    const cell = document.createElement('div');
+    cell.className = className;
+    cell.append(picture);
+    item.append(cell);
+  });
+
   content.className = 'tile-content';
-  if (image) {
-    image.className = 'tile-image';
-    if (!image.querySelector('picture, img')) image.remove();
+  const theme = [...words].reverse().find((w) => THEMES.includes(w));
+  if (theme) item.classList.add(`tile-${theme}`);
+  words.filter((w) => WIDTHS.includes(w)).forEach((w) => item.classList.add(`tile-${w}`));
+  const light = [...words].reverse().find((w) => w === 'light' || w === 'dark') === 'light';
+  if (light) item.classList.add('tile-light');
+  if (background) {
+    item.classList.add('tile-photo');
+    if (words.includes('dark') || (!theme && !light)) item.classList.add('tile-scrim');
   }
-  if (theme) {
-    const words = theme.textContent.toLowerCase().split(/[^a-z-]+/);
-    words.filter((w) => THEMES.includes(w) || WIDTHS.includes(w) || w === 'light')
-      .forEach((w) => item.classList.add(`tile-${w}`));
-    if (words.includes('dark')) item.classList.add('tile-scrim');
-    if (theme.querySelector('picture, img')) {
-      theme.className = 'tile-background';
-      theme.querySelectorAll('p:not(:has(picture, img))').forEach((p) => p.remove());
-      item.classList.add('tile-photo');
-      if (!words.some((w) => THEMES.includes(w) || w === 'light')) item.classList.add('tile-scrim');
-    } else {
-      theme.remove();
-    }
-  }
+
   content.querySelectorAll('h2, h3, h4, h5, h6').forEach((heading) => {
     const title = document.createElement('p');
     title.className = `tile-title ${heading.tagName.toLowerCase()}`;
@@ -42,8 +46,7 @@ export default function decorateTile(item) {
     heading.replaceWith(title);
   });
   const first = content.firstElementChild;
-  if (first?.tagName === 'P' && first.children.length === 1 && first.firstElementChild.tagName === 'EM') {
-    first.className = 'tile-pill';
-  }
+  const em = first?.tagName === 'P' && !first.classList.contains('tile-title') && first.firstElementChild;
+  if (em?.tagName === 'EM' && first.textContent.trim() === em.textContent.trim()) first.className = 'tile-pill';
   item.classList.add('tile');
 }

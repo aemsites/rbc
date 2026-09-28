@@ -1,4 +1,5 @@
 import { watchStuck } from '../utils/dom.js';
+import { decorateRateCode, decorateRates } from '../utils/rates.js';
 import {
   getMetadata,
   loadHeader,
@@ -243,6 +244,7 @@ export function decorateMain(main) {
   decorateSectionBackgrounds(main);
   decorateBlocks(main);
   decorateButtons(main);
+  decorateRateCode(main);
 }
 
 function reserveHeaderHeight(header) {
@@ -325,6 +327,7 @@ async function loadLazy(doc) {
 
   const main = doc.querySelector('main');
   await loadSections(main);
+  decorateRates(main);
 
   const { hash } = window.location;
   const element = hash ? doc.getElementById(hash.substring(1)) : false;
