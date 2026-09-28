@@ -1458,8 +1458,9 @@ header .nav-campaign .nav-main {
   justify-content: space-between;
 }
 
-header .nav-breadcrumb {
+:is(header, main) .nav-breadcrumb {
   --crumb-gutter: max(var(--space-l), (100% - var(--content-width)) / 2);
+  --nav-chevron: url('../../icons/chevron-down.svg');
 
   position: relative;
   padding-block: var(--space-2xs);
@@ -1468,7 +1469,7 @@ header .nav-breadcrumb {
   font-size: var(--body-font-size-xs);
 }
 
-header .nav-breadcrumb-list {
+:is(header, main) .nav-breadcrumb-list {
   margin: 0;
   padding: 0;
   list-style: none;
@@ -1480,12 +1481,12 @@ header .nav-breadcrumb-list {
   white-space: nowrap;
 }
 
-header .nav-breadcrumb-list::-webkit-scrollbar {
+:is(header, main) .nav-breadcrumb-list::-webkit-scrollbar {
   display: none;
 }
 
-header .nav-breadcrumb::before,
-header .nav-breadcrumb::after {
+:is(header, main) .nav-breadcrumb::before,
+:is(header, main) .nav-breadcrumb::after {
   content: "…";
   position: absolute;
   top: 50%;
@@ -1496,28 +1497,28 @@ header .nav-breadcrumb::after {
   pointer-events: none;
 }
 
-header .nav-breadcrumb::before {
+:is(header, main) .nav-breadcrumb::before {
   left: var(--crumb-gutter);
   padding-right: var(--space-s);
   background: linear-gradient(to left, transparent, var(--background-color) var(--space-2xs));
 }
 
-header .nav-breadcrumb::after {
+:is(header, main) .nav-breadcrumb::after {
   right: var(--crumb-gutter);
   padding-left: var(--space-s);
   background: linear-gradient(to right, transparent, var(--background-color) var(--space-2xs));
 }
 
-header .nav-breadcrumb-more-start::before,
-header .nav-breadcrumb-more-end::after {
+:is(header, main) .nav-breadcrumb-more-start::before,
+:is(header, main) .nav-breadcrumb-more-end::after {
   opacity: 1;
 }
 
-header .nav-breadcrumb-list li {
+:is(header, main) .nav-breadcrumb-list li {
   flex: 0 0 auto;
 }
 
-header .nav-breadcrumb-list li + li::before {
+:is(header, main) .nav-breadcrumb-list li + li::before {
   content: "";
   display: inline-block;
   width: 0.9em;
@@ -1529,21 +1530,21 @@ header .nav-breadcrumb-list li + li::before {
   vertical-align: -0.1em;
 }
 
-header .nav-breadcrumb .nav-breadcrumb-list li a {
+:is(header, main) .nav-breadcrumb .nav-breadcrumb-list li a {
   color: var(--rbc-blue);
   text-decoration: none;
 }
 
-header .nav-breadcrumb .nav-breadcrumb-list li a:hover {
+:is(header, main) .nav-breadcrumb .nav-breadcrumb-list li a:hover {
   text-decoration: underline;
 }
 
-header .nav-breadcrumb-list [aria-current="page"] {
+:is(header, main) .nav-breadcrumb-list [aria-current="page"] {
   color: var(--rbc-grey-600);
 }
 
 @media (width >= 768px) {
-  header .nav-breadcrumb {
+  .nav-breadcrumb {
     --crumb-gutter: max(var(--space-xl), (100% - var(--content-width)) / 2);
   }
 }

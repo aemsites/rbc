@@ -31,3 +31,19 @@ export function createElement(tag, props, children) {
 }
 
 export default createElement;
+
+// calls back with true when the element reaches the top of the viewport, false once it is below
+export function watchStuck(element, callback) {
+  let stuck = null;
+  const check = () => {
+    const rect = element.getBoundingClientRect();
+    if (!rect.width && !rect.height) return;
+    const next = rect.top <= 0;
+    if (next !== stuck) {
+      stuck = next;
+      callback(stuck);
+    }
+  };
+  ['scroll', 'resize', 'hashchange'].forEach((type) => window.addEventListener(type, check, { passive: true }));
+  check();
+}
