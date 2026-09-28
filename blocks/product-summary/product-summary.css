@@ -1,0 +1,62 @@
+.product-summary .product-summary-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-s) var(--space-xl);
+  padding-bottom: var(--space-l);
+  border-bottom: 1px solid var(--rbc-grey-200);
+}
+
+.product-summary .product-summary-head h2 {
+  max-width: 480px;
+  margin: 0;
+}
+
+.product-summary .product-summary-price {
+  text-align: right;
+}
+
+.product-summary .product-summary-price p {
+  margin: 0;
+}
+
+.product-summary .product-summary-price strong {
+  font-size: var(--heading-font-size-l);
+  font-weight: 700;
+}
+
+.product-summary .product-summary-rebate {
+  color: var(--rbc-grey-600);
+  font-size: var(--body-font-size-xs);
+  font-style: italic;
+}
+
+.product-summary .product-summary-features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
+  gap: var(--space-l);
+  margin: var(--space-l) 0 var(--space-xl);
+  padding: 0;
+  list-style: none;
+}
+
+.product-summary .product-summary-features :is(h3, h4) {
+  margin: 0 0 var(--space-xs);
+  font-size: var(--heading-font-size-m);
+}
+
+.product-summary .product-summary-features p {
+  margin: 0;
+  color: var(--rbc-grey-600);
+}
+
+.product-summary p.button-wrapper {
+  justify-content: center;
+  margin: 0;
+}
+
+.product-summary .product-summary-more {
+  margin: var(--space-s) 0 0;
+  text-align: center;
+}

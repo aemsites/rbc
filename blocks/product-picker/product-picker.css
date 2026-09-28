@@ -1,0 +1,168 @@
+.product-picker {
+  display: grid;
+  gap: var(--space-xl);
+}
+
+.product-picker .product-picker-intro > :first-child {
+  margin-top: 0;
+}
+
+.product-picker .product-picker-options {
+  display: grid;
+  gap: var(--space-s);
+  margin-top: var(--space-l);
+}
+
+.product-picker .product-picker-option {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  column-gap: var(--space-s);
+  border: 2px solid var(--rbc-grey-200);
+  border-radius: var(--radius-s);
+  padding: var(--space-s) var(--space-m);
+  background-color: var(--rbc-white);
+  color: var(--rbc-grey-900);
+  cursor: pointer;
+}
+
+.product-picker .product-picker-option:has(input:checked) {
+  border-color: var(--rbc-blue);
+  background-color: var(--rbc-light-blue);
+}
+
+.product-picker .product-picker-option:has(input:focus-visible) {
+  outline: 2px solid var(--rbc-yellow);
+  outline-offset: 2px;
+}
+
+.product-picker .product-picker-option input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.product-picker .product-picker-option:has(input:checked)::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 28px;
+  height: 28px;
+  background: var(--rbc-blue);
+  clip-path: polygon(0 0, 100% 0, 100% 100%);
+}
+
+.product-picker .product-picker-tagline {
+  grid-column: 1 / -1;
+  color: var(--rbc-grey-600);
+  font-size: var(--body-font-size-xs);
+}
+
+.product-picker .product-picker-option-name {
+  color: var(--rbc-blue);
+  font-weight: 500;
+}
+
+.product-picker .product-picker-option-price {
+  font-weight: 500;
+}
+
+.product-picker .product-picker-detail {
+  align-self: start;
+  border: 1px solid var(--rbc-grey-200);
+  border-radius: var(--radius-m);
+  padding: var(--space-xl);
+  background-color: var(--rbc-white);
+  color: var(--rbc-grey-900);
+}
+
+.product-picker .product-picker-detail p {
+  margin: 0;
+}
+
+.product-picker .product-picker-head {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-l);
+  padding-bottom: var(--space-l);
+  border-bottom: 1px solid currentcolor;
+}
+
+.product-picker .product-picker-name {
+  font-family: var(--heading-font-family);
+  font-size: var(--heading-font-size-m);
+}
+
+.product-picker .product-picker-price {
+  display: flex;
+  flex-direction: column;
+  flex: none;
+  text-align: right;
+  font-size: var(--body-font-size-xs);
+}
+
+.product-picker .product-picker-price strong {
+  font-size: var(--heading-font-size-l);
+  font-weight: 700;
+}
+
+.product-picker .product-picker-includes {
+  margin-top: var(--space-l);
+  font-size: var(--body-font-size-s);
+  font-weight: 500;
+}
+
+.product-picker .product-picker-detail ul {
+  margin: var(--space-s) 0 var(--space-l);
+  padding: 0;
+  list-style: none;
+}
+
+.product-picker .product-picker-detail li {
+  position: relative;
+  margin-bottom: var(--space-xs);
+  padding-left: var(--space-l);
+  font-size: var(--body-font-size-s);
+  font-weight: 500;
+}
+
+.product-picker .product-picker-detail li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.2em;
+  width: 14px;
+  height: 14px;
+  background-color: currentcolor;
+  mask: url("../../icons/check.svg") center / contain no-repeat;
+}
+
+.product-picker .product-picker-detail a.button {
+  width: 100%;
+  background-color: var(--rbc-blue);
+  color: var(--rbc-white);
+}
+
+.dark-background .product-picker .product-picker-detail {
+  border: 0;
+  background-color: var(--rbc-blue);
+  color: var(--rbc-white);
+}
+
+.dark-background .product-picker .product-picker-detail a.button {
+  background-color: var(--rbc-white);
+  color: var(--rbc-blue);
+}
+
+@media (width >= 900px) {
+  .product-picker {
+    grid-template-columns: 2fr 3fr;
+    align-items: start;
+  }
+}
+
+main > .section > .product-picker-wrapper:not(:last-child) {
+  margin-bottom: var(--space-3xl);
+}

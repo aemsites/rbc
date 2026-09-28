@@ -1,6 +1,6 @@
 import { createOptimizedPicture, toClassName } from '../../scripts/aem.js';
 import decorateTile, { tileWords } from './tiles.js';
-import { getProduct, getProducts } from '../../utils/products.js';
+import { getProduct, getProducts, monthlyFees } from '../../utils/products.js';
 import fetchLocalPlaceholders from '../../utils/placeholders.js';
 import { rateSpan } from '../../utils/rates.js';
 
@@ -17,14 +17,12 @@ function offerLink(product, text) {
   return product.offerDetailsUrl ? `<a href="${product.offerDetailsUrl}" target="_blank" rel="noopener">${text}</a>` : text;
 }
 
-function priceLine(fees, ph) {
-  const [regular] = fees;
+function priceLine(product, ph) {
+  const { regular, rebate } = monthlyFees(product);
   if (!regular) return '';
-  const rebate = fees.find((fee) => /value program/i.test(fee.label));
-  const strip = (value) => value.replace(/^as low as\s+/i, '');
   const per = (value) => (value.startsWith('$') ? ph.perMonth || '/mo' : '');
-  let line = `<strong>${regular.displayValue}</strong>${per(regular.displayValue)}`;
-  if (rebate) line += ` <em>${ph.or || 'or'}</em> <strong>${strip(rebate.displayValue)}</strong>${per(rebate.displayValue)} ${ph.withTheValueProgram || 'with the Value Program'}`;
+  let line = `<strong>${regular}</strong>${per(regular)}`;
+  if (rebate) line += ` <em>${ph.or || 'or'}</em> <strong>${rebate}</strong>${per(rebate)} ${ph.withTheValueProgram || 'with the Value Program'}`;
   return `<p>${line}</p>`;
 }
 
@@ -44,7 +42,7 @@ function productBody(product, ph, variant) {
       <p class="button-wrapper"><a class="button primary" href="${product.productPage}">${ph.learnMore || 'Learn More'}</a>${product.applyUrl ? ` <a class="button secondary" href="${product.applyUrl}">${ph.openAccount || 'Open Account'}</a>` : ''}</p>`;
   }
   return `<p>${product.categoryLabel}</p><h3>${product.name}</h3><p>${product.tagline}</p><ul>${highlights}</ul>
-    ${product.note ? `<p>${product.note}</p>` : ''}${product.offerBadge ? `<p><em>${offerLink(product, product.offerBadge)}</em></p>` : ''}${priceLine(product.fees, ph)}
+    ${product.note ? `<p>${product.note}</p>` : ''}${product.offerBadge ? `<p><em>${offerLink(product, product.offerBadge)}</em></p>` : ''}${priceLine(product, ph)}
     ${product.applyUrl ? button(ph.openAccount || 'Open Account', product.applyUrl, 'primary') : ''}
     <p><a href="${product.productPage}">${ph.viewMoreAccountBenefits || 'View More Account Benefits'}</a></p>`;
 }
@@ -116,17 +114,61 @@ function decorateProduct(li) {
   }
 
   body.querySelectorAll(':scope > p').forEach((p) => {
-    if (p.querySelector('strong') && /\d/.test(p.textContent)) p.classList.add('cards-product-price');
+    const strong = p.querySelector(':scope > strong');
+    const last = p.lastElementChild?.textContent.trim();
+    const endsInValue = strong && p.textContent.trim().endsWith(last);
+    if (strong && (/\d/.test(p.textContent) || endsInValue)) p.classList.add('cards-product-price');
     else if (p.children.length === 1 && p.firstElementChild.tagName === 'EM') p.classList.add('cards-product-badge');
   });
 }
 
+let detailCount = 0;
+
+// expandable: the row's third cell opens as a panel over the whole grid, as on rbcroyalbank.com
+function decorateDetail(li, detail, ph) {
+  detailCount += 1;
+  detail.className = 'cards-card-detail';
+  detail.id = `cards-card-detail-${detailCount}`;
+  detail.hidden = true;
+  const heading = li.querySelector('h2, h3, h4, h5, h6');
+  const title = document.createElement('p');
+  title.className = 'cards-card-detail-title';
+  title.textContent = heading?.textContent || '';
+  const icon = li.querySelector('.cards-card-image')?.cloneNode(true);
+  const iconButton = (className, label) => {
+    const el = document.createElement('button');
+    el.type = 'button';
+    el.className = className;
+    el.setAttribute('aria-label', `${label}: ${title.textContent}`);
+    return el;
+  };
+  const open = iconButton('cards-card-open', ph.showDetails || 'Show details');
+  const close = iconButton('cards-card-close', ph.close || 'Close');
+  open.setAttribute('aria-expanded', 'false');
+  open.setAttribute('aria-controls', detail.id);
+  detail.prepend(...[close, icon, title].filter(Boolean));
+  const toggle = (show) => {
+    detail.hidden = !show;
+    open.setAttribute('aria-expanded', show);
+    (show ? close : open).focus();
+  };
+  open.addEventListener('click', () => toggle(true));
+  close.addEventListener('click', () => toggle(false));
+  detail.addEventListener('keydown', (e) => { if (e.key === 'Escape') toggle(false); });
+  li.append(open, detail);
+}
+
 export default async function decorate(block) {
+  if (block.classList.contains('tinted-alternate')) block.classList.add('tinted');
   if (block.classList.contains('product')) await renderProductRows(block);
+  const expandable = block.classList.contains('expandable');
+  const ph = expandable ? await fetchLocalPlaceholders() : {};
   const ul = document.createElement('ul');
   [...block.children].forEach((row) => {
     const li = document.createElement('li');
     while (row.firstElementChild) li.append(row.firstElementChild);
+    const detail = expandable && li.children.length > 2 ? li.lastElementChild : null;
+    detail?.remove();
     if (block.classList.contains('tile')) {
       decorateTile(li, tileWords(block));
       ul.append(li);
@@ -137,6 +179,7 @@ export default async function decorate(block) {
       const only = div.children.length === 1 && media && !div.textContent.trim();
       div.className = only ? 'cards-card-image' : 'cards-card-body';
     });
+    if (detail) decorateDetail(li, detail, ph);
     ul.append(li);
   });
   ul.querySelectorAll('.cards-card-image img').forEach((img) => {
@@ -144,6 +187,14 @@ export default async function decorate(block) {
     const optimized = createOptimizedPicture(img.src, img.alt, false, [{ width: '750' }]);
     (img.closest('picture') || img).replaceWith(optimized);
   });
+  if (block.classList.contains('yellow-eyebrow')) {
+    ul.querySelectorAll(':scope > li').forEach((li) => {
+      const eyebrow = li.querySelector('.cards-card-body > p:first-child:not(:has(a, picture))');
+      if (!eyebrow?.nextElementSibling?.matches('h2, h3, h4, h5, h6')) return;
+      eyebrow.className = 'cards-card-eyebrow';
+      li.prepend(eyebrow);
+    });
+  }
   ul.querySelectorAll('h2, h3, h4, h5, h6').forEach((heading) => {
     const title = document.createElement('p');
     title.className = `cards-card-title ${heading.tagName.toLowerCase()}`;

@@ -25,4 +25,20 @@ export default function decorate(block) {
       }
     });
   });
+
+  // a short bold-only line straight above a heading is a tag, as in the newcomer feature lists
+  block.querySelectorAll('p:has(> strong:only-child)').forEach((p) => {
+    const next = p.nextElementSibling;
+    if (next?.matches('h2, h3, h4, h5, h6') && p.textContent.trim().length <= 24) p.classList.add('columns-tag');
+  });
+
+  // slide-in: the first column enters from the left, the rest from the right, once in view
+  if (block.classList.contains('slide-in')) {
+    block.classList.add('slide-in-ready');
+    new IntersectionObserver(([entry], observer) => {
+      if (!entry.isIntersecting) return;
+      block.classList.add('in-view');
+      observer.disconnect();
+    }, { threshold: 0.25 }).observe(block);
+  }
 }

@@ -42,10 +42,28 @@ function railRows(product, ph) {
   return rows.join('');
 }
 
+// once the rail scrolls away, a bar with the page title keeps its apply button in reach;
+// it lives on body because the rail's sticky column would trap its z-index
+function stickyBar(block, ph) {
+  const apply = block.querySelector('.product-rail-cta a.button');
+  const title = document.querySelector('main h1');
+  if (!apply || !title) return;
+  const bar = document.createElement('div');
+  bar.className = 'product-rail-bar';
+  bar.innerHTML = `<p class="product-rail-bar-title" aria-hidden="true">${title.textContent}</p>
+    <p class="button-wrapper"><a class="button primary" href="${apply.href}">${ph.openAccount || 'Open Account'}</a></p>`;
+  document.body.append(bar);
+  const section = block.closest('.section');
+  new IntersectionObserver(([entry]) => {
+    bar.classList.toggle('visible', !entry.isIntersecting && entry.boundingClientRect.top < 0);
+  }).observe(section);
+}
+
 export default async function decorate(block) {
+  const ph = await fetchLocalPlaceholders();
   const link = block.querySelector('a[href*="/products/"]');
   if (link && block.textContent.trim() === link.textContent.trim()) {
-    const [product, ph] = await Promise.all([getProduct(link.getAttribute('href')), fetchLocalPlaceholders()]);
+    const product = await getProduct(link.getAttribute('href'));
     if (product) block.innerHTML = railRows(product, ph);
   }
   [...block.children].forEach((r) => {
@@ -66,4 +84,5 @@ export default async function decorate(block) {
     }
     r.className = 'product-rail-fee';
   });
+  stickyBar(block, ph);
 }

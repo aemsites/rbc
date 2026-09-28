@@ -1,7 +1,10 @@
 import { loadCSS } from '../../scripts/aem.js';
 
-const THEMES = ['white', 'cool-white', 'light-blue', 'grey', 'yellow', 'blue', 'navy', 'blue-gradient', 'light-gradient'];
-const WIDTHS = ['narrow', 'wide', 'art-center'];
+const THEMES = [
+  'white', 'cool-white', 'light-blue', 'grey', 'yellow', 'blue', 'navy', 'blue-gradient', 'light-gradient',
+  'teal', 'maroon', 'purple', 'red', 'violet',
+];
+const WIDTHS = ['narrow', 'wide', 'art-center', 'art-right', 'art-top', 'art-inset'];
 const WORDS = new Set([...THEMES, ...WIDTHS, 'light', 'dark']);
 
 loadCSS(`${window.hlx.codeBasePath}/blocks/cards/tiles.css`);

@@ -72,7 +72,7 @@
 }
 
 @media (width >= 768px) {
-  .columns.rules > div {
+  .columns:is(.rules, .align-top) > div {
     align-items: start;
   }
 
@@ -87,4 +87,91 @@
 .columns p > .icon:only-child {
   width: 40px;
   height: 40px;
+}
+
+/* card: the copy sits in a bordered card that the image column overlaps */
+.columns.card > div > div:not(.columns-img-col) {
+  border: 1px solid var(--rbc-grey-300);
+  border-radius: var(--radius-s);
+  padding: var(--space-xl);
+  background-color: var(--rbc-white);
+}
+
+.columns.card > div > div:not(.columns-img-col) p > picture img {
+  max-height: 56px;
+  vertical-align: middle;
+}
+
+.columns.card hr {
+  margin-block: var(--space-l);
+  border: 0;
+  border-top: 1px solid var(--rbc-grey-200);
+}
+
+@media (width >= 768px) {
+  .columns.card > div {
+    column-gap: 0;
+  }
+
+  .columns.card > div > .columns-img-col {
+    position: relative;
+    z-index: 1;
+  }
+
+  .columns.card > div > .columns-img-col + div {
+    margin-left: -80px;
+    padding: var(--space-3xl) var(--space-2xl) var(--space-3xl) calc(80px + var(--space-2xl));
+  }
+}
+
+/* slide-in: columns enter from either side once scrolled into view */
+.columns.slide-in-ready > div > div {
+  opacity: 0;
+  transform: translateX(48px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.columns.slide-in-ready > div > div:first-child {
+  transform: translateX(-48px);
+}
+
+.columns.slide-in-ready.in-view > div > div {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .columns.slide-in-ready > div > div {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+.columns .columns-tag {
+  display: inline-block;
+  margin: 0 0 var(--space-2xs);
+  border-radius: var(--radius-s);
+  padding: 2px var(--space-2xs);
+  background-color: var(--rbc-light-blue);
+  color: var(--rbc-grey-900);
+  font-size: var(--body-font-size-xs);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.columns .columns-tag + :is(h3, h4) {
+  margin-top: 0;
+  font-family: var(--body-font-family);
+  font-size: var(--body-font-size-l);
+  font-weight: 700;
+}
+
+.columns.center {
+  text-align: center;
+}
+
+.columns.center p.button-wrapper {
+  justify-content: center;
 }
