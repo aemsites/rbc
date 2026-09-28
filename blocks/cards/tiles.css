@@ -1,0 +1,147 @@
+.tile:not(.block) {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: var(--radius-m);
+  background-color: var(--rbc-cool-white);
+  color: var(--text-color);
+}
+
+.tile.tile-white { background-color: var(--rbc-white); }
+.tile.tile-light-blue { background-color: var(--rbc-light-blue); }
+.tile.tile-grey { background-color: var(--rbc-grey-100); }
+.tile.tile-yellow { background-color: var(--rbc-yellow); }
+.tile.tile-blue { background-color: var(--rbc-blue); }
+.tile.tile-navy { background-color: var(--rbc-navy); }
+.tile.tile-blue-gradient { background: linear-gradient(180deg, var(--rbc-blue) 0%, #008bff 100%); }
+.tile.tile-light-gradient { background: linear-gradient(114deg, var(--rbc-light-blue) 0%, var(--rbc-white) 100%); }
+
+.tile:is(.tile-blue, .tile-navy, .tile-blue-gradient, .tile-scrim) {
+  --text-color: var(--rbc-white);
+  --link-color: var(--rbc-white);
+  --link-hover-color: var(--rbc-white);
+
+  color: var(--text-color);
+}
+
+.tile .tile-content {
+  position: relative;
+  z-index: 1;
+  max-width: 380px;
+  padding: var(--space-xl);
+}
+
+.tile .tile-content > :first-child {
+  margin-top: 0;
+}
+
+.tile :is(.tile-image, .tile-background) p {
+  margin: 0;
+}
+
+.tile .tile-background p {
+  height: 100%;
+}
+
+.tile .tile-content p:has(> :is(picture, img):only-child) {
+  margin-bottom: var(--space-m);
+  line-height: 0;
+}
+
+.tile .tile-content img {
+  width: auto;
+  max-height: 56px;
+}
+
+.tile .tile-pill {
+  display: inline-block;
+  margin-bottom: var(--space-xs);
+  border-radius: 999px;
+  padding: var(--space-3xs) var(--space-xs);
+  background-color: var(--rbc-orange);
+  color: var(--rbc-grey-900);
+  font-size: var(--body-font-size-xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.tile .tile-pill em {
+  font-style: normal;
+}
+
+.tile .tile-image {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  z-index: 0;
+  width: 45%;
+  margin: 0;
+  line-height: 0;
+}
+
+.tile .tile-image img {
+  width: 100%;
+  max-height: 320px;
+  object-fit: contain;
+  object-position: right bottom;
+}
+
+.tile .tile-background {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  margin: 0;
+  line-height: 0;
+}
+
+.tile .tile-background img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.tile:is(.tile-scrim, .tile-light) .tile-background::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.tile.tile-scrim .tile-background::after {
+  background: linear-gradient(180deg, rgb(0 0 0 / 60%) 0%, rgb(0 0 0 / 20%) 100%);
+}
+
+.tile.tile-light .tile-background::after {
+  background: linear-gradient(90deg, rgb(255 255 255 / 92%) 0%, rgb(255 255 255 / 85%) 35%, rgb(255 255 255 / 0%) 65%);
+}
+
+.tile:has(.tile-image) .tile-content {
+  box-sizing: border-box;
+  max-width: 55%;
+}
+
+.tile.tile-narrow .tile-content {
+  box-sizing: border-box;
+  max-width: 45%;
+}
+
+.tile.tile-wide .tile-content {
+  max-width: none;
+}
+
+.tile.tile-art-center .tile-content {
+  box-sizing: content-box;
+  max-width: 380px;
+}
+
+.tile.tile-art-center .tile-image {
+  right: 50%;
+  width: 70%;
+  transform: translateX(50%);
+}
+
+.tile.tile-art-center .tile-image img {
+  max-height: none;
+  object-position: center bottom;
+}

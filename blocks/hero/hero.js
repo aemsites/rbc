@@ -44,7 +44,7 @@ export default function decorate(block) {
   normalizeImage(block);
 
   const backdrop = block.classList.contains('background');
-  if (backdrop) block.closest('.section')?.classList.add('dark-background');
+  if (backdrop && !block.classList.contains('light')) block.closest('.section')?.classList.add('dark-background');
 
   const row = block.firstElementChild;
   if (row && row.children.length > 1 && !backdrop) {
@@ -59,6 +59,10 @@ export default function decorate(block) {
   }
 
   backgroundVideo(block);
+
+  block.querySelectorAll('p > em:only-child').forEach((em) => {
+    if (em.textContent.trim() === em.parentElement.textContent.trim()) em.parentElement.classList.add('hero-note');
+  });
 
   const eyebrow = block.querySelector('h1, h2, h3, h4, h5, h6')?.previousElementSibling;
   if (eyebrow?.tagName === 'P' && !eyebrow.querySelector('a, picture')) {

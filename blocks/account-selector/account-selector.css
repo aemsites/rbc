@@ -1,0 +1,374 @@
+.account-selector .account-selector-form {
+  max-width: var(--width-s);
+  margin: 0 auto;
+  border: 1px solid var(--rbc-grey-200);
+  border-radius: var(--radius-s);
+  padding: var(--space-xl);
+  background-color: var(--rbc-white);
+}
+
+.account-selector .account-selector-progress {
+  display: flex;
+  gap: 2px;
+  height: 4px;
+  margin: 0 0 var(--space-xs);
+  overflow: hidden;
+}
+
+.account-selector fieldset {
+  margin: 0;
+  border: 0;
+  padding: 0;
+}
+
+.account-selector legend {
+  margin-bottom: var(--space-l);
+  padding: 0;
+  font-family: var(--heading-font-family);
+  font-size: var(--heading-font-size-m);
+  text-align: center;
+}
+
+.account-selector legend > * {
+  margin: 0;
+}
+
+.account-selector legend p + p {
+  margin-top: var(--space-2xs);
+  font-family: var(--body-font-family);
+  font-size: var(--body-font-size-s);
+  color: var(--rbc-grey-600);
+}
+
+.account-selector .account-selector-stepper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-s);
+}
+
+.account-selector input[type="number"] {
+  width: 3ch;
+  margin: 0;
+  border: 0;
+  padding: 0;
+  background: none;
+  color: inherit;
+  font-size: var(--heading-font-size-l);
+  text-align: center;
+  appearance: textfield;
+}
+
+.account-selector input[type="number"]::-webkit-inner-spin-button,
+.account-selector input[type="number"]::-webkit-outer-spin-button {
+  margin: 0;
+  appearance: none;
+}
+
+.account-selector .account-selector-stepper button {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  margin: 0;
+  border: 2px solid currentcolor;
+  border-radius: 50%;
+  padding: 0;
+  background: none;
+  color: var(--rbc-blue);
+  font-size: var(--heading-font-size-m);
+  line-height: 1;
+  cursor: pointer;
+}
+
+.account-selector .account-selector-minus::before {
+  content: "\2212";
+}
+
+.account-selector .account-selector-plus::before {
+  content: "+";
+}
+
+.account-selector .account-selector-options {
+  display: grid;
+  gap: var(--space-s);
+  max-width: 360px;
+  margin: 0 auto;
+}
+
+.account-selector .account-selector-options label {
+  display: flex;
+  gap: var(--space-2xs);
+  align-items: baseline;
+}
+
+.account-selector .account-selector-options input {
+  accent-color: var(--rbc-blue);
+}
+
+.account-selector .account-selector-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: var(--space-xl);
+}
+
+.account-selector .account-selector-back {
+  margin: 0;
+  border: 0;
+  padding: 0;
+  background: none;
+  color: var(--link-color);
+  cursor: pointer;
+}
+
+.account-selector .account-selector-back[hidden] {
+  display: none;
+}
+
+.account-selector .account-selector-nav .button {
+  margin-left: auto;
+}
+
+.account-selector .account-selector-results h2 {
+  text-align: center;
+}
+
+.account-selector .account-selector-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
+  gap: var(--space-l);
+  margin: var(--space-xl) 0;
+  padding: 0;
+  list-style: none;
+}
+
+.account-selector .account-selector-cards > li {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--rbc-grey-300);
+  border-radius: var(--radius-m);
+  overflow: hidden;
+  background-color: var(--rbc-white);
+}
+
+.account-selector .account-selector-cards > li.recommended {
+  border: 2px solid var(--rbc-blue);
+}
+
+.account-selector .account-selector-badge {
+  display: none;
+  margin: 0;
+  padding: var(--space-2xs);
+  background-color: var(--rbc-yellow);
+  font-size: var(--body-font-size-xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.account-selector li.recommended .account-selector-badge {
+  display: block;
+}
+
+.account-selector .account-selector-head {
+  padding: var(--space-l) var(--space-m);
+  background-color: var(--rbc-blue);
+  color: var(--rbc-white);
+  text-align: center;
+}
+
+.account-selector .account-selector-head > * {
+  margin: 0;
+}
+
+.account-selector .account-selector-head :is(h3, h4) {
+  font-size: var(--heading-font-size-m);
+}
+
+.account-selector .account-selector-head p {
+  font-style: italic;
+}
+
+.account-selector .account-selector-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding: var(--space-l) var(--space-m);
+}
+
+.account-selector .account-selector-body > p:first-child {
+  margin: 0 0 var(--space-s);
+  font-size: var(--heading-font-size-l);
+  font-weight: 500;
+  text-align: center;
+}
+
+.account-selector .account-selector-body ul {
+  flex: 1;
+  margin: 0 0 var(--space-l);
+  padding-left: var(--space-l);
+  font-size: var(--body-font-size-s);
+}
+
+.account-selector .account-selector-body p.button-wrapper {
+  justify-content: center;
+  margin: 0;
+}
+
+.account-selector .account-selector-results > .button {
+  display: block;
+  margin: 0 auto;
+}
+
+.account-selector .account-selector-progress i {
+  flex: 1;
+  background-color: var(--rbc-grey-200);
+}
+
+.account-selector .account-selector-progress i.active {
+  background-color: var(--rbc-blue);
+}
+
+.account-selector .account-selector-step {
+  margin: 0 0 var(--space-m);
+  color: var(--rbc-grey-600);
+  font-size: var(--body-font-size-xs);
+  text-align: center;
+}
+
+.account-selector .account-selector-slider {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  column-gap: var(--space-m);
+}
+
+.account-selector .account-selector-slider input[type="range"] {
+  grid-column: 1 / 3;
+  width: 100%;
+  accent-color: var(--rbc-blue);
+}
+
+.account-selector .account-selector-slider span {
+  color: var(--rbc-grey-600);
+  font-size: var(--body-font-size-xs);
+}
+
+.account-selector .account-selector-slider span + span {
+  text-align: right;
+}
+
+.account-selector .account-selector-slider .account-selector-stepper {
+  grid-column: 3;
+  grid-row: 1;
+}
+
+.account-selector .account-selector-help {
+  margin-top: var(--space-m);
+}
+
+.account-selector .account-selector-help summary {
+  width: fit-content;
+  color: var(--link-color);
+  cursor: pointer;
+}
+
+.account-selector .account-selector-help label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-m);
+  margin-top: var(--space-xs);
+}
+
+.account-selector .account-selector-help .account-selector-stepper {
+  flex: 0 0 auto;
+}
+
+.account-selector .account-selector-note {
+  margin: var(--space-s) 0 0;
+  color: var(--rbc-grey-600);
+  font-size: var(--body-font-size-xs);
+}
+
+.account-selector .account-selector-nav .button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* short: two-question funnel that hands off to the full tool, laid over a section background */
+.account-selector.short .account-selector-form {
+  max-width: var(--width-m);
+  border: 0;
+  padding: 0;
+  background: none;
+  text-align: center;
+}
+
+.account-selector.short .account-selector-progress {
+  width: 96px;
+  margin: 0 auto var(--space-m);
+}
+
+.account-selector.short legend {
+  font-size: var(--heading-font-size-xl);
+}
+
+.dark-background .account-selector.short legend p + p,
+.dark-background .account-selector.short .account-selector-back {
+  color: inherit;
+}
+
+.account-selector.short .account-selector-options {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-s);
+  max-width: none;
+}
+
+.account-selector.short .account-selector-options label {
+  border: 1px solid var(--rbc-blue);
+  border-radius: var(--radius-s);
+  padding: var(--space-s) var(--space-xl);
+  background-color: var(--rbc-white);
+  color: var(--rbc-blue);
+  cursor: pointer;
+}
+
+.account-selector.short .account-selector-options label:has(:checked) {
+  background-color: var(--rbc-navy);
+  color: var(--rbc-white);
+}
+
+.account-selector.short .account-selector-options input {
+  position: absolute;
+  opacity: 0;
+}
+
+.dark-background .account-selector.short .account-selector-stepper button {
+  color: inherit;
+}
+
+.account-selector.short .account-selector-nav {
+  flex-direction: column;
+  gap: var(--space-s);
+}
+
+.account-selector.short .account-selector-nav .button {
+  margin: 0;
+}
+
+.dark-background .account-selector.short .account-selector-progress i {
+  background-color: rgb(255 255 255 / 40%);
+}
+
+.dark-background .account-selector.short .account-selector-progress i.active {
+  background-color: var(--rbc-white);
+}
+
+.dark-background .account-selector.short .account-selector-step {
+  display: none;
+}

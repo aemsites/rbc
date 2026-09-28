@@ -1,0 +1,42 @@
+const INDEX = '/products/query-index.json';
+let cache;
+
+// item cells come back as the structured doc's html: rows of key heading + value
+function parseItem(html) {
+  const item = {};
+  new DOMParser().parseFromString(`<div>${html}</div>`, 'text/html').body.firstElementChild
+    .querySelectorAll(':scope > div').forEach((row) => {
+      const key = row.querySelector('h3')?.textContent.trim();
+      if (key) item[key] = row.lastElementChild.textContent.trim();
+    });
+  return item;
+}
+
+function normalize(row) {
+  const product = { ...row };
+  product.slug = row.path.split('/').pop();
+  product.sortOrder = Number(row.sortOrder) || 0;
+  product.highlights = (Array.isArray(row.highlights) ? row.highlights : []).map(parseItem);
+  product.fees = (Array.isArray(row.fees) ? row.fees : []).map(parseItem)
+    .map((fee) => ({ ...fee, amount: fee.amount === '' ? undefined : Number(fee.amount) }));
+  return product;
+}
+
+export async function fetchProducts() {
+  cache = cache || fetch(INDEX)
+    .then((resp) => (resp.ok ? resp.json() : { data: [] }))
+    .then(({ data }) => data.map(normalize).sort((a, b) => a.sortOrder - b.sortOrder))
+    .catch(() => []);
+  return cache;
+}
+
+// ref is a /products/... path, a slug, or a product code
+export async function getProduct(ref) {
+  const key = String(ref).split('/').pop();
+  return (await fetchProducts()).find((p) => p.slug === key || p.productCode === key);
+}
+
+export async function getProducts({ category, persona } = {}) {
+  return (await fetchProducts()).filter((p) => (!category || p.category === category)
+    && (!persona || p.persona === persona));
+}

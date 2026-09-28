@@ -2,7 +2,8 @@
   border-bottom: 1px solid var(--rbc-grey-200);
 }
 
-.accordion > .accordion-item:first-child {
+.accordion > .accordion-item:first-child,
+.accordion .accordion-col > .accordion-item:first-child {
   border-top: 1px solid var(--rbc-grey-200);
 }
 
@@ -108,10 +109,5 @@
   .accordion.split > .accordion-more,
   .accordion.split > .accordion-toggle {
     grid-column: 1 / -1;
-  }
-
-  .accordion.split > .accordion-item:nth-child(-n + 2),
-  .accordion.split .accordion-more > .accordion-item:nth-child(-n + 2) {
-    border-top: 1px solid var(--rbc-grey-200);
   }
 }

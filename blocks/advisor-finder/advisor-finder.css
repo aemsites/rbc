@@ -1,0 +1,123 @@
+.advisor-finder .advisor-finder-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-s) var(--space-l);
+}
+
+.advisor-finder label {
+  font-weight: 700;
+}
+
+.advisor-finder label > * {
+  margin: 0;
+}
+
+.advisor-finder select {
+  min-width: 220px;
+  border: 1px solid var(--rbc-grey-300);
+  border-radius: var(--radius-s);
+  padding: var(--space-xs) var(--space-s);
+  background-color: var(--rbc-white);
+}
+
+.advisor-finder .advisor-finder-results {
+  max-width: var(--width-s);
+  margin: var(--space-xl) auto 0;
+}
+
+.advisor-finder .advisor-finder-heading {
+  font-weight: 700;
+}
+
+.advisor-finder .advisor-finder-results p {
+  margin: 0 0 var(--space-s);
+}
+
+.advisor-finder .advisor-finder-empty {
+  margin-top: var(--space-xl);
+  text-align: center;
+}
+
+.advisor-finder .advisor-finder-team {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
+  gap: var(--space-l);
+  margin: var(--space-2xl) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.advisor-finder .advisor-finder-team li {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--rbc-grey-200);
+  border-radius: var(--radius-m);
+  padding: var(--space-m);
+  background-color: var(--rbc-white);
+}
+
+.advisor-finder .advisor-finder-team picture {
+  display: block;
+  line-height: 0;
+}
+
+.advisor-finder .advisor-finder-team img {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: var(--radius-s);
+  object-fit: cover;
+  object-position: center 25%;
+}
+
+.advisor-finder .advisor-finder-team li > div {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding: var(--space-m) var(--space-xs) var(--space-xs);
+}
+
+.advisor-finder .advisor-finder-team h3 {
+  margin: 0 0 var(--space-s);
+  font-size: var(--heading-font-size-s);
+}
+
+.advisor-finder .advisor-finder-team h3 span {
+  display: block;
+  color: var(--rbc-grey-600);
+  font-family: var(--body-font-family);
+  font-size: var(--body-font-size-s);
+  font-weight: 400;
+}
+
+.advisor-finder .advisor-finder-team p {
+  margin: 0 0 var(--space-2xs);
+  font-size: var(--body-font-size-s);
+}
+
+.advisor-finder .advisor-finder-quote {
+  margin: var(--space-s) 0 var(--space-m);
+  color: var(--rbc-grey-600);
+  font-style: italic;
+}
+
+.advisor-finder .advisor-finder-more {
+  margin-top: auto;
+  border: 0;
+  padding: 0;
+  background: none;
+  color: var(--link-color);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.advisor-finder .advisor-finder-more::after {
+  content: " ›";
+}
+
+.advisor-finder .advisor-finder-team[hidden],
+.advisor-finder .advisor-finder-team li[hidden] {
+  display: none;
+}

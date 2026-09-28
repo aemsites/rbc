@@ -1,0 +1,44 @@
+.disclaimers summary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-s);
+  padding: var(--space-m) 0;
+  color: var(--link-color);
+  font-size: var(--body-font-size-s);
+  cursor: pointer;
+  list-style: none;
+}
+
+.disclaimers summary::-webkit-details-marker {
+  display: none;
+}
+
+.disclaimers summary::before {
+  content: "";
+  position: relative;
+  flex: 0 0 auto;
+  width: 14px;
+  height: 14px;
+  background:
+    linear-gradient(currentcolor, currentcolor) center / 100% 2px no-repeat,
+    linear-gradient(currentcolor, currentcolor) center / 2px 100% no-repeat;
+}
+
+.disclaimers details[open] summary::before {
+  background-size: 100% 2px, 0 0;
+}
+
+.disclaimers ul {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-s);
+  overflow-wrap: anywhere;
+  padding-left: 0;
+  list-style: none;
+  font-size: var(--body-font-size-xs);
+  color: var(--rbc-grey-600);
+}
+
+.disclaimers .disclaimers-label {
+  font-weight: 700;
+}
