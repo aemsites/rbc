@@ -391,6 +391,7 @@ async function loadLazy(doc) {
   loadHeader(doc.querySelector('body > header')).then(() => adoptBreadcrumb(doc));
 
   const main = doc.querySelector('main');
+  import('../utils/pzn.js');
   await loadSections(main);
   decorateRates(main);
 
