@@ -1,17 +1,21 @@
 import { getProduct, monthlyFees } from '../../utils/products.js';
 import fetchLocalPlaceholders from '../../utils/placeholders.js';
+import { footnoteSup } from '../../utils/footnotes.js';
 
 let pickerCount = 0;
 
 function detail(product, ph) {
-  const { regular, rebate } = monthlyFees(product);
+  const {
+    regular, rebate, regularFootnotes, rebateFootnotes,
+  } = monthlyFees(product);
+  const sup = (value) => footnoteSup(value, product.productPage);
   const rebateLine = rebate
-    ? `<span>${ph.or || 'or'} ${rebate}${ph.perMonth || '/mo'} ${ph.withTheValueProgram || 'with the Value Program'}</span>` : '';
-  const includes = product.highlights.map((h) => `<li>${h.text}</li>`).join('');
+    ? `<span>${ph.or || 'or'} ${rebate}${ph.perMonth || '/mo'} ${ph.withTheValueProgram || 'with the Value Program'}${sup(rebateFootnotes)}</span>` : '';
+  const includes = product.highlights.map((h) => `<li>${h.text}${sup(h.footnotes)}</li>`).join('');
   return `
     <div class="product-picker-head">
       <p class="product-picker-name">${product.name}</p>
-      <p class="product-picker-price"><span>${ph.monthlyFee || 'Monthly fee'}</span><strong>${regular}</strong>${rebateLine}</p>
+      <p class="product-picker-price"><span>${ph.monthlyFee || 'Monthly fee'}</span><strong>${regular}${sup(regularFootnotes)}</strong>${rebateLine}</p>
     </div>
     ${includes ? `<p class="product-picker-includes">${ph.includes || 'Includes:'}</p><ul>${includes}</ul>` : ''}
     <p class="button-wrapper"><a class="button" href="${product.applyUrl}">${ph.openAccount || 'Open Account'}</a></p>`;

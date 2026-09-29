@@ -1,5 +1,6 @@
 import applyConfig from '../../scripts/config.js';
 import { getProduct, getProducts } from '../../utils/products.js';
+import { footnoteSup } from '../../utils/footnotes.js';
 
 const TEMPLATE = `
 <form class="account-selector-form">
@@ -137,13 +138,14 @@ async function recommend(a) {
 
 // result cards come from the product records in the `products` row, or every chequing account
 function productCard(product, text) {
+  const sup = (value) => footnoteSup(value, product.productPage);
   const li = document.createElement('li');
   li.dataset.name = product.name;
   li.innerHTML = `<p class="account-selector-badge">${text('badge')}</p>
     <div class="account-selector-head"><h3>${product.name}</h3><p>${product.tagline}</p></div>
     <div class="account-selector-body">
-      <p>${product.fees[0]?.displayValue || ''}${product.fees[0]?.displayValue.startsWith('$') ? text('per-month') : ''}</p>
-      <ul>${product.highlights.slice(0, 3).map((h) => `<li>${h.text}</li>`).join('')}</ul>
+      <p>${product.fees[0]?.displayValue || ''}${product.fees[0]?.displayValue.startsWith('$') ? text('per-month') : ''}${sup(product.fees[0]?.footnotes)}</p>
+      <ul>${product.highlights.slice(0, 3).map((h) => `<li>${h.text}${sup(h.footnotes)}</li>`).join('')}</ul>
       ${product.applyUrl ? `<p class="button-wrapper"><a class="button primary" href="${product.applyUrl}">${text('open-this-account')}</a></p>` : ''}
       <p><a href="${product.productPage}">${text('view-account-details')}</a></p>
     </div>`;

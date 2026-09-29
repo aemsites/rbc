@@ -2,6 +2,7 @@ import { createOptimizedPicture } from '../../scripts/aem.js';
 import { getProduct } from '../../utils/products.js';
 import fetchLocalPlaceholders from '../../utils/placeholders.js';
 import { rateSpan } from '../../utils/rates.js';
+import { footnoteSup } from '../../utils/footnotes.js';
 
 function longDate(iso) {
   return new Intl.DateTimeFormat(document.documentElement.lang || 'en-CA', { dateStyle: 'long' })
@@ -22,16 +23,16 @@ function railRows(product, ph) {
     const image = product.offerImage ? picture(product.offerImage, product.offerImageAlt) : '';
     const ends = product.offerEndDate ? `${ph.offerEnds || 'Offer ends'} ${longDate(product.offerEndDate)}. ` : '';
     const details = product.offerDetailsUrl ? `<p><a href="${product.offerDetailsUrl}" target="_blank" rel="noopener">${ph.viewOfferDetails || 'View Offer Details'}</a></p>` : '';
-    rows.push(row(`<p>${product.offerEyebrow || ph.offer || 'Offer'}</p>`, `${image}<p>${product.offerHeadline}</p><p>${ends}${product.offerConditions || ''}</p>${details}`));
+    rows.push(row(`<p>${product.offerEyebrow || ph.offer || 'Offer'}</p>`, `${image}<p>${product.offerHeadline}${footnoteSup(product.offerFootnotes, product.offerDetailsUrl || product.productPage)}</p><p>${ends}${product.offerConditions || ''}</p>${details}`));
   }
   if (product.rateFallbackValue) {
     const value = product.rateRateCode
       ? rateSpan(product.rateRateCode, product.rateFallbackValue) : product.rateFallbackValue;
-    rows.push(row(`<p>${product.rateLabel}</p>`, `<p>${value}</p>`));
+    rows.push(row(`<p>${product.rateLabel}${footnoteSup(product.rateFootnotes, product.productPage)}</p>`, `<p>${value}</p>`));
   }
   product.fees.forEach((fee) => {
     const label = fee.detailUrl ? `<a href="${fee.detailUrl}">${fee.label}</a>` : fee.label;
-    rows.push(row(`<p>${label}${fee.footnotes ? `<sup>${fee.footnotes}</sup>` : ''}</p>`, `<p>${fee.displayValue}</p>`));
+    rows.push(row(`<p>${label}${footnoteSup(fee.footnotes, product.productPage)}</p>`, `<p>${fee.displayValue}</p>`));
   });
   if (product.feeDisclaimer) {
     const details = product.feeDetailsUrl ? ` <a href="${product.feeDetailsUrl}">${ph.viewFeeDetails || 'View the fee details'}</a>.` : '';

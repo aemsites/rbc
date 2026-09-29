@@ -13,12 +13,20 @@ main > .section > .cards-wrapper + .default-content-wrapper {
 }
 
 .cards > ul {
+  --cards-max: 4;
+  --cards-cap: calc(100% / (var(--cards-max) + 1) + 1px);
+
   list-style: none;
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(350px, 100%), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(max(min(350px, 100%), var(--cards-cap)), 1fr));
   gap: var(--space-l);
+}
+
+/* five or six cards read better as 3+2 or 3+3 than with an orphan */
+.cards > ul:has(> li:nth-child(5):last-child, > li:nth-child(6):last-child) {
+  --cards-max: 3;
 }
 
 .cards > ul:has(> li:only-child) {
@@ -114,7 +122,7 @@ main > .section > .cards-wrapper + .default-content-wrapper {
 }
 
 .cards.icons > ul {
-  grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(max(min(200px, 100%), var(--cards-cap)), 1fr));
 }
 
 .cards.icons:is(.medium, .large) > ul > li > .cards-card-image {
@@ -241,7 +249,7 @@ main > .section > .cards-wrapper + .default-content-wrapper {
 
 /* plain: a picture and a caption, no card chrome; for partner logos that carry their own colour */
 .cards.plain > ul {
-  grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(max(min(180px, 100%), var(--cards-cap)), 1fr));
 }
 
 .cards.plain > ul > li {
@@ -291,7 +299,7 @@ main > .section > .cards-wrapper + .default-content-wrapper {
 
 /* dark: navy tiles, for white-on-brand logos */
 .cards.dark:not(.tile) > ul {
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(max(200px, var(--cards-cap)), 1fr));
 }
 
 .cards.dark:not(.tile) > ul > li {
@@ -313,7 +321,7 @@ main > .section > .cards-wrapper + .default-content-wrapper {
 
 /* horizontal: image beside copy, in authored order */
 .cards.horizontal > ul {
-  grid-template-columns: repeat(auto-fill, minmax(min(420px, 100%), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(max(min(420px, 100%), var(--cards-cap)), 1fr));
 }
 
 .cards.horizontal > ul > li {
@@ -335,7 +343,7 @@ main > .section > .cards-wrapper + .default-content-wrapper {
 
 /* icons horizontal: a small mark beside short copy, several to a row */
 .cards.icons.horizontal > ul {
-  grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(max(min(240px, 100%), var(--cards-cap)), 1fr));
 }
 
 .cards.icons.horizontal > ul > li {
@@ -543,7 +551,7 @@ main > .section > .cards-wrapper + .default-content-wrapper {
 
 /* product card with a picture: two per row, header left, image right, list in two columns */
 .cards.product:has(> ul > li > .cards-card-image) > ul {
-  grid-template-columns: repeat(auto-fit, minmax(min(420px, 100%), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(max(min(420px, 100%), var(--cards-cap)), 1fr));
 }
 
 .cards.product > ul > li:has(> .cards-card-image) {
@@ -641,7 +649,7 @@ main > .section > .cards-wrapper + .default-content-wrapper {
 
 /* tile: bento tiles, stacked when the section Layout puts two blocks side by side */
 .cards.tile > ul {
-  grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(max(min(320px, 100%), var(--cards-cap)), 1fr));
 }
 
 .cards.tile > ul > li {
@@ -655,11 +663,11 @@ main > .section > .cards-wrapper + .default-content-wrapper {
 }
 
 .cards.tile.short > ul {
-  grid-template-columns: repeat(auto-fit, minmax(min(460px, 100%), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(max(min(460px, 100%), var(--cards-cap)), 1fr));
 }
 
 main > .section[data-layout]:not([data-layout="50-50"]) .cards.tile > ul {
-  grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(max(min(220px, 100%), var(--cards-cap)), 1fr));
 }
 
 .cards.tile.short > ul > li {
@@ -710,7 +718,7 @@ main > .section.left .cards.product > ul {
 /* expandable: small white cards whose plus button opens the full story over the whole grid */
 .cards.expandable > ul {
   position: relative;
-  grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(max(min(200px, 100%), var(--cards-cap)), 1fr));
   gap: var(--space-s);
 }
 

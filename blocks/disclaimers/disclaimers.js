@@ -1,4 +1,5 @@
 import fetchLocalPlaceholders from '../../utils/placeholders.js';
+import { legalId, normalizeLabel } from '../../utils/footnotes.js';
 
 export default async function decorate(block) {
   const ph = await fetchLocalPlaceholders();
@@ -13,13 +14,17 @@ export default async function decorate(block) {
   const list = document.createElement('ul');
   [...block.children].forEach((row) => {
     const [labelCell, textCell] = [...row.children];
-    const label = labelCell.textContent.trim();
+    const label = normalizeLabel(labelCell.textContent);
     const li = document.createElement('li');
-    li.id = `legal-${tab}-${label}`;
+    li.id = legalId(label, tab);
+    li.dataset.label = label;
+    li.tabIndex = -1;
     const marker = document.createElement('span');
     marker.className = 'disclaimers-label';
     marker.textContent = `${label}) `;
-    li.append(marker, ...textCell.childNodes);
+    li.append(...textCell.childNodes);
+    const first = li.firstElementChild?.tagName === 'P' ? li.firstElementChild : li;
+    first.prepend(marker);
     list.append(li);
   });
 

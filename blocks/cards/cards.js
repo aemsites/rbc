@@ -3,6 +3,7 @@ import decorateTile, { tileWords } from './tiles.js';
 import { getProduct, getProducts, monthlyFees } from '../../utils/products.js';
 import fetchLocalPlaceholders from '../../utils/placeholders.js';
 import { rateSpan } from '../../utils/rates.js';
+import { footnoteSup } from '../../utils/footnotes.js';
 
 function button(text, href, kind) {
   return `<p class="button-wrapper"><a class="button ${kind}" href="${href}">${text}</a></p>`;
@@ -18,31 +19,37 @@ function offerLink(product, text) {
 }
 
 function priceLine(product, ph) {
-  const { regular, rebate } = monthlyFees(product);
+  const {
+    regular, rebate, regularFootnotes, rebateFootnotes,
+  } = monthlyFees(product);
   if (!regular) return '';
   const per = (value) => (value.startsWith('$') ? ph.perMonth || '/mo' : '');
-  let line = `<strong>${regular}</strong>${per(regular)}`;
-  if (rebate) line += ` <em>${ph.or || 'or'}</em> <strong>${rebate}</strong>${per(rebate)} ${ph.withTheValueProgram || 'with the Value Program'}`;
+  const sup = (value) => footnoteSup(value, product.productPage);
+  let line = `<strong>${regular}</strong>${per(regular)}${sup(regularFootnotes)}`;
+  if (rebate) line += ` <em>${ph.or || 'or'}</em> <strong>${rebate}</strong>${per(rebate)} ${ph.withTheValueProgram || 'with the Value Program'}${sup(rebateFootnotes)}`;
   return `<p>${line}</p>`;
 }
 
 // the body markup an author would otherwise write by hand, built from the product record
 function productBody(product, ph, variant) {
+  const sup = (value) => footnoteSup(value, product.productPage);
   const rate = product.rateFallbackValue
-    ? `<li>${product.rateLabel}: ${product.rateRateCode ? rateSpan(product.rateRateCode, product.rateFallbackValue) : product.rateFallbackValue}</li>` : '';
-  const highlights = product.highlights.map((h) => `<li>${link(h.text, h.url)}</li>`).join('') + rate;
+    ? `<li>${product.rateLabel}: ${product.rateRateCode ? rateSpan(product.rateRateCode, product.rateFallbackValue) : product.rateFallbackValue}${sup(product.rateFootnotes)}</li>` : '';
+  const highlights = product.highlights.map((h) => `<li>${link(h.text, h.url)}${sup(h.footnotes)}</li>`).join('') + rate;
+  const note = product.note ? `<p>${product.note}${sup(product.noteFootnotes)}</p>` : '';
   const [fee] = product.fees;
+  const feeSup = sup(fee?.footnotes);
   if (variant === 'compact') {
-    return `<h3>${product.name}</h3><p>${fee?.label || ''} <strong>${fee?.displayValue || ''}</strong></p>
+    return `<h3>${product.name}</h3><p>${fee?.label || ''}${feeSup} <strong>${fee?.displayValue || ''}</strong></p>
       <p><a href="${product.productPage}">${ph.viewAccount || 'View Account'}</a></p>`;
   }
   if (variant === 'picture') {
     return `<p>${product.categoryLabel}</p><h3><a href="${product.productPage}">${product.name}</a></h3>
-      <p>${ph.monthlyFee || 'Monthly Fee'}: ${fee?.displayValue || ''}</p>${product.note ? `<p>${product.note}</p>` : ''}<ul>${highlights}</ul>
+      <p>${ph.monthlyFee || 'Monthly Fee'}${feeSup}: ${fee?.displayValue || ''}</p>${note}<ul>${highlights}</ul>
       <p class="button-wrapper"><a class="button primary" href="${product.productPage}">${ph.learnMore || 'Learn More'}</a>${product.applyUrl ? ` <a class="button secondary" href="${product.applyUrl}">${ph.openAccount || 'Open Account'}</a>` : ''}</p>`;
   }
   return `<p>${product.categoryLabel}</p><h3>${product.name}</h3><p>${product.tagline}</p><ul>${highlights}</ul>
-    ${product.note ? `<p>${product.note}</p>` : ''}${product.offerBadge ? `<p><em>${offerLink(product, product.offerBadge)}</em></p>` : ''}${priceLine(product, ph)}
+    ${note}${product.offerBadge ? `<p><em>${offerLink(product, product.offerBadge)}${footnoteSup(product.offerFootnotes, product.offerDetailsUrl || product.productPage)}</em></p>` : ''}${priceLine(product, ph)}
     ${product.applyUrl ? button(ph.openAccount || 'Open Account', product.applyUrl, 'primary') : ''}
     <p><a href="${product.productPage}">${ph.viewMoreAccountBenefits || 'View More Account Benefits'}</a></p>`;
 }

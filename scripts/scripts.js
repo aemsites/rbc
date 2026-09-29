@@ -1,5 +1,6 @@
 import { watchStuck } from '../utils/dom.js';
 import { decorateRateCode, decorateRates } from '../utils/rates.js';
+import linkFootnotes, { revealLegalHash } from '../utils/footnotes.js';
 import {
   getMetadata,
   loadHeader,
@@ -136,6 +137,7 @@ function decorateButtons(main) {
       inner.querySelectorAll('a[href]').forEach((link) => link.remove());
       return !inner.textContent.trim();
     });
+    if (!buttons.length && links.every((a) => !a.querySelector('img'))) p.classList.add('link-wrapper');
     if (buttons.length !== links.length) return;
 
     const variants = new Map(buttons.map((a) => {
@@ -245,6 +247,7 @@ export function decorateMain(main) {
   decorateBlocks(main);
   decorateButtons(main);
   decorateRateCode(main);
+  linkFootnotes(main);
 }
 
 function reserveHeaderHeight(header) {
@@ -332,6 +335,7 @@ async function loadLazy(doc) {
   const { hash } = window.location;
   const element = hash ? doc.getElementById(hash.substring(1)) : false;
   if (hash && element) element.scrollIntoView();
+  revealLegalHash();
 
   loadFooter(doc.querySelector('body > footer'));
 

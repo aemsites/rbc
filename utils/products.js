@@ -48,5 +48,7 @@ export function monthlyFees(product) {
   return {
     regular: regular?.displayValue || '',
     rebate: rebate?.displayValue.replace(/^(as low as|aussi peu que)\s+/i, '') || '',
+    regularFootnotes: regular?.footnotes || '',
+    rebateFootnotes: rebate?.footnotes || '',
   };
 }
