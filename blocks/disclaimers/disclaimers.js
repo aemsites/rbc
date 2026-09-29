@@ -13,11 +13,12 @@ export default async function decorate(block) {
   // carries its own label rather than one derived from position
   const list = document.createElement('ul');
   [...block.children].forEach((row) => {
-    const [labelCell, textCell] = [...row.children];
+    const [labelCell, textCell, idCell] = [...row.children];
     const label = normalizeLabel(labelCell.textContent);
     const li = document.createElement('li');
     li.id = legalId(label, tab);
     li.dataset.label = label;
+    if (idCell?.textContent.trim()) li.dataset.id = idCell.textContent.trim();
     li.tabIndex = -1;
     const marker = document.createElement('span');
     marker.className = 'disclaimers-label';

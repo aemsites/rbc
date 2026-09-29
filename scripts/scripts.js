@@ -210,6 +210,8 @@ async function inlineIcon(span) {
   if (!markup || !span.contains(img)) return;
   const svg = new DOMParser().parseFromString(markup, 'image/svg+xml').querySelector('svg');
   if (!svg || svg.querySelector('parsererror')) return;
+  const [width, height] = ['width', 'height'].map((attr) => parseFloat(svg.getAttribute(attr)));
+  if (!svg.hasAttribute('viewBox') && width && height) svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
   svg.querySelectorAll('script').forEach((node) => node.remove());
   svg.querySelectorAll('*').forEach((node) => {
     [...node.attributes]
