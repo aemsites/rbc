@@ -1,5 +1,6 @@
 import applyConfig from '../../scripts/config.js';
-import { getProduct, getProducts } from '../../utils/products.js';
+import { getProduct, getProducts, pickHighlights } from '../../utils/products.js';
+import { footnoteSup, expandRefs, resolveRefLinks } from '../../utils/footnotes.js';
 
 const TEMPLATE = `
 <form class="account-selector-form">
@@ -137,40 +138,49 @@ async function recommend(a) {
 
 // result cards come from the product records in the `products` row, or every chequing account
 function productCard(product, text) {
+  const sup = (value) => footnoteSup(value, product.productPage);
   const li = document.createElement('li');
   li.dataset.name = product.name;
   li.innerHTML = `<p class="account-selector-badge">${text('badge')}</p>
     <div class="account-selector-head"><h3>${product.name}</h3><p>${product.tagline}</p></div>
     <div class="account-selector-body">
-      <p>${product.fees[0]?.displayValue || ''}${product.fees[0]?.displayValue.startsWith('$') ? text('per-month') : ''}</p>
-      <ul>${product.highlights.slice(0, 3).map((h) => `<li>${h.text}</li>`).join('')}</ul>
+      <p>${product.fees[0]?.displayValue || ''}${product.fees[0]?.displayValue.startsWith('$') ? text('per-month') : ''}${sup(product.fees[0]?.footnotes)}</p>
+      <ul>${pickHighlights(product).slice(0, 3).map((h) => `<li>${expandRefs(h.text, product.productPage)}</li>`).join('')}</ul>
       ${product.applyUrl ? `<p class="button-wrapper"><a class="button primary" href="${product.applyUrl}">${text('open-this-account')}</a></p>` : ''}
       <p><a href="${product.productPage}">${text('view-account-details')}</a></p>
     </div>`;
   return li;
 }
 
-// `short`: two questions that hand off to the page in the `handoff` row
+const SLIDER_ONLY = '[data-short], .account-selector-help, fieldset ~ fieldset, legend, .account-selector-progress, .account-selector-step';
+
 export default async function decorate(block) {
   const refs = [...block.querySelectorAll('a[href*="/products/"]')].map((a) => a.getAttribute('href'));
   const config = applyConfig(block, TEMPLATE);
   const short = block.classList.contains('short');
-  block.querySelectorAll(short ? '[data-full]' : '[data-short]').forEach((el) => el.remove());
+  const slider = block.classList.contains('slider');
+  const handoff = short || slider;
+  let removed = short ? '[data-full]' : '[data-short]';
+  if (slider) removed = SLIDER_ONLY;
+  block.querySelectorAll(removed).forEach((el) => el.remove());
   const form = block.querySelector('form');
   const steps = [...form.querySelectorAll('fieldset')];
   const progress = form.querySelector('.account-selector-progress');
-  progress.append(...steps.map(() => document.createElement('i')));
+  progress?.append(...steps.map(() => document.createElement('i')));
   const stepLabel = form.querySelector('.account-selector-step');
   const back = form.querySelector('.account-selector-back');
   const next = form.querySelector('[type=submit]');
+  if (slider) next.className = 'button primary';
   const label = (key) => form.querySelector(`[data-key="${key}"]`).textContent;
   const results = block.querySelector('.account-selector-results');
   const cards = results.querySelector('.account-selector-cards');
   const heading = results.querySelector('h2');
   const edit = results.querySelector('.account-selector-results > button');
   const text = (key) => results.querySelector(`[data-key="${key}"]`).textContent;
-  const products = refs.length ? await Promise.all(refs.map(getProduct)) : await getProducts({ category: 'chequing', persona: 'everyone' });
+  let products = [];
+  if (!handoff) products = refs.length ? await Promise.all(refs.map(getProduct)) : await getProducts({ category: 'chequing', persona: 'everyone' });
   cards.append(...products.filter(Boolean).map((product) => productCard(product, text)));
+  resolveRefLinks(cards);
 
   const prefill = new URLSearchParams(window.location.search);
   form.querySelectorAll('input[type=number]').forEach((input) => {
@@ -209,11 +219,13 @@ export default async function decorate(block) {
   const show = (i) => {
     current = i;
     steps.forEach((s, n) => { s.hidden = n !== i; });
-    progress.querySelectorAll('i').forEach((seg, n) => seg.classList.toggle('active', n <= i));
-    stepLabel.textContent = `${i + 1} ${stepLabel.dataset.of} ${steps.length}`;
+    progress?.querySelectorAll('i').forEach((seg, n) => seg.classList.toggle('active', n <= i));
+    if (stepLabel) stepLabel.textContent = `${i + 1} ${stepLabel.dataset.of} ${steps.length}`;
     back.hidden = i === 0;
     const last = i === steps.length - 1;
-    next.textContent = last ? label(short ? 'finish-short' : 'finish') : label('continue');
+    let finish = short ? 'finish-short' : 'finish';
+    if (slider) finish = 'continue';
+    next.textContent = label(last ? finish : 'continue');
     next.disabled = short && !steps[i].querySelector('input:checked, input[type=number]');
   };
   form.addEventListener('change', () => { next.disabled = false; });
@@ -224,7 +236,7 @@ export default async function decorate(block) {
       show(current + 1);
       return;
     }
-    if (short) {
+    if (handoff) {
       const url = new URL(config.handoff || '/', window.location.href);
       new URLSearchParams(new FormData(form)).forEach((v, k) => url.searchParams.set(k, v));
       window.location.assign(url);

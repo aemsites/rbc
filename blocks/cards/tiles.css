@@ -16,8 +16,13 @@
 .tile.tile-navy { background-color: var(--rbc-navy); }
 .tile.tile-blue-gradient { background: linear-gradient(180deg, var(--rbc-blue) 0%, #008bff 100%); }
 .tile.tile-light-gradient { background: linear-gradient(114deg, var(--rbc-light-blue) 0%, var(--rbc-white) 100%); }
+.tile.tile-teal { background: linear-gradient(180deg, #008b84 0%, #00afa6 100%); }
+.tile.tile-maroon { background-color: #83142f; }
+.tile.tile-purple { background-color: #8d34be; }
+.tile.tile-red { background-color: #e12; }
+.tile.tile-violet { background-color: #622eea; }
 
-.tile:is(.tile-blue, .tile-navy, .tile-blue-gradient, .tile-scrim) {
+.tile:is(.tile-blue, .tile-navy, .tile-blue-gradient, .tile-teal, .tile-maroon, .tile-purple, .tile-red, .tile-violet, .tile-scrim) {
   --text-color: var(--rbc-white);
   --link-color: var(--rbc-white);
   --link-hover-color: var(--rbc-white);
@@ -75,7 +80,7 @@
   position: absolute;
   right: 0;
   bottom: 0;
-  z-index: 0;
+  z-index: 1;
   width: 45%;
   margin: 0;
   line-height: 0;
@@ -130,18 +135,60 @@
   max-width: none;
 }
 
-.tile.tile-art-center .tile-content {
+.tile:is(.tile-art-center, .tile-art-right) .tile-content {
   box-sizing: content-box;
   max-width: 380px;
 }
 
 .tile.tile-art-center .tile-image {
+  top: 45%;
   right: 50%;
   width: 70%;
   transform: translateX(50%);
 }
 
-.tile.tile-art-center .tile-image img {
+.tile.tile-art-right .tile-image {
+  top: 45%;
+  width: 100%;
+}
+
+.tile:is(.tile-art-center, .tile-art-right) .tile-image :is(p, picture) {
+  display: block;
+  height: 100%;
+}
+
+.tile:is(.tile-art-center, .tile-art-right) .tile-image img {
+  height: 100%;
   max-height: none;
+}
+
+.tile.tile-art-center .tile-image img {
   object-position: center bottom;
+}
+
+.tile.tile-art-top {
+  justify-content: flex-end;
+}
+
+.tile.tile-art-top .tile-image {
+  top: var(--space-xl);
+  bottom: auto;
+  left: var(--space-xl);
+  width: auto;
+  max-width: 60%;
+}
+
+.tile.tile-art-top .tile-image img {
+  max-height: 160px;
+  object-position: left top;
+}
+
+.tile.tile-art-top .tile-content {
+  max-width: none;
+  padding-top: 208px;
+}
+
+.tile.tile-art-inset .tile-image {
+  right: var(--space-l);
+  bottom: var(--space-l);
 }

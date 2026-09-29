@@ -42,3 +42,12 @@
 .disclaimers .disclaimers-label {
   font-weight: 700;
 }
+
+.disclaimers li {
+  border-radius: 4px;
+}
+
+.disclaimers li:focus {
+  outline: 2px solid var(--link-color);
+  outline-offset: 4px;
+}

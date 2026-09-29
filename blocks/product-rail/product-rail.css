@@ -1,3 +1,40 @@
+.product-rail-bar {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-m);
+  visibility: hidden;
+  padding: var(--space-s) max(var(--space-l), (100% - var(--content-width)) / 2);
+  background-color: var(--rbc-white);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 10%);
+  font-size: var(--body-font-size-m);
+  transform: translateY(-100%);
+  transition: transform 0.2s, visibility 0.2s;
+}
+
+.product-rail-bar.visible {
+  visibility: visible;
+  transform: none;
+}
+
+.product-rail-bar > * {
+  margin: 0;
+}
+
+.product-rail-bar-title {
+  color: var(--rbc-blue);
+  font-family: var(--heading-font-family);
+  font-size: var(--heading-font-size-m);
+  line-height: 1.2;
+}
+
+.product-rail-bar > .button-wrapper {
+  flex: none;
+}
+
 .product-rail {
   font-size: var(--body-font-size-s);
 }
@@ -9,18 +46,21 @@
 .product-rail .product-rail-image {
   position: relative;
   margin-bottom: var(--space-l);
+  border-radius: var(--radius-m);
+  padding: var(--space-l) var(--space-l) calc(var(--space-l) * 2 + var(--space-s));
+  background: linear-gradient(160deg, var(--rbc-blue) 0%, var(--rbc-navy) 100%);
   line-height: 0;
 }
 
 .product-rail .product-rail-image img {
   width: 100%;
-  border-radius: var(--radius-m);
+  border-radius: var(--radius-s);
 }
 
 .product-rail .product-rail-category {
   position: absolute;
-  left: var(--space-m);
-  bottom: var(--space-m);
+  left: var(--space-l);
+  bottom: var(--space-l);
   border-radius: var(--radius-s);
   padding: var(--space-3xs) var(--space-2xs);
   background-color: var(--rbc-white);
@@ -32,13 +72,11 @@
 
 .product-rail .product-rail-offer {
   position: relative;
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: var(--space-s);
   margin-bottom: var(--space-l);
   border: 1px solid var(--rbc-yellow);
   border-radius: var(--radius-s);
   padding: var(--space-l) var(--space-s) var(--space-s);
+  background-color: #fffbe6;
 }
 
 .product-rail .product-rail-eyebrow {
@@ -54,15 +92,22 @@
   text-transform: uppercase;
 }
 
-.product-rail .product-rail-offer picture {
-  grid-row: 2;
-  width: 56px;
-  line-height: 0;
+.product-rail .product-rail-offer > div:last-child {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: var(--space-s);
+  align-content: start;
 }
 
-.product-rail .product-rail-offer > div:last-child {
+.product-rail .product-rail-offer > div:last-child > * {
   grid-column: 2;
-  grid-row: 2;
+}
+
+.product-rail .product-rail-offer > div:last-child > :is(picture, p:has(> picture:only-child)) {
+  grid-column: 1;
+  grid-row: 1 / span 10;
+  width: 64px;
+  line-height: 0;
 }
 
 .product-rail .product-rail-offer > div:last-child > :first-child {

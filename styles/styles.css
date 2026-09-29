@@ -82,6 +82,7 @@
 
   /* layout */
   --content-width: 1200px;
+  --content-width-l: 1450px;
   --width-s: 640px;
   --width-m: 840px;
   --width-l: 1040px;
@@ -262,6 +263,19 @@ a:hover {
   text-decoration: underline;
 }
 
+sup {
+  font-size: 0.6em;
+  line-height: 0;
+  vertical-align: super;
+}
+
+sup a:any-link,
+sup a:hover,
+a:has(> sup:only-child) {
+  font-weight: inherit;
+  text-decoration: none;
+}
+
 /* buttons */
 p.button-wrapper {
   display: flex;
@@ -400,7 +414,7 @@ main > .section:first-of-type h1 {
   }
 }
 
-main > .section p a:not(.button, :has(img))::after {
+main > .section p.link-wrapper a::after {
   content: "";
   mask: url("/icons/chevron-down.svg") no-repeat center;
   position: relative;
@@ -434,7 +448,7 @@ main > .section.dark-background blockquote cite {
   color: var(--rbc-grey-200);
 }
 
-main > .section.dark-background a:any-link:not(.button) {
+main > .section.dark-background a:any-link:not(.button, sup > a) {
   text-decoration: underline;
 }
 
@@ -457,6 +471,14 @@ body:not(.style-guide) main > .section > .default-content-wrapper :is(p, h2, h3,
 
 body:not(.style-guide) main > .section > .default-content-wrapper p.button-wrapper {
   justify-content: center;
+}
+
+body:not(.style-guide) main > .section.left > .default-content-wrapper :is(p, h2, h3, h4, h5, h6) {
+  text-align: left;
+}
+
+body:not(.style-guide) main > .section.left > .default-content-wrapper p.button-wrapper {
+  justify-content: flex-start;
 }
 
 
@@ -533,6 +555,20 @@ main > .section.contained {
   }
 }
 
+main > .section.contained-l {
+   max-width: var(--content-width-l);
+    margin-inline: var(--space-l);
+
+    @media (width >= 768px) {
+      margin-inline: auto;
+    }
+}
+
+main > .section.contained.colored-background,
+main > .section.contained-l.colored-background {
+  border-radius: var(--radius-m);
+}
+
 main > .section.overlap {
   margin-top: calc(var(--space-m) * -1);
   z-index: 1;
@@ -579,6 +615,8 @@ main > .section.padding-bottom-2xl { padding-bottom: var(--space-5xl); }
 main > .section.padding-bottom-3xl { padding-bottom: var(--space-6xl); }
 main > .section.padding-bottom-4xl { padding-bottom: var(--space-7xl); }
 main > .section.padding-s { padding-block: var(--space-l); }
+
+main > .section.strip { padding-block: var(--space-xs); }
 main > .section.padding-m { padding-block: var(--space-xl); }
 main > .section.padding-l { padding-block: var(--space-3xl); }
 main > .section.padding-xl { padding-block: var(--space-4xl); }
@@ -586,18 +624,18 @@ main > .section.padding-2xl { padding-block: var(--space-5xl); }
 main > .section.padding-3xl { padding-block: var(--space-6xl); }
 main > .section.padding-4xl { padding-block: var(--space-7xl); }
 
-.checklist ul {
+.checklist ul:not(.block > ul) {
   padding-left: 0;
   list-style: none;
 }
 
-.checklist ul li {
+.checklist ul:not(.block > ul) > li {
   position: relative;
   margin-bottom: var(--space-2xs);
   padding-left: var(--space-l);
 }
 
-.checklist ul li::before {
+.checklist ul:not(.block > ul) > li::before {
   content: "";
   position: absolute;
   left: 0;
@@ -651,4 +689,13 @@ main > .section.sticky-title .nav-breadcrumb {
 main > .section.sticky-title.is-stuck h1 {
   margin: 0;
   font-size: var(--heading-font-size-m);
+}
+
+main .default-content-wrapper p:has(> :is(picture, img):only-child):has(+ :is(h1, h2, h3)) img {
+  max-height: 64px;
+}
+
+body:not(.style-guide) main > .section.strip > .default-content-wrapper p {
+  margin: 0;
+  font-size: var(--body-font-size-xs);
 }

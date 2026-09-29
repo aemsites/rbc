@@ -11,4 +11,7 @@ export default function decorate(main) {
   railSection.style.setProperty('--rail-row', start + 1);
   railSection.style.setProperty('--rail-span', end - start);
   if (rail.classList.contains('left')) main.classList.add('rail-left');
+  // on mobile the account summary reads first, right under the title
+  if (start) sections[0].after(railSection);
+  else main.prepend(railSection);
 }

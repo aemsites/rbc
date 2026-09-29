@@ -1,4 +1,6 @@
 import { watchStuck } from '../utils/dom.js';
+import { decorateRateCode, decorateRates } from '../utils/rates.js';
+import linkFootnotes, { revealLegalHash } from '../utils/footnotes.js';
 import {
   getMetadata,
   loadHeader,
@@ -135,6 +137,7 @@ function decorateButtons(main) {
       inner.querySelectorAll('a[href]').forEach((link) => link.remove());
       return !inner.textContent.trim();
     });
+    if (!buttons.length && links.every((a) => !a.querySelector('img'))) p.classList.add('link-wrapper');
     if (buttons.length !== links.length) return;
 
     const variants = new Map(buttons.map((a) => {
@@ -207,6 +210,8 @@ async function inlineIcon(span) {
   if (!markup || !span.contains(img)) return;
   const svg = new DOMParser().parseFromString(markup, 'image/svg+xml').querySelector('svg');
   if (!svg || svg.querySelector('parsererror')) return;
+  const [width, height] = ['width', 'height'].map((attr) => parseFloat(svg.getAttribute(attr)));
+  if (!svg.hasAttribute('viewBox') && width && height) svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
   svg.querySelectorAll('script').forEach((node) => node.remove());
   svg.querySelectorAll('*').forEach((node) => {
     [...node.attributes]
@@ -243,6 +248,8 @@ export function decorateMain(main) {
   decorateSectionBackgrounds(main);
   decorateBlocks(main);
   decorateButtons(main);
+  decorateRateCode(main);
+  linkFootnotes(main);
 }
 
 function reserveHeaderHeight(header) {
@@ -325,10 +332,12 @@ async function loadLazy(doc) {
 
   const main = doc.querySelector('main');
   await loadSections(main);
+  decorateRates(main);
 
   const { hash } = window.location;
   const element = hash ? doc.getElementById(hash.substring(1)) : false;
   if (hash && element) element.scrollIntoView();
+  revealLegalHash();
 
   loadFooter(doc.querySelector('body > footer'));
 

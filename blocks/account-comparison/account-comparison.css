@@ -5,6 +5,8 @@
 
 .account-comparison table {
   width: 100%;
+  min-width: 720px;
+  table-layout: fixed;
   border-collapse: collapse;
   font-size: var(--body-font-size-s);
   text-align: center;
@@ -35,11 +37,11 @@
   text-transform: uppercase;
 }
 
-.account-comparison .account-comparison-head th:first-child {
-  background-color: transparent;
+.account-comparison thead th:first-child {
+  width: 20%;
 }
 
-.account-comparison .account-comparison-products td {
+.account-comparison .account-comparison-products :is(th, td) {
   background-color: var(--rbc-light-blue);
   padding-block: var(--space-l);
 }
@@ -64,7 +66,7 @@
   padding-block: var(--space-xs);
 }
 
-.account-comparison .account-comparison-products + tr td {
+.account-comparison .account-comparison-products + tr :is(th, td) {
   background-color: var(--rbc-cool-white);
   font-style: italic;
 }

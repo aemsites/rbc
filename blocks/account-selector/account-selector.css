@@ -372,3 +372,15 @@
 .dark-background .account-selector.short .account-selector-step {
   display: none;
 }
+
+/* slider: just the transactions slider, handing off to the full tool */
+.account-selector.slider .account-selector-form {
+  border: 0;
+  padding: 0;
+  background: none;
+}
+
+.account-selector.slider .account-selector-nav {
+  justify-content: flex-end;
+  margin-top: var(--space-m);
+}

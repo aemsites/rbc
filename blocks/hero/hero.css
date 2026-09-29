@@ -1,6 +1,5 @@
 main > .section.hero-container {
   margin-block: 0;
-  padding-block: 0;
 }
 
 .hero-container .hero-wrapper {
@@ -140,6 +139,10 @@ main > .section.hero-container {
   max-width: 640px;
 }
 
+.hero.condensed > div > div {
+  max-width: 45%;
+}
+
 .hero.split > div > div:has(picture) {
   padding: 0;
 }
@@ -205,16 +208,10 @@ main > .section.hero-container {
   }
 }
 
-/* light: a pale photo that carries dark text, no overlay */
 .hero.background.light {
   color: var(--text-color);
 }
 
 .hero.background.light::after {
   display: none;
-}
-
-.hero a:has(> sup:only-child),
-main > .section.dark-background .hero a:has(> sup:only-child) {
-  text-decoration: none;
 }

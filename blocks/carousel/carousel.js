@@ -1,5 +1,5 @@
 import fetchLocalPlaceholders from '../../utils/placeholders.js';
-import decorateTile from '../cards/tiles.js';
+import decorateTile, { tileWords } from '../cards/tiles.js';
 
 function updateActiveSlide(slide) {
   const block = slide.closest('.carousel');
@@ -76,7 +76,25 @@ function bindEvents(block) {
   block.querySelectorAll('.carousel-slide').forEach((slide) => slideObserver.observe(slide));
 }
 
-function createSlide(row, slideIndex, carouselId, tile) {
+// the full-bleed single carousel rotates on its own, so it needs a pause control (WCAG 2.2.2)
+function autoplay(block, ph) {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'slide-pause';
+  block.querySelector('nav').append(button);
+  let timer;
+  const play = (playing) => {
+    clearInterval(timer);
+    const next = () => showSlide(block, Number(block.dataset.activeSlide || 0) + 1);
+    if (playing) timer = setInterval(next, 6000);
+    button.setAttribute('aria-label', playing ? ph.pause || 'Pause' : ph.play || 'Play');
+    button.classList.toggle('paused', !playing);
+  };
+  button.addEventListener('click', () => play(button.classList.contains('paused')));
+  play(!window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+}
+
+function createSlide(row, slideIndex, carouselId, tile, words) {
   const slide = document.createElement('li');
   slide.dataset.slideIndex = slideIndex;
   slide.setAttribute('id', `carousel-${carouselId}-slide-${slideIndex}`);
@@ -87,7 +105,7 @@ function createSlide(row, slideIndex, carouselId, tile) {
     if (!tile) column.classList.add(`carousel-slide-${imageOnly ? 'image' : 'content'}`);
     slide.append(column);
   });
-  if (tile) decorateTile(slide);
+  if (tile) decorateTile(slide, words);
 
   const labeledBy = slide.querySelector('h1, h2, h3, h4, h5, h6, .tile-title');
   if (labeledBy) slide.setAttribute('aria-labelledby', labeledBy.getAttribute('id'));
@@ -98,8 +116,12 @@ let carouselId = 0;
 export default async function decorate(block) {
   carouselId += 1;
   block.setAttribute('id', `carousel-${carouselId}`);
+  const dark = block.classList.contains('dark');
+  if (dark) block.classList.add('single');
   const single = block.classList.contains('single');
   const vantage = block.classList.contains('vantage');
+  const pill = single && !dark;
+  const tiles = vantage || block.classList.contains('tile');
   if (vantage) {
     const lead = block.firstElementChild;
     lead.className = 'carousel-lead';
@@ -142,11 +164,11 @@ export default async function decorate(block) {
       <button type="button" class="slide-prev" aria-label="${placeholders.previousSlide || 'Previous Slide'}"></button>
       <button type="button" class="slide-next" aria-label="${placeholders.nextSlide || 'Next Slide'}"></button>
     `;
-    (single || vantage ? container : nav).append(slideNavButtons);
+    (!pill && (single || vantage) ? container : nav).append(slideNavButtons);
   }
 
   rows.forEach((row, idx) => {
-    slidesWrapper.append(createSlide(row, idx, carouselId, vantage));
+    slidesWrapper.append(createSlide(row, idx, carouselId, tiles, tileWords(block)));
     if (slideIndicators) {
       const indicator = document.createElement('li');
       indicator.classList.add('carousel-slide-indicator');
@@ -162,4 +184,5 @@ export default async function decorate(block) {
   if (vantage) block.prepend(block.querySelector('.carousel-lead'));
 
   if (!isSingleSlide) bindEvents(block);
+  if (pill && !isSingleSlide) autoplay(block, placeholders);
 }

@@ -31,8 +31,9 @@
 
 .table table th,
 .table table td {
-  padding: 0.5em;
+  padding: var(--space-m) var(--space-l);
   text-align: left;
+  vertical-align: middle;
 }
 
 .table table th p,

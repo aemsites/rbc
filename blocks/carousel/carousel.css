@@ -345,3 +345,186 @@
     background: url("vantage-bg.png") right top / cover no-repeat;
   }
 }
+
+/* dark: single slides centred on a navy panel, icon in a white circle, dots inside */
+.carousel.dark {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+  border-radius: var(--radius-m);
+  background-color: var(--rbc-navy);
+}
+
+.carousel.dark :is(.carousel-slides-container, .carousel-slides) {
+  height: 100%;
+}
+
+.carousel.dark .carousel-slide {
+  justify-content: center;
+  align-items: center;
+  min-height: 320px;
+  background-color: transparent;
+  text-align: center;
+}
+
+.carousel.dark .carousel-slide::after {
+  display: none;
+}
+
+.carousel.dark .carousel-slide .carousel-slide-content {
+  margin: var(--space-2xl) var(--space-4xl) var(--space-3xl);
+}
+
+.carousel.dark .carousel-slide .carousel-slide-content :is(h2, h3, h4) {
+  margin-bottom: var(--space-xs);
+  font-family: var(--body-font-family);
+  font-size: var(--body-font-size-l);
+  font-weight: 700;
+}
+
+.carousel.dark .carousel-slide .carousel-slide-content p:has(> .icon:only-child) {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 80px;
+  height: 80px;
+  margin: 0 auto var(--space-m);
+  border-radius: 50%;
+  background-color: var(--rbc-white);
+}
+
+.carousel.dark .carousel-slide .carousel-slide-content .icon {
+  width: 40px;
+  height: 40px;
+}
+
+.carousel.dark nav {
+  position: absolute;
+  bottom: var(--space-l);
+  left: 0;
+  right: 0;
+}
+
+.carousel.dark .carousel-slide-indicator button {
+  border-color: var(--rbc-white);
+}
+
+.carousel.dark .carousel-slide-indicator button:disabled,
+.carousel.dark .carousel-slide-indicator button:hover,
+.carousel.dark .carousel-slide-indicator button:focus-visible {
+  border-color: var(--rbc-yellow);
+  background-color: var(--rbc-yellow);
+}
+
+.carousel.dark .carousel-navigation-buttons button {
+  background-color: transparent;
+}
+
+main > .section[data-layout] > .carousel-wrapper:has(.carousel.dark) {
+  align-self: stretch;
+}
+
+/* single, full bleed: eyebrow over the heading, controls gathered in a pill at the bottom */
+main > .section > .carousel-wrapper:has(.carousel.single:not(.dark)) {
+  max-width: none;
+  padding: 0;
+}
+
+main > .section:has(> .carousel-wrapper:only-child .carousel.single:not(.dark)) {
+  padding-block: 0;
+}
+
+.carousel.single:not(.dark) {
+  position: relative;
+}
+
+.carousel.single .carousel-slide .carousel-slide-content > p:first-child:has(+ :is(h2, h3)) {
+  font-size: var(--body-font-size-xs);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+
+.carousel.single:not(.dark) nav {
+  position: absolute;
+  bottom: var(--space-l);
+  left: 50%;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: var(--space-s);
+  border-radius: 999px;
+  padding: var(--space-3xs) var(--space-s);
+  background-color: rgb(0 0 0 / 60%);
+  transform: translateX(-50%);
+}
+
+.carousel.single:not(.dark) nav .carousel-navigation-buttons {
+  display: contents;
+}
+
+.carousel.single:not(.dark) nav .slide-prev { order: 0; }
+
+.carousel.single:not(.dark) nav .carousel-slide-indicators {
+  order: 1;
+  gap: var(--space-2xs);
+}
+.carousel.single:not(.dark) nav .slide-next { order: 2; }
+.carousel.single:not(.dark) nav .slide-pause { order: 3; }
+
+.carousel.single:not(.dark) nav button {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  background-color: transparent;
+  color: var(--rbc-white);
+}
+
+.carousel.single:not(.dark) nav .carousel-slide-indicator button {
+  width: 10px;
+  height: 10px;
+  border-color: var(--rbc-white);
+}
+
+.carousel.single:not(.dark) nav .carousel-slide-indicator button:disabled {
+  width: 24px;
+  border-radius: 999px;
+  border-color: var(--rbc-white);
+  background-color: var(--rbc-white);
+}
+
+.carousel.single .slide-pause {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+.carousel.single .slide-pause::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 3px;
+  height: 10px;
+  border-inline: 3px solid currentcolor;
+  transform: translate(-50%, -50%);
+}
+
+.carousel.single .slide-pause.paused::before {
+  width: 0;
+  height: 0;
+  border-width: 6px 0 6px 10px;
+  border-style: solid;
+  border-color: transparent transparent transparent currentcolor;
+}
+
+/* tile: slides use the cards tile model (content | art, colour words) */
+.carousel.tile .carousel-slide {
+  min-height: 448px;
+  border: 0;
+  border-radius: var(--radius-m);
+}
+
+.carousel.tile .carousel-slide .tile-content {
+  max-width: none;
+}

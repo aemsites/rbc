@@ -1,5 +1,8 @@
 import { getProduct } from '../../utils/products.js';
 import fetchLocalPlaceholders from '../../utils/placeholders.js';
+import {
+  footnoteSup, stripRefs, refIds, resolveRefLinks,
+} from '../../utils/footnotes.js';
 
 const wrap = (html) => `<div>${html}</div>`;
 const line = (...cells) => `<div>${cells.map(wrap).join('')}</div>`;
@@ -15,11 +18,17 @@ async function renderProductHeader(block) {
   const taglines = line('', ...products.map((p) => `<p>${p.tagline}</p>`));
   const cards = line('', ...products.map((p) => {
     const apply = p.applyUrl ? `<p class="button-wrapper"><a class="button primary" href="${p.applyUrl}">${ph.openNow || 'Open Now'}</a></p>` : '';
-    return `<h3><a href="${p.productPage}">${p.name}</a></h3><p><strong>${p.fees[0]?.displayValue || ''}</strong> ${monthlyFee}</p>${apply}`;
+    return `<h3><a href="${p.productPage}">${p.name}</a></h3><p><strong>${p.fees[0]?.displayValue || ''}</strong> ${monthlyFee}${footnoteSup(p.fees[0]?.footnotes, p.productPage)}</p>${apply}`;
   }));
-  const offers = line('', ...products.map((p) => (p.offerBadge ? `<p><a href="${p.offerDetailsUrl || p.productPage}" target="_blank" rel="noopener">${p.offerBadge.replace(/^\+\s*/, '')}</a></p>` : '')));
+  const offers = line('', ...products.map((p) => {
+    if (!p.offerBadge) return '';
+    const href = p.offerDetailsUrl || p.productPage;
+    // the badge is already a link, so the marker sits beside it rather than inside
+    return `<p><a href="${href}" target="_blank" rel="noopener">${stripRefs(p.offerBadge).replace(/^\+\s*/, '')}</a>${footnoteSup(refIds(p.offerBadge), href)}</p>`;
+  }));
   first.insertAdjacentHTML('beforebegin', taglines + cards + offers);
   first.remove();
+  await resolveRefLinks(block);
 }
 
 export default async function decorate(block) {
