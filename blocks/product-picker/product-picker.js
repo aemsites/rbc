@@ -1,17 +1,20 @@
-import { getProduct, monthlyFees } from '../../utils/products.js';
+import {
+  getProduct, monthlyFees, pickHighlights, keyList,
+} from '../../utils/products.js';
 import fetchLocalPlaceholders from '../../utils/placeholders.js';
-import { footnoteSup } from '../../utils/footnotes.js';
+import { footnoteSup, expandRefs, resolveRefLinks } from '../../utils/footnotes.js';
 
 let pickerCount = 0;
 
-function detail(product, ph) {
+function detail(product, keys, ph) {
   const {
     regular, rebate, regularFootnotes, rebateFootnotes,
   } = monthlyFees(product);
   const sup = (value) => footnoteSup(value, product.productPage);
   const rebateLine = rebate
     ? `<span>${ph.or || 'or'} ${rebate}${ph.perMonth || '/mo'} ${ph.withTheValueProgram || 'with the Value Program'}${sup(rebateFootnotes)}</span>` : '';
-  const includes = product.highlights.map((h) => `<li>${h.text}${sup(h.footnotes)}</li>`).join('');
+  const includes = pickHighlights(product, keys)
+    .map((h) => `<li>${expandRefs(h.text, product.productPage)}</li>`).join('');
   return `
     <div class="product-picker-head">
       <p class="product-picker-name">${product.name}</p>
@@ -21,13 +24,18 @@ function detail(product, ph) {
     <p class="button-wrapper"><a class="button" href="${product.applyUrl}">${ph.openAccount || 'Open Account'}</a></p>`;
 }
 
-// optional intro row, then one row per /products/ link; picking an account swaps the detail card
+// optional intro row, then one row per /products/ link with optional claim keys;
+// picking an account swaps the detail card
 export default async function decorate(block) {
   pickerCount += 1;
   const rows = [...block.children];
   const intro = rows.find((row) => !row.querySelector('a[href*="/products/"]'));
-  const refs = rows.map((row) => row.querySelector('a[href*="/products/"]')?.getAttribute('href')).filter(Boolean);
-  const [ph, ...found] = await Promise.all([fetchLocalPlaceholders(), ...refs.map(getProduct)]);
+  const refs = rows.filter((row) => row.querySelector('a[href*="/products/"]'))
+    .map((row) => [row.querySelector('a[href*="/products/"]').getAttribute('href'), keyList(row.children[1])]);
+  const [ph, ...found] = await Promise.all([
+    fetchLocalPlaceholders(), ...refs.map(([href]) => getProduct(href)),
+  ]);
+  const keys = new Map(found.map((product, i) => [product, refs[i][1]]));
   const products = found.filter(Boolean);
   if (!products.length) return;
 
@@ -54,11 +62,15 @@ export default async function decorate(block) {
       <span class="product-picker-tagline">${product.tagline || ''}</span>
       <span class="product-picker-option-name">${product.name}</span>
       <span class="product-picker-option-price">${regular}${per}</span>`;
-    option.querySelector('input').addEventListener('change', () => { card.innerHTML = detail(product, ph); });
+    option.querySelector('input').addEventListener('change', () => {
+      card.innerHTML = detail(product, keys.get(product), ph);
+      resolveRefLinks(card);
+    });
     group.append(option);
   });
   group.setAttribute('aria-label', intro?.querySelector('h2, h3')?.textContent || ph.chooseAnAccount || 'Choose an account');
   list.append(group);
-  card.innerHTML = detail(products[0], ph);
+  card.innerHTML = detail(products[0], keys.get(products[0]), ph);
   block.replaceChildren(list, card);
+  await resolveRefLinks(card);
 }

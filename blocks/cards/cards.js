@@ -1,19 +1,27 @@
 import { createOptimizedPicture, toClassName } from '../../scripts/aem.js';
 import decorateTile, { tileWords } from './tiles.js';
-import { getProduct, getProducts, monthlyFees } from '../../utils/products.js';
+import {
+  getProduct, getProducts, monthlyFees, pickHighlights, keyList,
+} from '../../utils/products.js';
 import fetchLocalPlaceholders from '../../utils/placeholders.js';
 import { rateSpan } from '../../utils/rates.js';
-import { footnoteSup } from '../../utils/footnotes.js';
+import {
+  footnoteSup, expandRefs, stripRefs, refIds, resolveRefLinks,
+} from '../../utils/footnotes.js';
 
 function button(text, href, kind) {
   return `<p class="button-wrapper"><a class="button ${kind}" href="${href}">${text}</a></p>`;
 }
 
-function link(text, href) {
-  return href ? `<a href="${href}">${text}</a>` : text;
+function claim(text, href, page) {
+  if (!href) return expandRefs(text, page);
+  const end = text.lastIndexOf(']]');
+  if (end < 0) return `<a href="${href}">${text}</a>`;
+  const [, lead, tail] = text.slice(end + 2).match(/^([^\w$]*)([\s\S]*)$/);
+  if (!tail) return `<a href="${href}">${stripRefs(text)}</a>${footnoteSup(refIds(text), page)}`;
+  return `${expandRefs(text.slice(0, end + 2), page)}${lead}<a href="${href}">${tail}</a>`;
 }
 
-// offers always live on a campaign page, so they open in a new tab
 function offerLink(product, text) {
   return product.offerDetailsUrl ? `<a href="${product.offerDetailsUrl}" target="_blank" rel="noopener">${text}</a>` : text;
 }
@@ -30,26 +38,31 @@ function priceLine(product, ph) {
   return `<p>${line}</p>`;
 }
 
-// the body markup an author would otherwise write by hand, built from the product record
-function productBody(product, ph, variant) {
-  const sup = (value) => footnoteSup(value, product.productPage);
-  const rate = product.rateFallbackValue
-    ? `<li>${product.rateLabel}: ${product.rateRateCode ? rateSpan(product.rateRateCode, product.rateFallbackValue) : product.rateFallbackValue}${sup(product.rateFootnotes)}</li>` : '';
-  const highlights = product.highlights.map((h) => `<li>${link(h.text, h.url)}${sup(h.footnotes)}</li>`).join('') + rate;
-  const note = product.note ? `<p>${product.note}${sup(product.noteFootnotes)}</p>` : '';
+function productBody(product, ph, variant, keys = []) {
+  const page = product.productPage;
+  const sup = (value) => footnoteSup(value, page);
+  const showRate = product.rateFallbackValue && (!keys.length || keys.includes('rate'));
+  const rate = showRate
+    ? `<li>${expandRefs(product.rateLabel, page)}: ${product.rateRateCode ? rateSpan(product.rateRateCode, product.rateFallbackValue) : product.rateFallbackValue}</li>` : '';
+  const highlights = pickHighlights(product, keys.filter((k) => k !== 'rate'))
+    .map((h) => `<li>${claim(h.text, h.url, page)}</li>`).join('') + rate;
+  const note = product.note ? `<p>${expandRefs(product.note, page)}</p>` : '';
   const [fee] = product.fees;
   const feeSup = sup(fee?.footnotes);
   if (variant === 'compact') {
-    return `<h3>${product.name}</h3><p>${fee?.label || ''}${feeSup} <strong>${fee?.displayValue || ''}</strong></p>
+    return `<h3>${product.name}</h3><p>${fee?.label || ''} <strong>${fee?.displayValue || ''}</strong>${feeSup}</p>
       <p><a href="${product.productPage}">${ph.viewAccount || 'View Account'}</a></p>`;
   }
   if (variant === 'picture') {
     return `<p>${product.categoryLabel}</p><h3><a href="${product.productPage}">${product.name}</a></h3>
-      <p>${ph.monthlyFee || 'Monthly Fee'}${feeSup}: ${fee?.displayValue || ''}</p>${note}<ul>${highlights}</ul>
+      <p>${ph.monthlyFee || 'Monthly Fee'}: ${fee?.displayValue || ''}${feeSup}</p>${note}<ul>${highlights}</ul>
       <p class="button-wrapper"><a class="button primary" href="${product.productPage}">${ph.learnMore || 'Learn More'}</a>${product.applyUrl ? ` <a class="button secondary" href="${product.applyUrl}">${ph.openAccount || 'Open Account'}</a>` : ''}</p>`;
   }
+  const offerPage = product.offerDetailsUrl || page;
+  const badge = product.offerBadge
+    ? `<p><em>${offerLink(product, stripRefs(product.offerBadge))}${footnoteSup(refIds(product.offerBadge), offerPage)}</em></p>` : '';
   return `<p>${product.categoryLabel}</p><h3>${product.name}</h3><p>${product.tagline}</p><ul>${highlights}</ul>
-    ${note}${product.offerBadge ? `<p><em>${offerLink(product, product.offerBadge)}${footnoteSup(product.offerFootnotes, product.offerDetailsUrl || product.productPage)}</em></p>` : ''}${priceLine(product, ph)}
+    ${note}${badge}${priceLine(product, ph)}
     ${product.applyUrl ? button(ph.openAccount || 'Open Account', product.applyUrl, 'primary') : ''}
     <p><a href="${product.productPage}">${ph.viewMoreAccountBenefits || 'View More Account Benefits'}</a></p>`;
 }
@@ -76,12 +89,12 @@ async function expandFilterRows(block) {
   rows.forEach((row) => row.remove());
 }
 
-// a row holding only a link to /products/... is filled in from the product index
 async function renderProductRows(block) {
   await expandFilterRows(block);
   const rows = [...block.children].filter((row) => {
-    const a = row.querySelector('a[href*="/products/"]');
-    return a && row.textContent.trim() === a.textContent.trim();
+    const cell = row.firstElementChild;
+    const a = cell?.querySelector('a[href*="/products/"]');
+    return a && row.children.length <= 2 && cell.textContent.trim() === a.textContent.trim();
   });
   if (!rows.length) return;
   const ph = await fetchLocalPlaceholders();
@@ -90,7 +103,7 @@ async function renderProductRows(block) {
     const product = await getProduct(row.querySelector('a').getAttribute('href'));
     if (!product) { row.remove(); return; }
     const body = document.createElement('div');
-    body.innerHTML = productBody(product, ph, variant);
+    body.innerHTML = productBody(product, ph, variant, keyList(row.children[1]));
     row.replaceChildren(body);
     if (variant === 'picture' && product.image) {
       const image = document.createElement('div');
@@ -98,6 +111,7 @@ async function renderProductRows(block) {
       row.append(image);
     }
   }));
+  await resolveRefLinks(block);
 }
 
 function decorateProduct(li) {

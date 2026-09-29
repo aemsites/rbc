@@ -1,6 +1,6 @@
 import { getProduct, monthlyFees } from '../../utils/products.js';
 import fetchLocalPlaceholders from '../../utils/placeholders.js';
-import { footnoteSup } from '../../utils/footnotes.js';
+import { footnoteSup, resolveRefLinks } from '../../utils/footnotes.js';
 
 // first row links a /products/ record; the remaining rows are the authored feature columns
 export default async function decorate(block) {
@@ -33,4 +33,5 @@ export default async function decorate(block) {
     <p class="button-wrapper"><a class="button primary" href="${product.applyUrl}">${ph.openAccount || 'Open Account'}</a></p>
     <p class="product-summary-more"><a href="${product.productPage}">${ph.viewMoreAccountBenefits || 'View More Account Benefits'}</a></p>`;
   block.querySelector('.product-summary-head').after(list);
+  await resolveRefLinks(block);
 }

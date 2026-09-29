@@ -24,18 +24,90 @@ export function legalId(label, tab = 'default') {
 
 const escape = (text) => text.replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
 const samePath = (a, b) => a.replace(/(\.html|\/)$/, '') === b.replace(/(\.html|\/)$/, '');
+const REF = /\[\[([^\]]+)\]\]/g;
+const splitIds = (value) => String(value || '').split(',').map((id) => id.trim()).filter(Boolean);
 
+// a disclaimer's number differs per page (and per tab), so records name it by id and
+// resolveRefLinks numbers it from the list the marker's own tab shows
 export function footnoteSup(value, page) {
-  const labels = String(value || '').split(',').map(normalizeLabel).filter(Boolean);
-  if (!labels.length) return '';
-  const here = !page || samePath(page, window.location.pathname);
-  const links = labels.map((label) => {
-    const text = escape(label);
-    return here
-      ? `<a class="footnote" data-label="${text}" href="#${legalId(label)}">${text}</a>`
-      : `<a href="${escape(page)}#${legalId(label)}" target="_blank" rel="noopener">${text}</a>`;
+  const links = splitIds(value)
+    .map((id) => `<a data-ref="${escape(id)}"${page ? ` data-page="${escape(page)}"` : ''}></a>`);
+  return links.length ? `<sup>${links.join(',')}</sup>` : '';
+}
+
+// record text carries markers inline, e.g. "Debits[[debit-count]]: 1 per month"
+export const expandRefs = (text, page) => String(text || '')
+  .replace(REF, (_, ids) => footnoteSup(ids, page));
+export const stripRefs = (text) => String(text || '').replace(REF, '').trim();
+export const refIds = (text) => [...String(text || '').matchAll(REF)].map(([, ids]) => ids).join(',');
+
+const tabsOf = (el) => (el.closest('[data-tab]')?.dataset.tab || '').split(',')
+  .map((t) => t.trim()).filter(Boolean);
+
+function localLabel(id, tabs) {
+  const lists = [...document.querySelectorAll('.disclaimers')].filter((list) => {
+    const own = tabsOf(list);
+    return !tabs.length || !own.length || own.some((t) => tabs.includes(t));
   });
-  return `<sup>${links.join(',')}</sup>`;
+  const row = lists.map((list) => list.querySelector(`li[data-id="${CSS.escape(id)}"]`)
+    || [...list.children].find((r) => r.children[2]?.textContent.trim() === id)).find(Boolean);
+  if (!row) return '';
+  return row.dataset.label || normalizeLabel(row.firstElementChild.textContent);
+}
+
+const remote = new Map();
+
+function remoteLabels(page) {
+  if (!remote.has(page)) {
+    remote.set(page, fetch(`${page}.plain.html`)
+      .then((resp) => (resp.ok ? resp.text() : ''))
+      .then((html) => {
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+        const rows = [...doc.querySelectorAll('.disclaimers > div')].filter((r) => r.children[2]);
+        return new Map(rows.map((r) => [
+          r.children[2].textContent.trim(), normalizeLabel(r.firstElementChild.textContent),
+        ]));
+      })
+      .catch(() => new Map()));
+  }
+  return remote.get(page);
+}
+
+// numbers each placeholder from its tab's list; ids this page doesn't list link to the row
+// on the record's own page, in a new tab, with that page's number
+export async function resolveRefLinks(root) {
+  const pending = [...root.querySelectorAll('a[data-ref]')];
+  const sups = new Set(pending.map((a) => a.closest('sup')).filter(Boolean));
+  await Promise.all(pending.map(async (a) => {
+    const { ref: id, page } = a.dataset;
+    const local = localLabel(id, tabsOf(a));
+    if (local) {
+      a.className = 'footnote';
+      a.dataset.label = local;
+      a.href = `#${legalId(local)}`;
+      a.textContent = local;
+    } else {
+      const remoteLabel = page && !samePath(page, window.location.pathname)
+        ? (await remoteLabels(page)).get(id) : '';
+      if (!remoteLabel) {
+        // eslint-disable-next-line no-console
+        console.warn(`disclaimer "${id}" is not listed on ${page || 'this page'}`);
+        a.remove();
+        return;
+      }
+      a.href = `${page}#${legalId(remoteLabel)}`;
+      a.target = '_blank';
+      a.rel = 'noopener';
+      a.textContent = remoteLabel;
+    }
+    delete a.dataset.ref;
+    delete a.dataset.page;
+  }));
+  sups.forEach((sup) => {
+    const links = [...sup.querySelectorAll('a')];
+    if (!links.length) sup.remove();
+    else sup.replaceChildren(...links.flatMap((a, i) => (i ? [',', a] : [a])));
+  });
 }
 
 const isNote = (sup) => sup.parentElement.tagName === 'P' && sup.parentElement.firstChild === sup;

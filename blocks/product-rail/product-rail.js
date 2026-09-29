@@ -2,7 +2,9 @@ import { createOptimizedPicture } from '../../scripts/aem.js';
 import { getProduct } from '../../utils/products.js';
 import fetchLocalPlaceholders from '../../utils/placeholders.js';
 import { rateSpan } from '../../utils/rates.js';
-import { footnoteSup } from '../../utils/footnotes.js';
+import {
+  footnoteSup, expandRefs, resolveRefLinks, normalizeLabel,
+} from '../../utils/footnotes.js';
 
 function longDate(iso) {
   return new Intl.DateTimeFormat(document.documentElement.lang || 'en-CA', { dateStyle: 'long' })
@@ -12,6 +14,13 @@ function longDate(iso) {
 const picture = (src, alt) => createOptimizedPicture(src, alt, false, [{ width: '750' }]).outerHTML;
 const cell = (html) => `<div>${html}</div>`;
 const row = (...cells) => `<div>${cells.map(cell).join('')}</div>`;
+
+// the fee note's marker can't reuse a label from the page's legal list (live uses + on savings)
+function noteMarker() {
+  const taken = new Set([...document.querySelectorAll('.disclaimers > div > div:first-child, .disclaimers li[data-label]')]
+    .map((el) => el.dataset.label || normalizeLabel(el.textContent)));
+  return ['*', '+', '**'].find((mark) => !taken.has(mark));
+}
 
 // the rail an author would otherwise write row by row, built from the product record
 function railRows(product, ph) {
@@ -23,20 +32,22 @@ function railRows(product, ph) {
     const image = product.offerImage ? picture(product.offerImage, product.offerImageAlt) : '';
     const ends = product.offerEndDate ? `${ph.offerEnds || 'Offer ends'} ${longDate(product.offerEndDate)}. ` : '';
     const details = product.offerDetailsUrl ? `<p><a href="${product.offerDetailsUrl}" target="_blank" rel="noopener">${ph.viewOfferDetails || 'View Offer Details'}</a></p>` : '';
-    rows.push(row(`<p>${product.offerEyebrow || ph.offer || 'Offer'}</p>`, `${image}<p>${product.offerHeadline}${footnoteSup(product.offerFootnotes, product.offerDetailsUrl || product.productPage)}</p><p>${ends}${product.offerConditions || ''}</p>${details}`));
+    rows.push(row(`<p>${product.offerEyebrow || ph.offer || 'Offer'}</p>`, `${image}<p>${expandRefs(product.offerHeadline, product.offerDetailsUrl || product.productPage)}</p><p>${ends}${product.offerConditions || ''}</p>${details}`));
   }
   if (product.rateFallbackValue) {
     const value = product.rateRateCode
       ? rateSpan(product.rateRateCode, product.rateFallbackValue) : product.rateFallbackValue;
-    rows.push(row(`<p>${product.rateLabel}${footnoteSup(product.rateFootnotes, product.productPage)}</p>`, `<p>${value}</p>`));
+    rows.push(row(`<p>${expandRefs(product.rateLabel, product.productPage)}</p>`, `<p>${value}</p>`));
   }
-  product.fees.forEach((fee) => {
+  // the regular fee's marker points at the fee note below, not the legal list
+  const note = product.feeDisclaimer ? `<sup>${noteMarker()}</sup>` : '';
+  product.fees.forEach((fee, i) => {
     const label = fee.detailUrl ? `<a href="${fee.detailUrl}">${fee.label}</a>` : fee.label;
-    rows.push(row(`<p>${label}${footnoteSup(fee.footnotes, product.productPage)}</p>`, `<p>${fee.displayValue}</p>`));
+    rows.push(row(`<p>${label}${i ? '' : note}</p>`, `<p>${fee.displayValue}${footnoteSup(fee.footnotes, product.productPage)}</p>`));
   });
   if (product.feeDisclaimer) {
     const details = product.feeDetailsUrl ? ` <a href="${product.feeDetailsUrl}">${ph.viewFeeDetails || 'View the fee details'}</a>.` : '';
-    rows.push(row(`<p>${product.feeDisclaimer}${details}</p>`));
+    rows.push(row(`<p>${note} ${product.feeDisclaimer}${details}</p>`));
   }
   const apply = product.applyUrl ? `<p class="button-wrapper"><a class="button primary" href="${product.applyUrl}">${ph.openAccountOnline || 'Open Account Online'}</a></p>` : '';
   rows.push(row(`${apply}<p><a href="#legal-disclaimers">${ph.viewLegalDisclaimers || 'View legal disclaimers'}</a></p>`));
@@ -66,6 +77,7 @@ export default async function decorate(block) {
   if (link && block.textContent.trim() === link.textContent.trim()) {
     const product = await getProduct(link.getAttribute('href'));
     if (product) block.innerHTML = railRows(product, ph);
+    await resolveRefLinks(block);
   }
   [...block.children].forEach((r) => {
     const [first, second] = [...r.children];
@@ -78,7 +90,8 @@ export default async function decorate(block) {
       second.className = 'product-rail-category';
       return;
     }
-    if (second.querySelector('picture, a') || second.children.length > 1 || second.textContent.trim().length > 60) {
+    // footnote links sit on fee values too, so they don't make a row an offer
+    if (second.querySelector('picture, a:not(sup a)') || second.children.length > 1 || second.textContent.trim().length > 60) {
       r.className = 'product-rail-offer';
       first.className = 'product-rail-eyebrow';
       return;

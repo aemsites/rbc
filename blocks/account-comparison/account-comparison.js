@@ -1,6 +1,8 @@
 import { getProduct } from '../../utils/products.js';
 import fetchLocalPlaceholders from '../../utils/placeholders.js';
-import { footnoteSup } from '../../utils/footnotes.js';
+import {
+  footnoteSup, stripRefs, refIds, resolveRefLinks,
+} from '../../utils/footnotes.js';
 
 const wrap = (html) => `<div>${html}</div>`;
 const line = (...cells) => `<div>${cells.map(wrap).join('')}</div>`;
@@ -22,10 +24,11 @@ async function renderProductHeader(block) {
     if (!p.offerBadge) return '';
     const href = p.offerDetailsUrl || p.productPage;
     // the badge is already a link, so the marker sits beside it rather than inside
-    return `<p><a href="${href}" target="_blank" rel="noopener">${p.offerBadge.replace(/^\+\s*/, '')}</a>${footnoteSup(p.offerFootnotes, href)}</p>`;
+    return `<p><a href="${href}" target="_blank" rel="noopener">${stripRefs(p.offerBadge).replace(/^\+\s*/, '')}</a>${footnoteSup(refIds(p.offerBadge), href)}</p>`;
   }));
   first.insertAdjacentHTML('beforebegin', taglines + cards + offers);
   first.remove();
+  await resolveRefLinks(block);
 }
 
 export default async function decorate(block) {

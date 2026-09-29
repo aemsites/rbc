@@ -1,6 +1,6 @@
 import applyConfig from '../../scripts/config.js';
-import { getProduct, getProducts } from '../../utils/products.js';
-import { footnoteSup } from '../../utils/footnotes.js';
+import { getProduct, getProducts, pickHighlights } from '../../utils/products.js';
+import { footnoteSup, expandRefs, resolveRefLinks } from '../../utils/footnotes.js';
 
 const TEMPLATE = `
 <form class="account-selector-form">
@@ -145,7 +145,7 @@ function productCard(product, text) {
     <div class="account-selector-head"><h3>${product.name}</h3><p>${product.tagline}</p></div>
     <div class="account-selector-body">
       <p>${product.fees[0]?.displayValue || ''}${product.fees[0]?.displayValue.startsWith('$') ? text('per-month') : ''}${sup(product.fees[0]?.footnotes)}</p>
-      <ul>${product.highlights.slice(0, 3).map((h) => `<li>${h.text}${sup(h.footnotes)}</li>`).join('')}</ul>
+      <ul>${pickHighlights(product).slice(0, 3).map((h) => `<li>${expandRefs(h.text, product.productPage)}</li>`).join('')}</ul>
       ${product.applyUrl ? `<p class="button-wrapper"><a class="button primary" href="${product.applyUrl}">${text('open-this-account')}</a></p>` : ''}
       <p><a href="${product.productPage}">${text('view-account-details')}</a></p>
     </div>`;
@@ -154,7 +154,6 @@ function productCard(product, text) {
 
 const SLIDER_ONLY = '[data-short], .account-selector-help, fieldset ~ fieldset, legend, .account-selector-progress, .account-selector-step';
 
-// short: two questions; slider: the transactions slider alone. Both hand off to the handoff page
 export default async function decorate(block) {
   const refs = [...block.querySelectorAll('a[href*="/products/"]')].map((a) => a.getAttribute('href'));
   const config = applyConfig(block, TEMPLATE);
@@ -181,6 +180,7 @@ export default async function decorate(block) {
   let products = [];
   if (!handoff) products = refs.length ? await Promise.all(refs.map(getProduct)) : await getProducts({ category: 'chequing', persona: 'everyone' });
   cards.append(...products.filter(Boolean).map((product) => productCard(product, text)));
+  resolveRefLinks(cards);
 
   const prefill = new URLSearchParams(window.location.search);
   form.querySelectorAll('input[type=number]').forEach((input) => {
