@@ -1,31 +1,18 @@
 const PROD_HOSTS = ['main--rbc--aemsites.aem.live', 'www.rbcroyalbank.com'];
 
-const slots = new Map();
-const pending = new Map();
-
+// a section with `pzn-slot` metadata is a named spot; its authored content is the default
 async function fill(name, path) {
-  const slot = slots.get(name);
-  if (!slot) {
-    pending.set(name, path);
-    return;
-  }
+  const section = document.querySelector(`main .section[data-pzn-slot="${CSS.escape(name)}"]`);
+  if (!section) return;
   // eslint-disable-next-line import/no-cycle
   const { loadFragment } = await import('../blocks/fragment/fragment.js');
   const fragment = await loadFragment(path);
   if (!fragment) return;
-  slot.replaceChildren(...[...fragment.querySelectorAll(':scope > .section')]
-    .flatMap((section) => [...section.childNodes]));
-  slot.dataset.pznFragment = path;
+  section.replaceChildren(...[...fragment.querySelectorAll(':scope > .section')]
+    .flatMap((part) => [...part.childNodes]));
+  section.dataset.pznFragment = path;
   window.dataLayer = window.dataLayer || [];
   window.dataLayer.push({ event: 'pzn_fragment', pznSlot: name, pznFragment: path });
-}
-
-export default function registerSlot(name, slot) {
-  slots.set(name, slot);
-  if (!pending.has(name)) return;
-  const path = pending.get(name);
-  pending.delete(name);
-  fill(name, path);
 }
 
 // Conductrics variations fire this instead of editing markup; targeting stays in Conductrics

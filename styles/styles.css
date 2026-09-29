@@ -413,6 +413,10 @@ main > .section p a:not(.button, :has(img))::after {
 }
 
 /* section metadata */
+main > .section[data-pzn-slot]:empty {
+  display: none;
+}
+
 main > .section.colored-background {
   margin-block: 0;
   padding-block: var(--space-2xl);
