@@ -1,0 +1,3 @@
+.pzn-slot-wrapper:has(> .pzn-slot:empty) {
+  display: none;
+}
