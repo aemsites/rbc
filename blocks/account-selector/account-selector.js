@@ -1,20 +1,26 @@
 import applyConfig from '../../scripts/config.js';
-import { getProduct, getProducts, pickHighlights } from '../../utils/products.js';
+import { getMetadata } from '../../scripts/aem.js';
+import {
+  getProduct, getProducts, pickHighlights, isPrice,
+} from '../../utils/products.js';
 import { footnoteSup, expandRefs, resolveRefLinks } from '../../utils/footnotes.js';
+
+const SHEET = '/fragments/account-selector.json';
+const TABS = { 'fr-CA': 'fr', 'zh-Hans': 'sc', 'zh-Hant': 'tc' };
 
 const TEMPLATE = `
 <form class="account-selector-form">
   <div class="account-selector-progress" aria-hidden="true"></div>
-  <p class="account-selector-step" data-of="of"></p>
+  <p class="account-selector-step"></p>
   <fieldset>
     <legend>
       <p data-key="q1">How many purchases, withdrawals and bill payments do you make on average each month?</p>
       <p data-key="q1-tip"><strong>Tip:</strong> Exclude <em>Interac</em> e-Transfers, public transit transactions and transfers between RBC accounts — they're free</p>
     </legend>
     <div data-full class="account-selector-slider">
-      <input type="range" min="0" max="25" value="0" aria-label="Transactions per month, 0 to 25 or more">
+      <input type="range" min="0" max="25" value="0">
       <span>0</span><span>25+</span>
-      <input type="number" name="transactions" min="0" max="99" value="0" aria-label="Transactions per month">
+      <input type="number" name="transactions" min="0" max="99" value="0">
     </div>
     <details data-full class="account-selector-help">
       <summary data-key="q1-help">Help Me Estimate This</summary>
@@ -30,7 +36,7 @@ const TEMPLATE = `
   </fieldset>
   <fieldset>
     <legend><p data-key="q2">How often would you use non-RBC ATMs in Canada each month?</p></legend>
-    <input type="number" name="atms" min="0" max="99" value="0" aria-label="Non-RBC ATM uses per month">
+    <input type="number" name="atms" min="0" max="99" value="0">
   </fieldset>
   <fieldset data-full>
     <legend><p data-key="q3">Do you need any of these other products or features?</p></legend>
@@ -73,6 +79,10 @@ const TEMPLATE = `
     <span hidden data-key="finish-short">Continue at Account Selector Tool</span>
     <span hidden data-key="minus">Minus one</span>
     <span hidden data-key="plus">Plus one</span>
+    <span hidden data-key="step-of">of</span>
+    <span hidden data-key="range-label">Transactions per month, 0 to 25 or more</span>
+    <span hidden data-key="transactions-label">Transactions per month</span>
+    <span hidden data-key="atms-label">Non-RBC ATM uses per month</span>
   </div>
 </form>
 <div class="account-selector-results" hidden>
@@ -113,12 +123,21 @@ function answers(form) {
   return data;
 }
 
+// the CGI answers with an account name in either language; cards are matched by slug
+const SLUGS = [
+  [/vip/i, 'vip-banking'],
+  [/signature|sans limite/i, 'signature-no-limit'],
+  [/day to day|courant/i, 'day-to-day-banking'],
+  [/advantage|avantage/i, 'advantage-banking'],
+];
+const slugFor = (name) => SLUGS.find(([re]) => re.test(name))?.[1];
+
 // ponytail: rule of thumb when the CGI is unreachable (previews); production uses the proxy
 function guess(a) {
-  if (a.additionalAccounts === 'Yes') return 'RBC VIP Banking';
-  if (a.creditCardFee === 'Yes' || a.safeDepositBox === 'Yes') return 'RBC Signature No Limit Banking';
-  if (a.numDebits <= 12 && a.isStudent !== 'Yes' && a.isNewcomer !== 'Yes') return 'RBC Day to Day Banking';
-  return 'RBC Advantage Banking';
+  if (a.additionalAccounts === 'Yes') return 'vip-banking';
+  if (a.creditCardFee === 'Yes' || a.safeDepositBox === 'Yes') return 'signature-no-limit';
+  if (a.numDebits <= 12 && a.isStudent !== 'Yes' && a.isNewcomer !== 'Yes') return 'day-to-day-banking';
+  return 'advantage-banking';
 }
 
 async function recommend(a) {
@@ -131,7 +150,8 @@ async function recommend(a) {
     });
     const json = await res.json();
     const name = json.result_code === 0 && json.result_content?.recommended;
-    if (name) return name.trim();
+    const slug = name && slugFor(name);
+    if (slug) return slug;
   } catch (e) { /* fall through */ }
   return guess(a);
 }
@@ -141,10 +161,11 @@ function productCard(product, text) {
   const sup = (value) => footnoteSup(value, product.productPage);
   const li = document.createElement('li');
   li.dataset.name = product.name;
+  li.dataset.slug = product.slug;
   li.innerHTML = `<p class="account-selector-badge">${text('badge')}</p>
     <div class="account-selector-head"><h3>${product.name}</h3><p>${product.tagline}</p></div>
     <div class="account-selector-body">
-      <p>${product.fees[0]?.displayValue || ''}${product.fees[0]?.displayValue.startsWith('$') ? text('per-month') : ''}${sup(product.fees[0]?.footnotes)}</p>
+      <p>${product.fees[0]?.displayValue || ''}${isPrice(product.fees[0]?.displayValue) ? text('per-month') : ''}${sup(product.fees[0]?.footnotes)}</p>
       <ul>${pickHighlights(product).slice(0, 3).map((h) => `<li>${expandRefs(h.text, product.productPage)}</li>`).join('')}</ul>
       ${product.applyUrl ? `<p class="button-wrapper"><a class="button primary" href="${product.applyUrl}">${text('open-this-account')}</a></p>` : ''}
       <p><a href="${product.productPage}">${text('view-account-details')}</a></p>
@@ -154,9 +175,27 @@ function productCard(product, text) {
 
 const SLIDER_ONLY = '[data-short], .account-selector-help, fieldset ~ fieldset, legend, .account-selector-progress, .account-selector-step';
 
+// copy sheet: an authored link to a .json replaces the default; tab per page language
+async function loadCopy(block) {
+  const link = [...block.querySelectorAll('a[href]')]
+    .find((a) => new URL(a.href, window.location.href).pathname.endsWith('.json'));
+  const path = link ? new URL(link.href, window.location.href).pathname : SHEET;
+  [...block.children].find((row) => row.contains(link))?.remove();
+  const json = await fetch(path).then((r) => (r.ok ? r.json() : {})).catch(() => ({}));
+  const tab = TABS[getMetadata('lang')] || 'data';
+  const rows = Array.isArray(json.data) ? json.data : (json[tab] || json.data)?.data || [];
+  const filled = rows.filter((r) => r.Key && r.Text);
+  return Object.fromEntries(filled.map((r) => [r.Key.trim().toLowerCase(), r.Text]));
+}
+
 export default async function decorate(block) {
   const refs = [...block.querySelectorAll('a[href*="/products/"]')].map((a) => a.getAttribute('href'));
+  const copy = await loadCopy(block);
   const config = applyConfig(block, TEMPLATE);
+  // block rows win over the sheet
+  block.querySelectorAll('[data-key]').forEach((el) => {
+    if (!(el.dataset.key in config) && copy[el.dataset.key]) el.innerHTML = copy[el.dataset.key];
+  });
   const short = block.classList.contains('short');
   const slider = block.classList.contains('slider');
   const handoff = short || slider;
@@ -172,6 +211,9 @@ export default async function decorate(block) {
   const next = form.querySelector('[type=submit]');
   if (slider) next.className = 'button primary';
   const label = (key) => form.querySelector(`[data-key="${key}"]`).textContent;
+  form.querySelector('input[type=range]')?.setAttribute('aria-label', label('range-label'));
+  form.querySelector('input[type=number][name=transactions]')?.setAttribute('aria-label', label('transactions-label'));
+  form.querySelector('input[name=atms]')?.setAttribute('aria-label', label('atms-label'));
   const results = block.querySelector('.account-selector-results');
   const cards = results.querySelector('.account-selector-cards');
   const heading = results.querySelector('h2');
@@ -220,7 +262,7 @@ export default async function decorate(block) {
     current = i;
     steps.forEach((s, n) => { s.hidden = n !== i; });
     progress?.querySelectorAll('i').forEach((seg, n) => seg.classList.toggle('active', n <= i));
-    if (stepLabel) stepLabel.textContent = `${i + 1} ${stepLabel.dataset.of} ${steps.length}`;
+    if (stepLabel) stepLabel.textContent = `${i + 1} ${label('step-of')} ${steps.length}`;
     back.hidden = i === 0;
     const last = i === steps.length - 1;
     let finish = short ? 'finish-short' : 'finish';
@@ -243,10 +285,10 @@ export default async function decorate(block) {
       return;
     }
     next.disabled = true;
-    const pick = (await recommend(answers(form))).toLowerCase();
+    const pick = await recommend(answers(form));
     next.disabled = false;
     cards.querySelectorAll(':scope > li').forEach((li) => {
-      const hit = li.dataset.name.toLowerCase().startsWith(pick);
+      const hit = li.dataset.slug === pick;
       li.classList.toggle('recommended', hit);
       if (hit) cards.prepend(li);
     });

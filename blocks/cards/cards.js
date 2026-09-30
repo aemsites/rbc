@@ -3,7 +3,7 @@ import {
 } from '../../scripts/aem.js';
 import decorateTile, { tileWords } from './tiles.js';
 import {
-  getProduct, getProducts, monthlyFees, pickHighlights, keyList, offerLegalPage,
+  getProduct, getProducts, monthlyFees, pickHighlights, keyList, offerLegalPage, isPrice, zeroPrice,
 } from '../../utils/products.js';
 import fetchLocalPlaceholders from '../../utils/placeholders.js';
 import { rateSpan } from '../../utils/rates.js';
@@ -33,9 +33,9 @@ function priceLine(product, ph) {
     regular, rebate, regularFootnotes, rebateFootnotes,
   } = monthlyFees(product);
   if (!regular) return '';
-  const per = (value) => (value.startsWith('$') ? ph.perMonth || '/mo' : '');
+  const per = (value) => (isPrice(value) ? ph.perMonth || '/mo' : '');
   const sup = (value) => footnoteSup(value, product.productPage);
-  const price = product.fees[0]?.amount === 0 && !regular.startsWith('$') ? '$0' : regular;
+  const price = product.fees[0]?.amount === 0 && !isPrice(regular) ? zeroPrice() : regular;
   const amount = (value, footnotes) => `<span class="cards-product-amount"><strong>${value}</strong>${per(value)}${sup(footnotes)}</span>`;
   if (!rebate) return `<p class="cards-product-price">${amount(price, regularFootnotes)}</p>`;
   return `<p class="cards-product-price cards-product-price-split">${amount(price, regularFootnotes)}

@@ -1,4 +1,8 @@
+import { getMetadata } from '../scripts/aem.js';
+
 const INDEX = '/products/query-index.json';
+// one index holds every language; records live under the language root, e.g. /fr/products/
+const ROOTS = { 'fr-CA': '/fr/' };
 let cache;
 
 // item cells come back as the structured doc's html: rows of key heading + value
@@ -22,10 +26,16 @@ function normalize(row) {
   return product;
 }
 
+function inPageLanguage(path) {
+  const root = ROOTS[getMetadata('lang')];
+  return root ? path.startsWith(root) : !Object.values(ROOTS).some((r) => path.startsWith(r));
+}
+
 export async function fetchProducts() {
   cache = cache || fetch(INDEX)
     .then((resp) => (resp.ok ? resp.json() : { data: [] }))
-    .then(({ data }) => data.map(normalize).sort((a, b) => a.sortOrder - b.sortOrder))
+    .then(({ data }) => data.filter((row) => inPageLanguage(row.path)).map(normalize)
+      .sort((a, b) => a.sortOrder - b.sortOrder))
     .catch(() => []);
   return cache;
 }
@@ -55,6 +65,13 @@ export const keyList = (cell) => (cell?.textContent || '').split(',').map((k) =>
 // offer footnotes a page lacks link to the offer's page, or the product page if it's off-site
 export const offerLegalPage = (product) => (product.offerDetailsUrl?.startsWith('/')
   ? product.offerDetailsUrl : product.productPage);
+
+// a dollar amount in either order: "$4" (en) or "4 $" (fr)
+export const isPrice = (value = '') => /^\$\s?\d|\d\s?\$/.test(value);
+
+export const zeroPrice = () => new Intl.NumberFormat(getMetadata('lang') || 'en-CA', {
+  style: 'currency', currency: 'CAD', currencyDisplay: 'narrowSymbol', maximumFractionDigits: 0,
+}).format(0);
 
 // the regular monthly fee, and the price with the Value Program rebate when the record has one
 export function monthlyFees(product) {
