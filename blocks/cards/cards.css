@@ -49,10 +49,6 @@ main > .section > .cards-wrapper + .default-content-wrapper {
 
 .cards > ul > li a:any-link:not(.button) {
   color: var(--link-color);
-
-  &::after {
-    display: none;
-  }
 }
 
 .cards .cards-card-body {
@@ -237,6 +233,12 @@ main > .section > .cards-wrapper + .default-content-wrapper {
   width: 32px;
   height: 32px;
   color: var(--rbc-grey-900);
+}
+
+/* a footnote is its own flex item here; pull it back against the text it marks */
+.cards.yellow-eyebrow .cards-card-eyebrow > sup {
+  align-self: flex-start;
+  margin-inline: calc(var(--space-s) * -1) auto;
 }
 
 .cards.yellow-eyebrow .cards-card-eyebrow .icon svg [stroke]:not([stroke="none"]) {

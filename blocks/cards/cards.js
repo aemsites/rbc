@@ -35,7 +35,6 @@ function priceLine(product, ph) {
   if (!regular) return '';
   const per = (value) => (value.startsWith('$') ? ph.perMonth || '/mo' : '');
   const sup = (value) => footnoteSup(value, product.productPage);
-  // cards quote a price even where the record says Free, as rbcroyalbank.com does
   const price = product.fees[0]?.amount === 0 && !regular.startsWith('$') ? '$0' : regular;
   const amount = (value, footnotes) => `<span class="cards-product-amount"><strong>${value}</strong>${per(value)}${sup(footnotes)}</span>`;
   if (!rebate) return `<p class="cards-product-price">${amount(price, regularFootnotes)}</p>`;
@@ -45,7 +44,6 @@ function priceLine(product, ph) {
     <span class="cards-product-rebate-label">${ph.withTheValueProgram || 'with the Value Program'}</span></span></p>`;
 }
 
-// label `type` shows the generic account type (placeholder category-<category>), `none` hides it
 function cardLabel(product, ph, label) {
   if (label === 'none') return '';
   const type = label === 'type' && ph[toCamelCase(`category-${product.category}`)];
@@ -66,7 +64,7 @@ function productBody(product, ph, variant, keys = [], options = {}) {
   const feeSup = sup(fee?.footnotes);
   if (variant === 'compact') {
     return `<h3>${product.name}</h3><p class="cards-product-price">${fee?.label || ''} <span class="cards-product-amount"><strong>${fee?.displayValue || ''}</strong>${feeSup}</span></p>
-      <p><a href="${product.productPage}">${ph.viewAccount || 'View Account'}</a></p>`;
+      <p class="link-wrapper"><a href="${product.productPage}">${ph.viewAccount || 'View Account'}</a></p>`;
   }
   if (variant === 'picture') {
     return `${cardLabel(product, ph, options.label)}<h3><a href="${product.productPage}">${product.name}</a></h3>
@@ -81,13 +79,12 @@ function productBody(product, ph, variant, keys = [], options = {}) {
   return `${cardLabel(product, ph, options.label)}<h3>${product.name}</h3><p>${product.tagline}</p><ul>${highlights}</ul>
     ${note}${badge}${caption}${priceLine(product, ph)}
     ${product.applyUrl ? button(cta, product.applyUrl, 'primary') : ''}
-    <p><a href="${product.productPage}">${ph.viewMoreAccountBenefits || 'View More Account Benefits'}</a></p>`;
+    <p class="link-wrapper"><a href="${product.productPage}">${ph.viewMoreAccountBenefits || 'View More Account Benefits'}</a></p>`;
 }
 
 const CONFIG_KEYS = ['category', 'persona', 'cta', 'label'];
 const words = (value) => String(value || '').split(',').map((v) => v.trim().toLowerCase()).filter(Boolean);
 
-// `category | chequing, youth` and `persona | student` add matching records where the settings sat
 async function expandFilterRows(anchor, config) {
   const category = words(config.category);
   const persona = words(config.persona);
@@ -152,7 +149,6 @@ function decorateProduct(li) {
     category.className = 'cards-product-category';
     head.after(category);
   }
-  // record cards style by the record's category, whatever label the block shows
   if (body.dataset.category) li.dataset.category = body.dataset.category;
 
   body.querySelectorAll(':scope > p').forEach((p) => {
@@ -166,7 +162,6 @@ function decorateProduct(li) {
 
 let detailCount = 0;
 
-// expandable: the row's third cell opens as a panel over the whole grid, as on rbcroyalbank.com
 function decorateDetail(li, detail, ph) {
   detailCount += 1;
   detail.className = 'cards-card-detail';
@@ -231,7 +226,7 @@ export default async function decorate(block) {
   });
   if (block.classList.contains('yellow-eyebrow')) {
     ul.querySelectorAll(':scope > li').forEach((li) => {
-      const eyebrow = li.querySelector('.cards-card-body > p:first-child:not(:has(a, picture))');
+      const eyebrow = li.querySelector('.cards-card-body > p:first-child:not(:has(a:not(.footnote), picture))');
       if (!eyebrow?.nextElementSibling?.matches('h2, h3, h4, h5, h6')) return;
       eyebrow.className = 'cards-card-eyebrow';
       li.prepend(eyebrow);
