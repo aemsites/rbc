@@ -10,6 +10,7 @@ Edge Delivery Services. Read a block first. Omissions are in the repo or known.
 - No build step; devDependencies only.
 - Scope CSS to `.blockname`; `-wrapper`/`-container` are section classes.
 - `fragment/fragment.js` is the only cross-block import. Otherwise use `/scripts/`.
+- `document.createElement` in block JS. Use `createElement` from `utils/dom.js`; existing blocks are pending refactor.
 
 ## Outdated
 - `fstab.yaml`, `helix-query.yaml`, `paths.json` are retired. Config lives at tools.aem.live.
