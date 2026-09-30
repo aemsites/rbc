@@ -65,7 +65,7 @@ function productBody(product, ph, variant, keys = [], options = {}) {
   const [fee] = product.fees;
   const feeSup = sup(fee?.footnotes);
   if (variant === 'compact') {
-    return `<h3>${product.name}</h3><p>${fee?.label || ''} <strong>${fee?.displayValue || ''}</strong>${feeSup}</p>
+    return `<h3>${product.name}</h3><p class="cards-product-price">${fee?.label || ''} <span class="cards-product-amount"><strong>${fee?.displayValue || ''}</strong>${feeSup}</span></p>
       <p><a href="${product.productPage}">${ph.viewAccount || 'View Account'}</a></p>`;
   }
   if (variant === 'picture') {
@@ -122,7 +122,7 @@ async function renderProductRows(block) {
     if (!product) { row.remove(); return; }
     const body = document.createElement('div');
     body.innerHTML = productBody(product, ph, variant, keyList(row.children[1]), options);
-    body.dataset.category = product.category;
+    if (variant !== 'compact') body.dataset.category = product.category;
     row.replaceChildren(body);
     if (variant === 'picture' && product.image) {
       const image = document.createElement('div');
