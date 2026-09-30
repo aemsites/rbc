@@ -166,11 +166,11 @@
   object-position: center bottom;
 }
 
-.tile.tile-art-top {
+.tile:is(.tile-art-top, .tile-art-top-center) {
   justify-content: flex-end;
 }
 
-.tile.tile-art-top .tile-image {
+.tile:is(.tile-art-top, .tile-art-top-center) .tile-image {
   top: var(--space-xl);
   bottom: auto;
   left: var(--space-xl);
@@ -178,14 +178,27 @@
   max-width: 60%;
 }
 
-.tile.tile-art-top .tile-image img {
+.tile:is(.tile-art-top, .tile-art-top-center) .tile-image img {
   max-height: 160px;
   object-position: left top;
 }
 
-.tile.tile-art-top .tile-content {
+.tile:is(.tile-art-top, .tile-art-top-center) .tile-content {
   max-width: none;
   padding-top: 208px;
+}
+
+.tile.tile-art-top-center .tile-image {
+  right: 0;
+  left: 0;
+  max-width: none;
+  text-align: center;
+}
+
+.tile.tile-art-top-center .tile-image img {
+  width: auto;
+  max-width: 60%;
+  object-position: center top;
 }
 
 .tile.tile-art-inset .tile-image {

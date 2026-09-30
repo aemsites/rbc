@@ -154,7 +154,7 @@
   border-radius: var(--radius-s);
   padding: 2px var(--space-2xs);
   background-color: var(--rbc-light-blue);
-  color: var(--rbc-grey-900);
+  color: #456B86;
   font-size: var(--body-font-size-xs);
   letter-spacing: 0.06em;
   text-transform: uppercase;
