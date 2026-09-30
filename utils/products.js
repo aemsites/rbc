@@ -52,6 +52,10 @@ export function pickHighlights(product, keys = []) {
 
 export const keyList = (cell) => (cell?.textContent || '').split(',').map((k) => k.trim()).filter(Boolean);
 
+// offer footnotes a page lacks link to the offer's page, or the product page if it's off-site
+export const offerLegalPage = (product) => (product.offerDetailsUrl?.startsWith('/')
+  ? product.offerDetailsUrl : product.productPage);
+
 // the regular monthly fee, and the price with the Value Program rebate when the record has one
 export function monthlyFees(product) {
   const [regular] = product.fees;

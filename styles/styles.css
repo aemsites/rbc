@@ -448,10 +448,6 @@ main > .section.dark-background blockquote cite {
   color: var(--rbc-grey-200);
 }
 
-main > .section.dark-background a:any-link:not(.button, sup > a) {
-  text-decoration: underline;
-}
-
 main > .section.dark-background a.button.secondary {
   box-shadow: inset 0 0 0 1px var(--rbc-white);
   background-color: transparent;
