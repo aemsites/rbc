@@ -1,7 +1,9 @@
-import { createOptimizedPicture, toClassName } from '../../scripts/aem.js';
+import {
+  createOptimizedPicture, readBlockConfig, toCamelCase, toClassName,
+} from '../../scripts/aem.js';
 import decorateTile, { tileWords } from './tiles.js';
 import {
-  getProduct, getProducts, monthlyFees, pickHighlights, keyList,
+  getProduct, getProducts, monthlyFees, pickHighlights, keyList, offerLegalPage,
 } from '../../utils/products.js';
 import fetchLocalPlaceholders from '../../utils/placeholders.js';
 import { rateSpan } from '../../utils/rates.js';
@@ -33,13 +35,26 @@ function priceLine(product, ph) {
   if (!regular) return '';
   const per = (value) => (value.startsWith('$') ? ph.perMonth || '/mo' : '');
   const sup = (value) => footnoteSup(value, product.productPage);
-  let line = `<strong>${regular}</strong>${per(regular)}${sup(regularFootnotes)}`;
-  if (rebate) line += ` <em>${ph.or || 'or'}</em> <strong>${rebate}</strong>${per(rebate)} ${ph.withTheValueProgram || 'with the Value Program'}${sup(rebateFootnotes)}`;
-  return `<p>${line}</p>`;
+  // cards quote a price even where the record says Free, as rbcroyalbank.com does
+  const price = product.fees[0]?.amount === 0 && !regular.startsWith('$') ? '$0' : regular;
+  const amount = (value, footnotes) => `<span class="cards-product-amount"><strong>${value}</strong>${per(value)}${sup(footnotes)}</span>`;
+  if (!rebate) return `<p class="cards-product-price">${amount(price, regularFootnotes)}</p>`;
+  return `<p class="cards-product-price cards-product-price-split">${amount(price, regularFootnotes)}
+    <em class="cards-product-or">${ph.or || 'or'}</em>
+    <span class="cards-product-rebate">${amount(rebate, rebateFootnotes)}
+    <span class="cards-product-rebate-label">${ph.withTheValueProgram || 'with the Value Program'}</span></span></p>`;
 }
 
-function productBody(product, ph, variant, keys = []) {
+// label `type` shows the generic account type (placeholder category-<category>), `none` hides it
+function cardLabel(product, ph, label) {
+  if (label === 'none') return '';
+  const type = label === 'type' && ph[toCamelCase(`category-${product.category}`)];
+  return `<p>${type || product.categoryLabel}</p>`;
+}
+
+function productBody(product, ph, variant, keys = [], options = {}) {
   const page = product.productPage;
+  const cta = options.cta || ph.openAccount || 'Open Account';
   const sup = (value) => footnoteSup(value, page);
   const showRate = product.rateFallbackValue && (!keys.length || keys.includes('rate'));
   const rate = showRate
@@ -50,47 +65,50 @@ function productBody(product, ph, variant, keys = []) {
   const [fee] = product.fees;
   const feeSup = sup(fee?.footnotes);
   if (variant === 'compact') {
-    return `<h3>${product.name}</h3><p>${fee?.label || ''} <strong>${fee?.displayValue || ''}</strong>${feeSup}</p>
+    return `<h3>${product.name}</h3><p class="cards-product-price">${fee?.label || ''} <span class="cards-product-amount"><strong>${fee?.displayValue || ''}</strong>${feeSup}</span></p>
       <p><a href="${product.productPage}">${ph.viewAccount || 'View Account'}</a></p>`;
   }
   if (variant === 'picture') {
-    return `<p>${product.categoryLabel}</p><h3><a href="${product.productPage}">${product.name}</a></h3>
+    return `${cardLabel(product, ph, options.label)}<h3><a href="${product.productPage}">${product.name}</a></h3>
       <p>${ph.monthlyFee || 'Monthly Fee'}: ${fee?.displayValue || ''}${feeSup}</p>${note}<ul>${highlights}</ul>
-      <p class="button-wrapper"><a class="button primary" href="${product.productPage}">${ph.learnMore || 'Learn More'}</a>${product.applyUrl ? ` <a class="button secondary" href="${product.applyUrl}">${ph.openAccount || 'Open Account'}</a>` : ''}</p>`;
+      <p class="button-wrapper"><a class="button primary" href="${product.productPage}">${ph.learnMore || 'Learn More'}</a>${product.applyUrl ? ` <a class="button secondary" href="${product.applyUrl}">${cta}</a>` : ''}</p>`;
   }
-  const offerPage = product.offerDetailsUrl || page;
+  const offerPage = offerLegalPage(product);
   const badge = product.offerBadge
     ? `<p><em>${offerLink(product, stripRefs(product.offerBadge))}${footnoteSup(refIds(product.offerBadge), offerPage)}</em></p>` : '';
-  return `<p>${product.categoryLabel}</p><h3>${product.name}</h3><p>${product.tagline}</p><ul>${highlights}</ul>
-    ${note}${badge}${priceLine(product, ph)}
-    ${product.applyUrl ? button(ph.openAccount || 'Open Account', product.applyUrl, 'primary') : ''}
+  const caption = product.offerBadge && product.offerCaption
+    ? `<p class="cards-product-caption"><em>${expandRefs(product.offerCaption, offerPage)}</em></p>` : '';
+  return `${cardLabel(product, ph, options.label)}<h3>${product.name}</h3><p>${product.tagline}</p><ul>${highlights}</ul>
+    ${note}${badge}${caption}${priceLine(product, ph)}
+    ${product.applyUrl ? button(cta, product.applyUrl, 'primary') : ''}
     <p><a href="${product.productPage}">${ph.viewMoreAccountBenefits || 'View More Account Benefits'}</a></p>`;
 }
 
-const FILTER_KEYS = ['category', 'persona'];
+const CONFIG_KEYS = ['category', 'persona', 'cta', 'label'];
+const words = (value) => String(value || '').split(',').map((v) => v.trim().toLowerCase()).filter(Boolean);
 
-// `category | chequing, youth` and `persona | student` rows expand into one row per matching record
-async function expandFilterRows(block) {
-  const rows = [...block.children].filter((row) => row.children.length === 2
-    && FILTER_KEYS.includes(row.firstElementChild.textContent.trim().toLowerCase()));
-  if (!rows.length) return;
-  const words = (cell) => cell.textContent.split(',').map((v) => v.trim().toLowerCase()).filter(Boolean);
-  const filter = Object.fromEntries(rows.map((row) => [
-    words(row.firstElementChild)[0], words(row.lastElementChild),
-  ]));
-  const wanted = (p) => (!filter.category || filter.category.includes(p.category))
-    && (filter.persona ? filter.persona.includes(p.persona) : !p.variantOf);
+// `category | chequing, youth` and `persona | student` add matching records where the settings sat
+async function expandFilterRows(anchor, config) {
+  const category = words(config.category);
+  const persona = words(config.persona);
+  if (!category.length && !persona.length) return;
+  const wanted = (p) => (!category.length || category.includes(p.category))
+    && (persona.length ? persona.includes(p.persona) : !p.variantOf);
   const products = (await getProducts()).filter(wanted);
-  rows[0].before(...products.map((p) => {
+  anchor.before(...products.map((p) => {
     const row = document.createElement('div');
     row.innerHTML = `<div><a href="${p.path}">${p.path}</a></div>`;
     return row;
   }));
-  rows.forEach((row) => row.remove());
 }
 
 async function renderProductRows(block) {
-  await expandFilterRows(block);
+  const config = readBlockConfig(block);
+  const settings = [...block.children].filter((row) => row.children.length === 2
+    && CONFIG_KEYS.includes(toClassName(row.firstElementChild.textContent)));
+  if (settings.length) await expandFilterRows(settings[0], config);
+  settings.forEach((row) => row.remove());
+  const options = { cta: config.cta, label: config.label && toClassName(config.label) };
   const rows = [...block.children].filter((row) => {
     const cell = row.firstElementChild;
     const a = cell?.querySelector('a[href*="/products/"]');
@@ -103,7 +121,8 @@ async function renderProductRows(block) {
     const product = await getProduct(row.querySelector('a').getAttribute('href'));
     if (!product) { row.remove(); return; }
     const body = document.createElement('div');
-    body.innerHTML = productBody(product, ph, variant, keyList(row.children[1]));
+    body.innerHTML = productBody(product, ph, variant, keyList(row.children[1]), options);
+    if (variant !== 'compact') body.dataset.category = product.category;
     row.replaceChildren(body);
     if (variant === 'picture' && product.image) {
       const image = document.createElement('div');
@@ -133,13 +152,15 @@ function decorateProduct(li) {
     category.className = 'cards-product-category';
     head.after(category);
   }
+  // record cards style by the record's category, whatever label the block shows
+  if (body.dataset.category) li.dataset.category = body.dataset.category;
 
   body.querySelectorAll(':scope > p').forEach((p) => {
     const strong = p.querySelector(':scope > strong');
     const last = p.lastElementChild?.textContent.trim();
     const endsInValue = strong && p.textContent.trim().endsWith(last);
     if (strong && (/\d/.test(p.textContent) || endsInValue)) p.classList.add('cards-product-price');
-    else if (p.children.length === 1 && p.firstElementChild.tagName === 'EM') p.classList.add('cards-product-badge');
+    else if (p.children.length === 1 && p.firstElementChild.tagName === 'EM' && !p.className) p.classList.add('cards-product-badge');
   });
 }
 
