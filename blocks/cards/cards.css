@@ -367,6 +367,18 @@ main > .section > .cards-wrapper + .default-content-wrapper {
   padding: var(--space-m);
 }
 
+/* image-bottom: the image sits on the card's bottom edge (e.g. a phone cut off by the card) */
+@media (width > 600px) {
+  .cards.horizontal.image-bottom > ul > li > .cards-card-image {
+    align-self: end;
+    padding-bottom: 0;
+  }
+
+  .cards.horizontal.image-bottom > ul > li > .cards-card-image img {
+    height: auto;
+  }
+}
+
 /* product: account cards */
 .cards.product > ul {
   grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 360px));
@@ -762,7 +774,9 @@ main > .section[data-layout]:not([data-layout="50-50"]) .cards.tile > ul {
 }
 
 main > .section[data-layout="50-50"] .cards.tile,
-main > .section[data-layout="50-50"] .cards.tile > ul {
+main > .section[data-layout="50-50"] .cards.tile > ul,
+main > .section[data-layout] .cards.tile:has(> ul > li:only-child),
+main > .section[data-layout] .cards.tile:has(> ul > li:only-child) > ul {
   height: 100%;
 }
 
