@@ -1,43 +1,88 @@
+import { createOptimizedPicture } from '../../scripts/aem.js';
+import { createElement } from '../../utils/dom.js';
+import fetchLocalPlaceholders from '../../utils/placeholders.js';
+
 const contentImages = (block, sel) => [...block.querySelectorAll(sel)]
   .filter((el) => !el.closest('span.icon'));
+
+const PLAY_ICON = '<svg viewBox="0 0 80 81" aria-hidden="true" focusable="false"><path fill="currentColor" d="M40 .625c-22.091 0-40 17.909-40 40s17.909 40 40 40 40-17.909 40-40-17.909-40-40-40zM40 77.5c-20.333 0-36.875-16.542-36.875-36.875S19.667 3.75 40 3.75s36.875 16.542 36.875 36.875S60.333 77.5 40 77.5zm11.894-35.903L35.406 51.72a.875.875 0 01-1.333-.745v-20.11a.875.875 0 011.328-.748l16.488 9.988a.875.875 0 01.005 1.493z"/></svg>';
 
 function normalizeImage(block) {
   const [img] = contentImages(block, 'img');
   if (!img) return;
-  img.loading = 'eager';
-  if (img.closest('picture')) return;
-  const picture = document.createElement('picture');
-  img.replaceWith(picture);
-  picture.append(img);
+  if (img.closest('picture')) {
+    img.loading = 'eager';
+    return;
+  }
+  img.replaceWith(createOptimizedPicture(img.src, img.alt, true));
 }
 
-function backgroundVideo(block) {
+// plays once over the whole hero, then fades to reveal the image, copy and a replay button
+function introVideo(block) {
   const source = block.querySelector('a[href$=".mp4"]');
   if (!source) return;
   const captions = block.querySelector('a[href$=".vtt"]');
-  const poster = block.querySelector(':scope > picture img');
+  const content = block.querySelector(':scope > div');
 
-  const video = document.createElement('video');
-  video.src = source.href;
+  const video = createElement('video', {
+    src: source.href, muted: '', playsinline: '', preload: 'auto',
+  });
+  // the attribute alone doesn't mute a script-created video for autoplay
   video.muted = true;
-  video.setAttribute('muted', '');
-  video.loop = true;
-  video.playsInline = true;
-  if (poster) video.poster = poster.src;
-  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) video.autoplay = true;
-
   if (captions) {
-    const track = document.createElement('track');
-    track.kind = 'captions';
-    track.src = captions.href;
-    track.default = true;
+    const track = createElement('track', {
+      kind: 'captions', src: captions.href, srclang: document.documentElement.lang || 'en', default: '',
+    });
     video.append(track);
+    track.addEventListener('load', () => { track.track.mode = 'showing'; });
   }
 
-  [source, captions].forEach((link) => link?.closest('p')?.remove());
-  const layer = block.querySelector(':scope > picture');
-  if (layer) layer.replaceWith(video);
-  else block.prepend(video);
+  const skip = createElement('button', { type: 'button', class: 'hero-video-skip' }, 'Skip video');
+  fetchLocalPlaceholders().then((ph) => { if (ph.skipVideo) skip.textContent = ph.skipVideo; });
+
+  const layer = createElement('div', { class: 'hero-video' }, [video, skip]);
+
+  const play = createElement('button', { type: 'button', class: 'button secondary hero-video-play' }, source.textContent.trim());
+  play.insertAdjacentHTML('afterbegin', PLAY_ICON);
+
+  const sourceP = source.closest('p');
+  const ctas = [...block.querySelectorAll('p.button-wrapper')].find((p) => p !== sourceP);
+  if (ctas) {
+    ctas.append(play);
+    sourceP.remove();
+  } else {
+    sourceP.className = 'button-wrapper';
+    sourceP.replaceChildren(play);
+  }
+  captions?.closest('p')?.remove();
+
+  const show = (playing) => {
+    block.classList.toggle('video-playing', playing);
+    content.inert = playing;
+  };
+  const end = () => {
+    if (!block.classList.contains('video-playing')) return;
+    const hadFocus = layer.contains(document.activeElement);
+    video.pause();
+    show(false);
+    if (hadFocus) play.focus({ preventScroll: true });
+  };
+  const start = () => {
+    show(true);
+    video.currentTime = 0;
+    video.play().then(() => skip.focus({ preventScroll: true })).catch(end);
+  };
+  video.addEventListener('ended', end);
+  video.addEventListener('error', end);
+  skip.addEventListener('click', end);
+  play.addEventListener('click', start);
+
+  block.classList.add('hero-intro');
+  block.prepend(layer);
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  show(true);
+  // blocked autoplay (low power mode, data saver) falls back to the image and copy
+  video.play().catch(() => show(false));
 }
 
 export default function decorate(block) {
@@ -58,10 +103,15 @@ export default function decorate(block) {
     }
   }
 
-  backgroundVideo(block);
+  introVideo(block);
 
   block.querySelectorAll('p > em:only-child').forEach((em) => {
     if (em.textContent.trim() === em.parentElement.textContent.trim()) em.parentElement.classList.add('hero-note');
+  });
+
+  // a line with part of it in <em>: the tagline under the buttons, <em> in the accent font
+  block.querySelectorAll('p:has(> em):not(.hero-note, .button-wrapper)').forEach((p) => {
+    if (!p.querySelector('a')) p.classList.add('hero-tagline');
   });
 
   const eyebrow = block.querySelector('h1, h2, h3, h4, h5, h6')?.previousElementSibling;

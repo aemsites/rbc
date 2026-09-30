@@ -166,11 +166,11 @@
   object-position: center bottom;
 }
 
-.tile.tile-art-top {
+.tile:is(.tile-art-top, .tile-art-top-center) {
   justify-content: flex-end;
 }
 
-.tile.tile-art-top .tile-image {
+.tile:is(.tile-art-top, .tile-art-top-center) .tile-image {
   top: var(--space-xl);
   bottom: auto;
   left: var(--space-xl);
@@ -178,17 +178,46 @@
   max-width: 60%;
 }
 
-.tile.tile-art-top .tile-image img {
+.tile:is(.tile-art-top, .tile-art-top-center) .tile-image img {
   max-height: 160px;
   object-position: left top;
 }
 
-.tile.tile-art-top .tile-content {
+.tile:is(.tile-art-top, .tile-art-top-center) .tile-content {
   max-width: none;
   padding-top: 208px;
+}
+
+.tile.tile-art-top-center .tile-image {
+  right: 0;
+  left: 0;
+  max-width: none;
+  text-align: center;
+}
+
+.tile.tile-art-top-center .tile-image img {
+  width: auto;
+  max-width: 60%;
+  object-position: center top;
 }
 
 .tile.tile-art-inset .tile-image {
   right: var(--space-l);
   bottom: var(--space-l);
 }
+
+
+.tile.padding-bottom-s { padding-bottom: var(--space-l); }
+.tile.padding-bottom-m { padding-bottom: var(--space-xl); }
+.tile.padding-bottom-l { padding-bottom: var(--space-3xl); }
+.tile.padding-bottom-xl { padding-bottom: var(--space-4xl); }
+.tile.padding-bottom-2xl { padding-bottom: var(--space-5xl); }
+.tile.padding-bottom-3xl { padding-bottom: var(--space-6xl); }
+.tile.padding-bottom-4xl { padding-bottom: var(--space-7xl); }
+.tile.padding-top-s { padding-top: var(--space-l); }
+.tile.padding-top-m { padding-top: var(--space-xl); }
+.tile.padding-top-l { padding-top: var(--space-3xl); }
+.tile.padding-top-xl { padding-top: var(--space-4xl); }
+.tile.padding-top-2xl { padding-top: var(--space-5xl); }
+.tile.padding-top-3xl { padding-top: var(--space-6xl); }
+.tile.padding-top-4xl { padding-top: var(--space-7xl); }

@@ -31,7 +31,7 @@ export default async function decorate(block) {
       <div class="product-summary-price"><p><strong>${regular}</strong>${regular.startsWith('$') ? per : ''}${sup(regularFootnotes)}</p>${rebateLine}</div>
     </div>
     <p class="button-wrapper"><a class="button primary" href="${product.applyUrl}">${ph.openAccount || 'Open Account'}</a></p>
-    <p class="product-summary-more"><a href="${product.productPage}">${ph.viewMoreAccountBenefits || 'View More Account Benefits'}</a></p>`;
+    <p class="product-summary-more link-wrapper"><a href="${product.productPage}">${ph.viewMoreAccountBenefits || 'View More Account Benefits'}</a></p>`;
   block.querySelector('.product-summary-head').after(list);
   await resolveRefLinks(block);
 }

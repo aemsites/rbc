@@ -49,10 +49,6 @@ main > .section > .cards-wrapper + .default-content-wrapper {
 
 .cards > ul > li a:any-link:not(.button) {
   color: var(--link-color);
-
-  &::after {
-    display: none;
-  }
 }
 
 .cards .cards-card-body {
@@ -239,6 +235,12 @@ main > .section > .cards-wrapper + .default-content-wrapper {
   color: var(--rbc-grey-900);
 }
 
+/* a footnote is its own flex item here; pull it back against the text it marks */
+.cards.yellow-eyebrow .cards-card-eyebrow > sup {
+  align-self: flex-start;
+  margin-inline: calc(var(--space-s) * -1) auto;
+}
+
 .cards.yellow-eyebrow .cards-card-eyebrow .icon svg [stroke]:not([stroke="none"]) {
   stroke: currentcolor;
 }
@@ -365,6 +367,18 @@ main > .section > .cards-wrapper + .default-content-wrapper {
   padding: var(--space-m);
 }
 
+/* image-bottom: the image sits on the card's bottom edge (e.g. a phone cut off by the card) */
+@media (width > 600px) {
+  .cards.horizontal.image-bottom > ul > li > .cards-card-image {
+    align-self: end;
+    padding-bottom: 0;
+  }
+
+  .cards.horizontal.image-bottom > ul > li > .cards-card-image img {
+    height: auto;
+  }
+}
+
 /* product: account cards */
 .cards.product > ul {
   grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 360px));
@@ -457,6 +471,57 @@ main > .section > .cards-wrapper + .default-content-wrapper {
   font-weight: 500;
 }
 
+.cards.product .cards-product-amount {
+  white-space: nowrap;
+}
+
+.cards.product .cards-product-amount strong {
+  margin-right: var(--space-3xs);
+}
+
+/* regular | or | rebate, as rbcroyalbank.com lays out the Value Program price */
+.cards.product .cards-product-price-split {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  column-gap: var(--space-xs);
+}
+
+.cards.product .cards-product-price-split > .cards-product-amount {
+  justify-self: end;
+}
+
+.cards.product .cards-product-or {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3xs);
+  font-family: georgia, 'Times New Roman', serif;
+  font-size: var(--body-font-size-m);
+  font-weight: 700;
+}
+
+.cards.product .cards-product-or::before,
+.cards.product .cards-product-or::after {
+  content: '';
+  width: 1px;
+  height: var(--space-m);
+  background-color: var(--rbc-grey-200);
+}
+
+.cards.product .cards-product-rebate {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-self: start;
+}
+
+.cards.product .cards-product-rebate-label {
+  font-size: var(--body-font-size-xs);
+  font-weight: 500;
+  text-align: center;
+}
+
 .cards.product .cards-product-badge {
   align-self: center;
   margin: 0 0 var(--space-s);
@@ -477,6 +542,13 @@ main > .section > .cards-wrapper + .default-content-wrapper {
   color: inherit;
   font-weight: inherit;
   text-decoration: none;
+}
+
+.cards.product .cards-product-caption {
+  align-self: center;
+  margin: calc(var(--space-s) * -0.5) 0 var(--space-s);
+  color: var(--rbc-grey-600);
+  font-size: var(--body-font-size-xs);
 }
 
 .cards.product .cards-card-body p.button-wrapper {
@@ -702,7 +774,9 @@ main > .section[data-layout]:not([data-layout="50-50"]) .cards.tile > ul {
 }
 
 main > .section[data-layout="50-50"] .cards.tile,
-main > .section[data-layout="50-50"] .cards.tile > ul {
+main > .section[data-layout="50-50"] .cards.tile > ul,
+main > .section[data-layout] .cards.tile:has(> ul > li:only-child),
+main > .section[data-layout] .cards.tile:has(> ul > li:only-child) > ul {
   height: 100%;
 }
 

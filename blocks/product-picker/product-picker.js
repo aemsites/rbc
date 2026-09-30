@@ -1,5 +1,5 @@
 import {
-  getProduct, monthlyFees, pickHighlights, keyList,
+  getProduct, monthlyFees, pickHighlights, keyList, isPrice,
 } from '../../utils/products.js';
 import fetchLocalPlaceholders from '../../utils/placeholders.js';
 import { footnoteSup, expandRefs, resolveRefLinks } from '../../utils/footnotes.js';
@@ -55,7 +55,7 @@ export default async function decorate(block) {
 
   products.forEach((product, i) => {
     const { regular } = monthlyFees(product);
-    const per = regular.startsWith('$') ? ph.perMonth || '/mo' : '';
+    const per = isPrice(regular) ? ph.perMonth || '/mo' : '';
     const option = document.createElement('label');
     option.className = 'product-picker-option';
     option.innerHTML = `<input type="radio" name="product-picker-${pickerCount}" value="${product.slug}"${i ? '' : ' checked'}>

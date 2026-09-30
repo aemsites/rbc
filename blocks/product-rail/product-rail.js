@@ -1,5 +1,5 @@
 import { createOptimizedPicture } from '../../scripts/aem.js';
-import { getProduct } from '../../utils/products.js';
+import { getProduct, offerLegalPage } from '../../utils/products.js';
 import fetchLocalPlaceholders from '../../utils/placeholders.js';
 import { rateSpan } from '../../utils/rates.js';
 import {
@@ -31,8 +31,10 @@ function railRows(product, ph) {
   if (product.offerHeadline) {
     const image = product.offerImage ? picture(product.offerImage, product.offerImageAlt) : '';
     const ends = product.offerEndDate ? `${ph.offerEnds || 'Offer ends'} ${longDate(product.offerEndDate)}. ` : '';
-    const details = product.offerDetailsUrl ? `<p><a href="${product.offerDetailsUrl}" target="_blank" rel="noopener">${ph.viewOfferDetails || 'View Offer Details'}</a></p>` : '';
-    rows.push(row(`<p>${product.offerEyebrow || ph.offer || 'Offer'}</p>`, `${image}<p>${expandRefs(product.offerHeadline, product.offerDetailsUrl || product.productPage)}</p><p>${ends}${product.offerConditions || ''}</p>${details}`));
+    const offerPage = offerLegalPage(product);
+    // rbcroyalbank.com rails don't link off-site offers (e.g. the investments HISA page)
+    const details = offerPage === product.offerDetailsUrl ? `<p class="link-wrapper"><a href="${product.offerDetailsUrl}" target="_blank" rel="noopener">${ph.viewOfferDetails || 'View Offer Details'}</a></p>` : '';
+    rows.push(row(`<p>${product.offerEyebrow || ph.offer || 'Offer'}</p>`, `${image}<p>${expandRefs(product.offerHeadline, offerPage)}</p><p>${ends}${product.offerConditions || ''}</p>${details}`));
   }
   if (product.rateFallbackValue) {
     const value = product.rateRateCode
@@ -50,7 +52,7 @@ function railRows(product, ph) {
     rows.push(row(`<p>${note} ${product.feeDisclaimer}${details}</p>`));
   }
   const apply = product.applyUrl ? `<p class="button-wrapper"><a class="button primary" href="${product.applyUrl}">${ph.openAccountOnline || 'Open Account Online'}</a></p>` : '';
-  rows.push(row(`${apply}<p><a href="#legal-disclaimers">${ph.viewLegalDisclaimers || 'View legal disclaimers'}</a></p>`));
+  rows.push(row(`${apply}<p class="link-wrapper"><a href="#legal-disclaimers">${ph.viewLegalDisclaimers || 'View legal disclaimers'}</a></p>`));
   return rows.join('');
 }
 
