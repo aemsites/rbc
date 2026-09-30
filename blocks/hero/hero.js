@@ -1,3 +1,5 @@
+import { createOptimizedPicture } from '../../scripts/aem.js';
+import { createElement } from '../../utils/dom.js';
 import fetchLocalPlaceholders from '../../utils/placeholders.js';
 
 const contentImages = (block, sel) => [...block.querySelectorAll(sel)]
@@ -8,11 +10,11 @@ const PLAY_ICON = '<svg viewBox="0 0 80 81" aria-hidden="true" focusable="false"
 function normalizeImage(block) {
   const [img] = contentImages(block, 'img');
   if (!img) return;
-  img.loading = 'eager';
-  if (img.closest('picture')) return;
-  const picture = document.createElement('picture');
-  img.replaceWith(picture);
-  picture.append(img);
+  if (img.closest('picture')) {
+    img.loading = 'eager';
+    return;
+  }
+  img.replaceWith(createOptimizedPicture(img.src, img.alt, true));
 }
 
 // plays once over the whole hero, then fades to reveal the image, copy and a replay button
@@ -22,39 +24,26 @@ function introVideo(block) {
   const captions = block.querySelector('a[href$=".vtt"]');
   const content = block.querySelector(':scope > div');
 
-  const video = document.createElement('video');
-  video.src = source.href;
+  const video = createElement('video', {
+    src: source.href, muted: '', playsinline: '', preload: 'auto',
+  });
+  // the attribute alone doesn't mute a script-created video for autoplay
   video.muted = true;
-  video.setAttribute('muted', '');
-  video.playsInline = true;
-  video.preload = 'auto';
   if (captions) {
-    const track = document.createElement('track');
-    track.kind = 'captions';
-    track.src = captions.href;
-    track.srclang = document.documentElement.lang || 'en';
-    track.default = true;
+    const track = createElement('track', {
+      kind: 'captions', src: captions.href, srclang: document.documentElement.lang || 'en', default: '',
+    });
     video.append(track);
-    // default is ignored when the track is added after src
     track.addEventListener('load', () => { track.track.mode = 'showing'; });
   }
 
-  // autoplay runs 15s; WCAG 2.2.2 needs a way to stop it
-  const skip = document.createElement('button');
-  skip.type = 'button';
-  skip.className = 'hero-video-skip';
-  skip.textContent = 'Skip video';
+  const skip = createElement('button', { type: 'button', class: 'hero-video-skip' }, 'Skip video');
   fetchLocalPlaceholders().then((ph) => { if (ph.skipVideo) skip.textContent = ph.skipVideo; });
 
-  const layer = document.createElement('div');
-  layer.className = 'hero-video';
-  layer.append(video, skip);
+  const layer = createElement('div', { class: 'hero-video' }, [video, skip]);
 
-  const play = document.createElement('button');
-  play.type = 'button';
-  play.className = 'button secondary hero-video-play';
-  play.innerHTML = PLAY_ICON;
-  play.append(source.textContent.trim());
+  const play = createElement('button', { type: 'button', class: 'button secondary hero-video-play' }, source.textContent.trim());
+  play.insertAdjacentHTML('afterbegin', PLAY_ICON);
 
   const sourceP = source.closest('p');
   const ctas = [...block.querySelectorAll('p.button-wrapper')].find((p) => p !== sourceP);
