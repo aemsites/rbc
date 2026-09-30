@@ -1,0 +1,130 @@
+.glossary .glossary-nav {
+  margin-bottom: var(--space-3xl);
+  padding-block: 15px;
+  background-color: var(--rbc-grey-100);
+}
+
+.glossary .glossary-alphabet {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.glossary .glossary-letter {
+  min-width: 47px;
+  margin: 0;
+  border: 1px solid var(--rbc-blue);
+  border-radius: 3px;
+  padding: var(--space-2xs) 15px;
+  background: transparent;
+  color: var(--rbc-blue);
+  font-size: var(--body-font-size-s);
+  font-weight: 400;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.glossary .glossary-letter:disabled {
+  background-color: var(--rbc-grey-100);
+  color: var(--rbc-grey-600);
+  box-shadow: inset 0 0 0 1px var(--rbc-grey-600);
+  cursor: default;
+}
+
+.glossary .glossary-group {
+  margin-bottom: var(--space-xl);
+  border-bottom: 1px solid var(--rbc-grey-200);
+  padding-bottom: var(--space-xl);
+  scroll-margin-top: max(275px, calc(var(--glossary-sticky-top, 0px) + var(--glossary-nav-height, 0px) + var(--space-2xl)));
+  overflow-wrap: anywhere;
+}
+
+@media (width <= 768px) {
+  .glossary .glossary-nav {
+    box-shadow: 0 0 0 100vmax var(--rbc-grey-100);
+    clip-path: inset(0 -100vmax);
+  }
+}
+
+@media (width >= 769px) {
+  .glossary .glossary-nav {
+    position: sticky;
+    top: var(--glossary-sticky-top, 0);
+    z-index: 30;
+  }
+
+  .glossary .glossary-nav::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background-color: var(--rbc-grey-100);
+
+    /* Extend the background without adding scrollable width. */
+    box-shadow: 0 0 0 100vmax var(--rbc-grey-100);
+    clip-path: inset(0 -100vmax);
+    pointer-events: none;
+  }
+
+  .glossary .glossary-nav.glossary-stuck {
+    /* Shadow the clipped full-bleed background, not just the content width. */
+    filter: drop-shadow(0 3px 3px rgb(0 0 0 / 15%));
+  }
+
+  .glossary .glossary-letter {
+    font-size: var(--body-font-size-m);
+  }
+}
+
+.glossary .glossary-letter:focus-visible,
+.glossary .glossary-group:focus-visible {
+  outline: 2px solid var(--rbc-blue);
+  outline-offset: 4px;
+}
+
+.glossary .glossary-letter[aria-current],
+.glossary .glossary-letter:hover:not(:disabled) {
+  background-color: var(--rbc-blue);
+  color: var(--rbc-white);
+  box-shadow: inset 0 0 0 1px var(--rbc-blue);
+}
+
+.glossary .glossary-group h2 {
+  margin: 0 0 var(--space-s);
+}
+
+.glossary .glossary-definitions {
+  min-width: 0;
+}
+
+.glossary .glossary-definitions > :first-child {
+  margin-top: 0;
+}
+
+.glossary .glossary-definitions > :last-child {
+  margin-bottom: 0;
+}
+
+.glossary .glossary-definitions p {
+  margin: 0 0 var(--space-s);
+}
+
+.glossary .glossary-definitions strong {
+  font-weight: 500;
+}
+
+@media (width >= 768px) {
+  .glossary .glossary-group {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: var(--space-xl);
+  }
+
+  .glossary .glossary-group h2 {
+    margin-bottom: 0;
+  }
+}
