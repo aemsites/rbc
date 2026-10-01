@@ -13,7 +13,7 @@ const NAMES = {
   '®/™': 'trademark',
 };
 
-const LABELS = '.disclaimers > div > div:first-child, .disclaimers li[data-label]';
+const LABELS = '.disclaimers > div > div:first-child:not(:only-child), .disclaimers li[data-label]';
 
 export const normalizeLabel = (text) => text.replace(/\s+/g, '').replace(/\)$/, '');
 

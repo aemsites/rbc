@@ -542,6 +542,28 @@ main > .section.shadow {
   }
 }
 
+/* callout: a white card with a blue top rule, e.g. an article TLDR or a single CTA */
+main > .section.callout {
+  max-width: calc(var(--content-width) - 2 * var(--space-xl));
+  margin-inline: var(--space-l);
+  padding-block: var(--space-l);
+  background: var(--rbc-white);
+  box-shadow: inset 0 4px 0 0 var(--rbc-blue), 0 2px 24px 0 rgb(0 0 0 / 7%);
+
+  @media (width >= 768px) {
+    margin-inline: auto;
+    padding-block: var(--space-xl);
+  }
+}
+
+main > .section.callout .default-content-wrapper > :first-child {
+  margin-top: 0;
+}
+
+main > .section.callout .default-content-wrapper > :last-child {
+  margin-bottom: 0;
+}
+
 main > .section.contained {
   max-width: var(--content-width);
   margin-inline: var(--space-l);

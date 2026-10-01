@@ -1,0 +1,381 @@
+/* shared by the article and newcomer-article templates */
+.article main {
+  --article-band: #fafafa;
+  --article-muted: #6f6f6f;
+  --article-toc-rule: #b3b3b3;
+  --rail-width: 300px;
+  --rail-gap: var(--space-4xl);
+}
+
+/* articles read left to right, unlike the centred landing pages */
+body.article main > .section > .default-content-wrapper :is(p, h2, h3, h4, h5, h6) {
+  margin-bottom: 0.25em;
+  text-align: left;
+}
+
+body.article main > .section > .default-content-wrapper p.button-wrapper {
+  justify-content: flex-start;
+}
+
+body.article main > .section.center > .default-content-wrapper :is(p, h2, h3, h4, h5, h6) {
+  text-align: center;
+}
+
+body.article main > .section.center > .default-content-wrapper p.button-wrapper {
+  justify-content: center;
+}
+
+.article main > .section.article-body li::marker {
+  color: var(--rbc-blue);
+}
+
+.article main > .section.article-body h2 {
+  margin-top: var(--space-2xl);
+}
+
+.article main > .section.article-body .default-content-wrapper > :first-child {
+  margin-top: 0;
+}
+
+/* without a contents rail the article is one narrower column */
+.article main.article-single > .section > div {
+  max-width: var(--width-m);
+}
+
+.article main > .section.article-body.colored-background {
+  padding: var(--space-xl) var(--space-l);
+}
+
+.article main > .section.article-body.colored-background > div {
+  padding: 0;
+}
+
+/* boxed sections (callouts, tinted panels) stay inside the reading column */
+.article main.article-single > .section.article-body:is(.callout, .colored-background) {
+  max-width: var(--width-m);
+  margin-inline: var(--space-l);
+
+  @media (width >= 768px) {
+    margin-inline: auto;
+  }
+}
+
+/* header */
+.article main > .section.article-header {
+  margin-bottom: var(--space-xl);
+}
+
+/* newcomer titles sit in a box, clear of the nav */
+.article.newcomer-article main > .section.article-header {
+  padding-top: var(--space-xl);
+}
+
+.article .article-header h1 {
+  margin: var(--space-s) 0;
+}
+
+.article .article-category,
+.article .article-topic {
+  display: inline-block;
+  border: 1px solid var(--rbc-blue);
+  border-radius: 30px;
+  padding: 3px 15px;
+  font-size: var(--body-font-size-xs);
+  line-height: 16px;
+  text-transform: uppercase;
+}
+
+.article .article-category:hover,
+.article .article-topic:hover {
+  background-color: var(--rbc-blue);
+  color: var(--rbc-white);
+  text-decoration: none;
+}
+
+body.article main > .section > .default-content-wrapper p.article-byline {
+  margin: 0;
+  font-size: var(--body-font-size-xs);
+}
+
+body.article main > .section > .default-content-wrapper p.article-image {
+  margin: var(--space-xl) 0 0;
+}
+
+.article .article-image img {
+  display: block;
+  width: 100%;
+  max-width: 670px;
+}
+
+.article .article-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-s);
+}
+
+.article .article-meta .article-date {
+  margin: var(--space-l) 0 0;
+  color: var(--article-muted);
+  font-size: var(--body-font-size-xs);
+  letter-spacing: 2px;
+}
+
+/* the grey band runs behind the title and stops partway down the image */
+.article:not(.newcomer-article) main > .section.article-header {
+  padding-top: var(--space-l);
+  background: linear-gradient(var(--article-band) calc(100% - 7rem), transparent 0);
+}
+
+.article:not(.newcomer-article) main > .section.article-header:not(:has(.article-image)) {
+  padding-bottom: var(--space-l);
+  background: var(--article-band);
+}
+
+.article:not(.newcomer-article) .article-header h1 {
+  color: var(--text-color);
+}
+
+/* share links */
+.article .article-share {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2xs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.article .article-share li {
+  margin: 0;
+}
+
+.article .article-share :is(a, button) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3xs);
+  border: 0;
+  padding: 0 6px;
+  background: none;
+  color: var(--link-color);
+  font-size: var(--body-font-size-xs);
+  line-height: 1.5;
+  cursor: pointer;
+}
+
+.article .article-share :is(a, button)::before {
+  content: "";
+  width: 18px;
+  height: 18px;
+  background-color: currentcolor;
+  mask: var(--share-icon) center / contain no-repeat;
+}
+
+.article .article-share-x { --share-icon: url("/icons/share-x.svg"); }
+.article .article-share-facebook { --share-icon: url("/icons/share-facebook.svg"); }
+.article .article-share-linkedin { --share-icon: url("/icons/share-linkedin.svg"); }
+.article .article-share-email { --share-icon: url("/icons/share-email.svg"); }
+.article .article-share-copy { --share-icon: url("/icons/share-copy.svg"); }
+
+.article .article-share-status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.article .article-meta .article-share {
+  margin-top: var(--space-l);
+}
+
+/* on this page */
+.article main > .section.article-rail {
+  margin-block: 0 var(--space-xl);
+}
+
+.article .article-rail .article-share {
+  margin-bottom: var(--space-l);
+}
+
+.article .article-toc summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid var(--border-color);
+  padding: var(--space-xs) var(--space-s);
+  cursor: pointer;
+  list-style: none;
+}
+
+.article .article-toc summary::-webkit-details-marker {
+  display: none;
+}
+
+.article .article-toc summary::after {
+  content: "";
+  width: 20px;
+  height: 20px;
+  background-color: var(--link-color);
+  mask: url("/icons/chevron-down.svg") center / contain no-repeat;
+  transition: transform 0.2s;
+}
+
+.article .article-toc details[open] summary::after {
+  transform: rotate(180deg);
+}
+
+.article .article-toc ul {
+  margin: 0;
+  border-left: 1px solid var(--article-toc-rule);
+  padding: 0;
+  list-style: none;
+}
+
+.article .article-toc li {
+  margin: 0 0 10px -1px;
+  border-left: 2px solid transparent;
+}
+
+.article .article-toc li:has(> a[aria-current]) {
+  border-left-color: var(--rbc-blue);
+}
+
+.article .article-toc a {
+  display: block;
+  padding: var(--space-2xs) var(--space-s);
+  color: #444;
+  font-size: var(--body-font-size-m);
+  line-height: 1.3;
+}
+
+.article .article-toc a[aria-current] {
+  color: var(--rbc-blue);
+}
+
+.article .article-toc details[open] ul {
+  margin-top: var(--space-s);
+}
+
+/* share and topics after the article */
+.article .article-end p {
+  margin: var(--space-xl) 0 var(--space-xs);
+}
+
+.article .article-topics {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-xs);
+  margin-top: var(--space-xl);
+}
+
+.article .article-topics p {
+  margin: 0;
+}
+
+.article main > .section.article-body .default-content-wrapper li + li {
+  margin-top: var(--space-2xs);
+}
+
+@media (width >= 900px) {
+  /* lines up with the header's content box: --content-width wide, --space-xl gutters */
+  .article main.article-has-rail {
+    display: grid;
+    grid-template-columns:
+      minmax(var(--space-xl), 1fr)
+      minmax(0, calc(var(--content-width) - var(--rail-width)))
+      var(--rail-width)
+      minmax(var(--space-xl), 1fr);
+  }
+
+  .article main.article-has-rail > .section {
+    grid-column: 1 / -1;
+  }
+
+  /* grid items don't collapse margins, so space sections from one side only */
+  .article main.article-has-rail > .section.article-body {
+    grid-column: 2;
+    margin: 0 var(--rail-gap) var(--space-2xl) 0;
+  }
+
+  .article main.article-has-rail > .section.article-body > div {
+    max-width: none;
+    padding: 0;
+  }
+
+  .article main > .section.article-rail {
+    grid-column: 3;
+    grid-row: var(--rail-row) / span var(--rail-span);
+    margin-block: 0;
+  }
+
+  .article main.article-has-rail > .section.article-rail > div {
+    position: sticky;
+    top: calc(var(--nav-height) + var(--space-l));
+    padding: 0;
+  }
+
+  .article main.article-has-rail > .section.article-body.callout > div {
+    padding: 0 var(--space-l);
+  }
+
+  .article .article-toc summary {
+    display: none;
+  }
+
+  .article .article-toc details[open] ul {
+    margin-top: 0;
+  }
+}
+
+/* newcomer articles: the title sits in a bordered box beside its image */
+.newcomer-article .article-header .default-content-wrapper {
+  display: flex;
+  flex-direction: column;
+  max-width: none;
+  margin-inline: var(--space-l);
+  border: 1px solid var(--border-color);
+  padding: 0;
+}
+
+.newcomer-article .article-header .article-header-text {
+  padding: var(--space-xl) var(--space-l);
+}
+
+body.article.newcomer-article main > .section > .default-content-wrapper p.article-image {
+  order: -1;
+  margin: 0;
+}
+
+.newcomer-article .article-image img {
+  max-width: none;
+  height: 100%;
+  object-fit: cover;
+}
+
+.newcomer-article .article-meta .article-date {
+  color: var(--rbc-grey-600);
+  font-size: var(--body-font-size-s);
+  letter-spacing: normal;
+}
+
+@media (width >= 768px) {
+  .newcomer-article .article-header .default-content-wrapper {
+    display: grid;
+    grid-template-columns: 1fr minmax(0, 34%);
+    margin-inline: max(var(--space-xl), (100% - var(--content-width)) / 2);
+  }
+
+  .newcomer-article .article-header .article-header-text {
+    align-self: center;
+    padding: var(--space-3xl) var(--space-3xl);
+  }
+
+  body.article.newcomer-article main > .section > .default-content-wrapper p.article-image {
+    order: 0;
+  }
+}
