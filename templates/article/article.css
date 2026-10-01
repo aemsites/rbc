@@ -3,8 +3,29 @@
   --article-band: #fafafa;
   --article-muted: #6f6f6f;
   --article-toc-rule: #b3b3b3;
-  --rail-width: 300px;
+
+  /* reading widths match production: 640px beside the rail, 690px on its own */
+  --article-width: 640px;
+  --article-width-single: 690px;
+  --rail-width: 340px;
   --rail-gap: var(--space-4xl);
+
+  /* the body column sits slightly in from the title and date */
+  --article-inset: 15px;
+  --article-rule: #73b0e3;
+  --article-stripe: #e3f4ff;
+
+  /* production renders type with greyscale smoothing, which reads lighter */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* newcomer articles read wider, with a narrower rail */
+.article.newcomer-article main {
+  --article-width: 840px;
+  --rail-width: 300px;
+  --rail-gap: var(--space-xl);
+  --article-inset: 0px;
 }
 
 /* articles read left to right, unlike the centred landing pages */
@@ -29,6 +50,11 @@ body.article main > .section.center > .default-content-wrapper p.button-wrapper 
   color: var(--rbc-blue);
 }
 
+/* formula lines ("Interest = Principal * Rate * Time"), flagged by article.js */
+body.article main > .section > .default-content-wrapper p.article-formula {
+  text-align: center;
+}
+
 .article main > .section.article-body h2 {
   margin-top: var(--space-2xl);
 }
@@ -39,7 +65,7 @@ body.article main > .section.center > .default-content-wrapper p.button-wrapper 
 
 /* without a contents rail the article is one narrower column */
 .article main.article-single > .section > div {
-  max-width: var(--width-m);
+  max-width: var(--article-width-single);
 }
 
 .article main > .section.article-body.colored-background {
@@ -52,12 +78,54 @@ body.article main > .section.center > .default-content-wrapper p.button-wrapper 
 
 /* boxed sections (callouts, tinted panels) stay inside the reading column */
 .article main.article-single > .section.article-body:is(.callout, .colored-background) {
-  max-width: var(--width-m);
+  box-sizing: border-box;
+  max-width: var(--article-width-single);
   margin-inline: var(--space-l);
 
   @media (width >= 768px) {
     margin-inline: auto;
   }
+}
+
+/* data tables: compact, light-blue rules; like production they fill about three-quarters
+   of the column, or more if the content needs it */
+.article main > .section.article-body .table {
+  width: fit-content;
+  min-width: 75%;
+  max-width: 100%;
+  margin: var(--space-s) 0 var(--space-xl);
+}
+
+.article main > .section.article-body .table table {
+  width: 100%;
+  border-bottom: 2px solid var(--article-rule);
+  font-size: var(--body-font-size-xs);
+  line-height: 16px;
+}
+
+.article main > .section.article-body .table table thead tr {
+  border-top: 0;
+  border-bottom: 2px solid var(--article-rule);
+}
+
+.article main > .section.article-body .table table tbody tr {
+  border-bottom: 0;
+}
+
+.article main > .section.article-body .table table :is(th, td) {
+  padding: 15px;
+}
+
+.article main > .section.article-body .table table th {
+  font-weight: 500;
+}
+
+.article main > .section.article-body .table.striped table tbody tr:nth-child(odd) {
+  background-color: transparent;
+}
+
+.article main > .section.article-body .table.striped table tbody tr:nth-child(even) {
+  background-color: var(--article-stripe);
 }
 
 /* header */
@@ -277,6 +345,12 @@ body.article main > .section > .default-content-wrapper p.article-image {
   margin: 0;
 }
 
+/* inline links in the copy are underlined and keep the text's weight */
+.article main > .section.article-body:not(.article-end) a:any-link:not(.button) {
+  font-weight: inherit;
+  text-decoration: underline;
+}
+
 .article main > .section.article-body .default-content-wrapper li + li {
   margin-top: var(--space-2xs);
 }
@@ -298,8 +372,10 @@ body.article main > .section > .default-content-wrapper p.article-image {
 
   /* grid items don't collapse margins, so space sections from one side only */
   .article main.article-has-rail > .section.article-body {
+    box-sizing: border-box;
     grid-column: 2;
-    margin: 0 var(--rail-gap) var(--space-2xl) 0;
+    max-width: var(--article-width);
+    margin: 0 var(--rail-gap) var(--space-2xl) var(--article-inset);
   }
 
   .article main.article-has-rail > .section.article-body > div {

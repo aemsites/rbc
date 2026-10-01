@@ -149,6 +149,18 @@ function decorateHeader(header, sections, ph, options) {
   return meta;
 }
 
+// a paragraph that is wholly bold and states "x = y" is a formula, which the articles centre
+function markFormulas(sections) {
+  sections.forEach((section) => {
+    section.querySelectorAll(':scope > .default-content-wrapper > p').forEach((p) => {
+      const strong = p.firstElementChild;
+      if (p.children.length !== 1 || strong.tagName !== 'STRONG') return;
+      const text = p.textContent.trim();
+      if (text === strong.textContent.trim() && / = /.test(text)) p.classList.add('article-formula');
+    });
+  });
+}
+
 function buildEnd(ph) {
   const children = [
     createElement('p', { class: 'article-end-title' }, createElement('strong', {}, ph.shareThisArticle || 'Share This Article')),
@@ -183,6 +195,7 @@ export async function decorateArticle(main, options = {}) {
 
   const meta = decorateHeader(header, sections, ph, opts);
   sections.forEach((s) => s.classList.add('article-body'));
+  markFormulas(sections);
 
   if (opts.endShare) {
     const end = buildEnd(ph);
