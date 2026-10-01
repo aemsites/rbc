@@ -118,19 +118,37 @@ function isOutbound(url) {
   }
 }
 
+// Authored block name (set on every block by decorateBlock() in aem.js), or
+// "default-content-<n>" (1-based section position) for clicks outside any block.
+function clickSection(el) {
+  const block = el.closest('[data-block-name]');
+  if (block) return block.dataset.blockName;
+  const section = el.closest('.section');
+  const sections = [...document.querySelectorAll('main .section')];
+  const index = section ? sections.indexOf(section) + 1 : 0;
+  return index ? `default-content-${index}` : 'default-content';
+}
+
+function trackClick(event) {
+  const clickable = event.target.closest?.('a[href], button[href]');
+  if (!clickable) return;
+  const url = clickable.getAttribute('href');
+  if (!url) return;
+  window.dataLayer.push({
+    event: 'element_click',
+    click_url: url,
+    click_text: (clickable.textContent || '').trim(),
+    click_section: clickSection(clickable),
+    outbound: isOutbound(url),
+  });
+}
+
 function initClickTracking() {
-  document.addEventListener('click', (event) => {
-    const clickable = event.target.closest?.('a[href], button[href]');
-    if (!clickable) return;
-    const url = clickable.getAttribute('href');
-    if (!url) return;
-    window.dataLayer.push({
-      event: 'element_click',
-      click_url: url,
-      click_text: (clickable.textContent || '').trim(),
-      click_section: clickable.tagName.toLowerCase(),
-      outbound: isOutbound(url),
-    });
+  document.addEventListener('click', trackClick, true);
+  // auxclick covers the middle-mouse-button "open in new tab" gesture, which
+  // never fires a regular click event. Ctrl/Cmd+click still fires click as usual.
+  document.addEventListener('auxclick', (event) => {
+    if (event.button === 1) trackClick(event);
   }, true);
 }
 
