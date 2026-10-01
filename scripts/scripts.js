@@ -92,7 +92,10 @@ function buildAutoBlocks(main) {
           try {
             const { pathname } = new URL(fragment.href);
             const frag = await loadFragment(pathname);
-            fragment.parentElement.replaceWith(...frag.children);
+            // an inline link (e.g. in a column) takes the fragment's content, not its sections
+            const content = [...frag.children].flatMap((section) => [...section.children]);
+            const host = fragment.parentElement.tagName === 'P' ? fragment.parentElement : fragment;
+            host.replaceWith(...content);
           } catch (error) {
             // eslint-disable-next-line no-console
             console.error('Fragment loading failed', error);

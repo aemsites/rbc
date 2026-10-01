@@ -1,4 +1,5 @@
-import { getMetadata } from '../scripts/aem.js';
+import { createOptimizedPicture, getMetadata } from '../scripts/aem.js';
+import { expandRefs } from './footnotes.js';
 
 const INDEX = '/products/query-index.json';
 // one index holds every language; records live under the language root, e.g. /fr/products/
@@ -65,6 +66,26 @@ export const keyList = (cell) => (cell?.textContent || '').split(',').map((k) =>
 // offer footnotes a page lacks link to the offer's page, or the product page if it's off-site
 export const offerLegalPage = (product) => (product.offerDetailsUrl?.startsWith('/')
   ? product.offerDetailsUrl : product.productPage);
+
+function longDate(iso) {
+  return new Intl.DateTimeFormat(document.documentElement.lang || 'en-CA', { dateStyle: 'long' })
+    .format(new Date(`${iso}T12:00:00`));
+}
+
+// eyebrow and body cells of a product's current offer, as the rail and the offer block show it
+export function offerCells(product, ph) {
+  if (!product.offerHeadline) return null;
+  const image = product.offerImage
+    ? createOptimizedPicture(product.offerImage, product.offerImageAlt, false, [{ width: '750' }]).outerHTML : '';
+  const ends = product.offerEndDate ? `${ph.offerEnds || 'Offer ends'} ${longDate(product.offerEndDate)}. ` : '';
+  const offerPage = offerLegalPage(product);
+  // rbcroyalbank.com doesn't link off-site offers (e.g. the investments HISA page)
+  const details = offerPage === product.offerDetailsUrl ? `<p class="link-wrapper"><a href="${product.offerDetailsUrl}" target="_blank" rel="noopener">${ph.viewOfferDetails || 'View Offer Details'}</a></p>` : '';
+  return [
+    `<p>${product.offerEyebrow || ph.offer || 'Offer'}</p>`,
+    `${image}<p>${expandRefs(product.offerHeadline, offerPage)}</p><p>${ends}${product.offerConditions || ''}</p>${details}`,
+  ];
+}
 
 // a dollar amount in either order: "$4" (en) or "4 $" (fr)
 export const isPrice = (value = '') => /^\$\s?\d|\d\s?\$/.test(value);

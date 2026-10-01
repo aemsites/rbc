@@ -1,15 +1,10 @@
 import { createOptimizedPicture } from '../../scripts/aem.js';
-import { getProduct, offerLegalPage } from '../../utils/products.js';
+import { getProduct, offerCells } from '../../utils/products.js';
 import fetchLocalPlaceholders from '../../utils/placeholders.js';
 import { rateSpan } from '../../utils/rates.js';
 import {
   footnoteSup, expandRefs, resolveRefLinks, normalizeLabel,
 } from '../../utils/footnotes.js';
-
-function longDate(iso) {
-  return new Intl.DateTimeFormat(document.documentElement.lang || 'en-CA', { dateStyle: 'long' })
-    .format(new Date(`${iso}T12:00:00`));
-}
 
 const picture = (src, alt) => createOptimizedPicture(src, alt, false, [{ width: '750' }]).outerHTML;
 const cell = (html) => `<div>${html}</div>`;
@@ -28,14 +23,8 @@ function railRows(product, ph) {
   if (product.cardImage) {
     rows.push(row(picture(product.cardImage, product.cardImageAlt), `<p>${product.categoryLabel}</p>`));
   }
-  if (product.offerHeadline) {
-    const image = product.offerImage ? picture(product.offerImage, product.offerImageAlt) : '';
-    const ends = product.offerEndDate ? `${ph.offerEnds || 'Offer ends'} ${longDate(product.offerEndDate)}. ` : '';
-    const offerPage = offerLegalPage(product);
-    // rbcroyalbank.com rails don't link off-site offers (e.g. the investments HISA page)
-    const details = offerPage === product.offerDetailsUrl ? `<p class="link-wrapper"><a href="${product.offerDetailsUrl}" target="_blank" rel="noopener">${ph.viewOfferDetails || 'View Offer Details'}</a></p>` : '';
-    rows.push(row(`<p>${product.offerEyebrow || ph.offer || 'Offer'}</p>`, `${image}<p>${expandRefs(product.offerHeadline, offerPage)}</p><p>${ends}${product.offerConditions || ''}</p>${details}`));
-  }
+  const offer = offerCells(product, ph);
+  if (offer) rows.push(row(...offer));
   if (product.rateFallbackValue) {
     const value = product.rateRateCode
       ? rateSpan(product.rateRateCode, product.rateFallbackValue) : product.rateFallbackValue;
