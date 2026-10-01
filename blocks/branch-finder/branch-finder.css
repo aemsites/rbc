@@ -1,7 +1,19 @@
 /* stylelint-disable no-descending-specificity */
+main > .section.branch-finder-container {
+  margin-block: 0;
+  padding-block: var(--space-2xl);
+  background: url('../../img/map-bg.jpg') center / cover no-repeat;
+}
+
 .branch-finder-container .branch-finder-wrapper {
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
+}
+
+@media (width >= 768px) {
+  .branch-finder-container .branch-finder-wrapper {
+    justify-content: flex-end;
+  }
 }
 
 .branch-finder {
