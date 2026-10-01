@@ -1,6 +1,7 @@
 // Inline clean-up shared by every rule: links, buttons, footnotes, icons, images.
 // DOM APIs only, so it runs in the browser and in jsdom.
 import ICONS from './icons.js';
+import ICON_ALIASES from './icon-aliases.js';
 import PAGES from './pages.js';
 
 export const LIVE = 'https://www.rbcroyalbank.com';
@@ -38,7 +39,7 @@ export function rewriteHref(href, base) {
   return page ? `${page.path}${url.hash}` : url.href;
 }
 
-export const iconName = (src) => ICONS[absolute(src)] || null;
+export const iconName = (src) => ICONS[absolute(src)] || ICON_ALIASES[absolute(src)] || null;
 
 export function bgImage(el) {
   const holder = [el, ...el.querySelectorAll('[style]')]

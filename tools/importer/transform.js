@@ -362,7 +362,7 @@ function banner(section, ctx) {
   clone.querySelectorAll('.bnr-mobile-img, .banner-img-mobile, .banner-img').forEach((n) => n.remove());
   const body = [...flat(content(clone, ctx)), ...videoLinks(section)];
   const dark = section.querySelector('.text-white, .white-text') && !section.matches('.white-gradient');
-  if (dark && image) return block(doc, blockName('Hero', ['background']), [[image, body]]);
+  if (image) return block(doc, blockName('Hero', dark ? ['background'] : ['background', 'light']), [[image, body]]);
   return block(doc, 'Hero', [[[image, ...body].filter(Boolean)]]);
 }
 
