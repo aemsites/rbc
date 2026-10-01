@@ -162,6 +162,15 @@ async function importPage(page) {
     main, meta, modals, fragments, report,
   } = transform(document, { url: page.url, options: { intro: option('intro') || 'hero' } });
   const { merged, added } = mergeMetadata(existing ? metadataRows(existing) : new Map(), meta);
+  // the breadcrumb falls back to the h1, so a matching breadcrumb-title is redundant
+  const h1 = document.querySelector('h1')?.textContent.replace(/\s+/g, ' ').trim().toLowerCase();
+  const crumbCell = merged.get('breadcrumb-title');
+  const crumbTitle = crumbCell && new JSDOM(crumbCell).window.document.body.textContent
+    .replace(/\s+/g, ' ').trim().toLowerCase();
+  if (h1 && crumbTitle === h1) {
+    merged.delete('breadcrumb-title');
+    added.push('breadcrumb-title removed (= h1)');
+  }
 
   let body;
   if (flag('metadata-only')) {

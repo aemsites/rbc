@@ -1,12 +1,19 @@
 // Page metadata from the live <head>, following the pilot conventions:
 // title, description, keywords, image, breadcrumb-title, json-ld, hreflang-*, lang.
 import PAGES from './pages.js';
+import daPath from './paths.js';
 import { LIVE, absolute, img } from './inline.js';
 
 const HREFLANG = {
   EN: 'hreflang-en-ca', FR: 'hreflang-fr-ca', SC: 'hreflang-zh-hans', TC: 'hreflang-zh-hant',
 };
 const LANG = { FR: 'fr-CA' };
+// sheet aliases that 404 on live; the youth hub's live canonical points at one
+const LIVE_404 = new Set([
+  '/bank-accounts/youth-student-banking/youth-student-banking', '/bank-accounts/savings-accounts/nomi-find-and-save',
+]);
+// pages whose live canonical is a known mistake (just-arrived points at /new-to-canada)
+const WRONG_CANONICAL = new Set(['/new-to-canada/just-arrived']);
 
 const pageFor = (url) => {
   const { pathname } = new URL(url);
@@ -41,6 +48,15 @@ export default function pageMetadata(doc, url, report) {
   const ogImage = content('meta[property="og:image"]');
   if (ogImage) meta.image = img(doc, ogImage);
   if (content('meta[name="keywords"]')) meta.keywords = content('meta[name="keywords"]');
+  const robots = content('meta[name="robots"]');
+  if (/noindex|nofollow/i.test(robots || '')) meta.robots = robots.replace(/\s+/g, '');
+  const canonical = doc.head.querySelector('link[rel="canonical"]')?.getAttribute('href');
+  if (canonical && !WRONG_CANONICAL.has(daPath(url))) {
+    const target = daPath(absolute(canonical));
+    // live canonicals mostly point at the page itself; keep only ones naming another in-scope page
+    if (target !== daPath(url) && !LIVE_404.has(target) && PAGES.some((p) => p.path === target)) meta.canonical = `${LIVE}${target}`;
+    else if (target !== daPath(url)) report?.push(`canonical ignored: ${canonical}`);
+  }
 
   const page = pageFor(url);
   PAGES.filter((p) => page && p.group === page.group && p.lang !== page.lang && !p.outOfScope)
