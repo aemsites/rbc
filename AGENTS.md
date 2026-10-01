@@ -22,3 +22,9 @@ Edge Delivery Services. Read a block first. Omissions are in the repo or known.
 - A PR without a `{branch}--{repo}--{owner}.aem.page/{path}` link is rejected.
 - All committed files are served. Use `.hlxignore`.
 - Skills: `/plugin marketplace add adobe/skills`, then `aem-edge-delivery-services` (24 skills, incl. `docs-search`).
+
+## DataLayer (`scripts/gtm.js`, `scripts/consent-check.js`)
+- Any edit to dataLayer-related code (`gtm.js`, `consent-check.js`, or anything feeding
+  `window.dataLayer`) must bump `RELEASE_DATE` in `scripts/gtm.js` to the current date
+  (`YYYY-MM-DD`). This is a manually-maintained field, not derived — update it yourself,
+  don't skip it.

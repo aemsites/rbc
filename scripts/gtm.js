@@ -12,6 +12,11 @@ const PROD_HOSTS = ['main--rbc--aemsites.aem.live', 'www.rbcroyalbank.com'];
 const CHANNEL = 'public'; // hardcoded per spec, same value for every page
 const CMS_TYPE = 'adobe'; // hardcoded per spec, EDS has no other cms_type value
 
+// Manually maintained: update this to the current date (YYYY-MM-DD) any time this file or any
+// other dataLayer-related code is changed. See AGENTS.md ("DataLayer") for why this isn't
+// automated.
+const RELEASE_DATE = '2026-10-01';
+
 const defined = (obj) => Object.fromEntries(
   Object.entries(obj).filter(([, value]) => value !== undefined && value !== null && value !== ''),
 );
@@ -27,9 +32,6 @@ function environment() {
 // lob / page-type / content-group / business-line are page metadata that must be authored
 // per-page or bulk-applied via the metadata sheet (not yet populated - see PR description for
 // the proposed column additions).
-// TODO(open question): release_date is intentionally omitted for now - its purpose and
-// ownership (content publish date vs. campaign launch date, authored vs. derived) is still
-// pending a final decision - see docs/gtm-datalayer-open-questions.md.
 function initialPushData() {
   return defined({
     lob: getMetadata('lob'),
@@ -40,6 +42,7 @@ function initialPushData() {
     page_language: (document.documentElement.lang || 'en').split('-')[0],
     business_line: getMetadata('business-line') || 'personal',
     env: environment(),
+    release_date: RELEASE_DATE,
   });
 }
 
