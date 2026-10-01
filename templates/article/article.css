@@ -46,12 +46,17 @@ body.article main > .section.center > .default-content-wrapper p.button-wrapper 
   justify-content: center;
 }
 
+.article main > .section.article-body strong {
+  font-weight: 500;
+}
+
 .article main > .section.article-body li::marker {
   color: var(--rbc-blue);
 }
 
 /* formula lines ("Interest = Principal * Rate * Time"), flagged by article.js */
-body.article main > .section > .default-content-wrapper p.article-formula {
+body.article main > .section > .default-content-wrapper p.article-formula,
+.article main > .section.article-body .accordion p.article-formula {
   text-align: center;
 }
 
@@ -96,35 +101,48 @@ body.article main > .section > .default-content-wrapper p.article-formula {
   margin: var(--space-s) 0 var(--space-xl);
 }
 
-.article main > .section.article-body .table table {
+.article main > .section.article-body :is(.table, .accordion-item-body) table {
   width: 100%;
   border-bottom: 2px solid var(--article-rule);
   font-size: var(--body-font-size-xs);
   line-height: 16px;
 }
 
-.article main > .section.article-body .table table thead tr {
+/* FAQ answer tables read at body size, like the copy around them */
+.article main > .section.article-body .accordion-item-body table {
+  background-color: var(--rbc-white);
+  font-size: var(--body-font-size-m);
+  line-height: var(--body-line-height);
+}
+
+.article main > .section.article-body .accordion-item-body .table-swipe {
+  margin: var(--space-l) 0 var(--space-s);
+}
+
+.article main > .section.article-body :is(.table, .accordion-item-body) table thead tr {
   border-top: 0;
   border-bottom: 2px solid var(--article-rule);
 }
 
-.article main > .section.article-body .table table tbody tr {
+.article main > .section.article-body :is(.table, .accordion-item-body) table tbody tr {
   border-bottom: 0;
 }
 
-.article main > .section.article-body .table table :is(th, td) {
+.article main > .section.article-body :is(.table, .accordion-item-body) table :is(th, td) {
   padding: 15px;
 }
 
-.article main > .section.article-body .table table th {
+.article main > .section.article-body :is(.table, .accordion-item-body) table th {
   font-weight: 500;
+  text-align: left;
 }
 
-.article main > .section.article-body .table.striped table tbody tr:nth-child(odd) {
-  background-color: transparent;
+/* FAQ answer tables are striped like the source */
+.article main > .section.article-body :is(.table.striped, .accordion-item-body) table tbody tr:nth-child(odd) {
+  background-color: var(--rbc-white);
 }
 
-.article main > .section.article-body .table.striped table tbody tr:nth-child(even) {
+.article main > .section.article-body :is(.table.striped, .accordion-item-body) table tbody tr:nth-child(even) {
   background-color: var(--article-stripe);
 }
 

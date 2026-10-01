@@ -52,6 +52,18 @@ export default function parse(element, { document }) {
     return row;
   });
 
-  const block = WebImporter.Blocks.createBlock(document, { name: 'Table (striped)', cells });
+  // Source table types map to block options:
+  //   table-swipe (Tablesaw swipe: one or more columns at a time, arrows + dots) -> swipe
+  //   row-stack (each row becomes a labelled card on mobile)                      -> stack
+  //   is-style-table-striped                                                      -> striped
+  //   col-stack tables already fit on mobile, so they need no option of their own.
+  const source = `${table.className} ${(table.closest('[class*="table-"]') || table).className}`;
+  const options = [];
+  if (/is-style-table-striped/.test(source)) options.push('striped');
+  if (/\btable-swipe\b/.test(source)) options.push('swipe');
+  if (/\brow-stack\b/.test(source)) options.push('stack');
+  const name = options.length ? `Table (${options.join(', ')})` : 'Table';
+
+  const block = WebImporter.Blocks.createBlock(document, { name, cells });
   element.replaceWith(block);
 }

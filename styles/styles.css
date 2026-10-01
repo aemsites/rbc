@@ -717,3 +717,70 @@ body:not(.style-guide) main > .section.strip > .default-content-wrapper p {
   margin: 0;
   font-size: var(--body-font-size-xs);
 }
+
+/* swipe tables (utils/table-swipe.js): as many columns as fit, arrows and dots for the rest */
+.table-swipe {
+  max-width: 100%;
+}
+
+.table-swipe-measure table {
+  width: max-content;
+}
+
+.table-swipe-measure :is(th, td) {
+  white-space: nowrap;
+}
+
+.table-swipe-controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2xs);
+  margin-bottom: var(--space-xs);
+}
+
+.table-swipe-controls[hidden] {
+  display: none;
+}
+
+.table-swipe-dots {
+  display: flex;
+  gap: 4px;
+  margin: 0 var(--space-2xs) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.table-swipe-dot {
+  width: 6px;
+  height: 6px;
+  border: 1px solid var(--link-color);
+  border-radius: 50%;
+}
+
+.table-swipe-dot.active {
+  background-color: var(--link-color);
+}
+
+.table-swipe-controls button {
+  width: 20px;
+  height: 20px;
+  border: 0;
+  padding: 0;
+  background-color: var(--link-color);
+  mask: url("/icons/chevron-down.svg") center / 16px no-repeat;
+  cursor: pointer;
+}
+
+.table-swipe-controls .table-swipe-prev {
+  transform: rotate(90deg);
+}
+
+.table-swipe-controls .table-swipe-next {
+  transform: rotate(-90deg);
+}
+
+.table-swipe-controls button:disabled {
+  background-color: var(--rbc-grey-300);
+  cursor: default;
+}

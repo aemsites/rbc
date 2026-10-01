@@ -347,6 +347,10 @@ export default function transform(hookName, element, payload) {
     // 3. Overlays / widgets that never contain content.
     WebImporter.DOMUtils.remove(element, ['#onetrust-consent-sdk', '.grecaptcha-badge']);
 
+    // 3b. The live page's stacktable script clones row-stack tables into a mobile-only copy
+    // (table.stacktable.small-only); keep only the real table, which the table block stacks.
+    element.querySelectorAll('table.stacktable.small-only').forEach((t) => t.remove());
+
     // 4. ul.numbered-list -> ol (before parsers so block cells get the fix too).
     element.querySelectorAll('ul.numbered-list').forEach((ul) => {
       const ol = doc.createElement('ol');

@@ -152,7 +152,8 @@ function decorateHeader(header, sections, ph, options) {
 // a paragraph that is wholly bold and states "x = y" is a formula, which the articles centre
 function markFormulas(sections) {
   sections.forEach((section) => {
-    section.querySelectorAll(':scope > .default-content-wrapper > p').forEach((p) => {
+    // FAQ answers too: the accordion keeps these paragraphs when it decorates
+    section.querySelectorAll(':scope > .default-content-wrapper > p, .accordion p').forEach((p) => {
       const strong = p.firstElementChild;
       if (p.children.length !== 1 || strong.tagName !== 'STRONG') return;
       const text = p.textContent.trim();

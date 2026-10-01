@@ -34,6 +34,7 @@ export default function parse(element, { document }) {
   if (!panels.length) panels = [...root.querySelectorAll('.wp-block-rbc-rbc-collapsible-panel')];
 
   const cells = [];
+  let swipe = false;
   panels.forEach((panel) => {
     const toggle = panel.querySelector('.collapse-toggle, button, h2, h3, h4');
     const question = clean(toggle && toggle.textContent);
@@ -46,10 +47,12 @@ export default function parse(element, { document }) {
       inner.querySelectorAll('div.flex, div.flex-item').forEach((w) => w.replaceWith(...w.childNodes));
       // nested data tables: keep as plain tables
       inner.querySelectorAll('table').forEach((t) => {
+        // Tablesaw swipe tables page their columns: the block's swipe option does the same
+        if (/\btable-swipe\b|tablesaw-swipe/.test(t.className)) swipe = true;
+        t.querySelectorAll('.mobile-only, .tablesaw-cell-label').forEach((n) => n.remove());
         t.removeAttribute('class');
         t.removeAttribute('id');
         t.querySelectorAll('[class]').forEach((n) => n.removeAttribute('class'));
-        t.querySelectorAll('.mobile-only, .tablesaw-cell-label').forEach((n) => n.remove());
       });
       answer.append(...inner.childNodes);
     }
@@ -61,6 +64,6 @@ export default function parse(element, { document }) {
     return;
   }
 
-  const block = WebImporter.Blocks.createBlock(document, { name: 'Accordion', cells });
+  const block = WebImporter.Blocks.createBlock(document, { name: swipe ? 'Accordion (swipe)' : 'Accordion', cells });
   element.replaceWith(block);
 }
