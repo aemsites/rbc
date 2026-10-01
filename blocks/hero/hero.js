@@ -85,24 +85,48 @@ function introVideo(block) {
   video.play().catch(() => show(false));
 }
 
-export default function decorate(block) {
-  normalizeImage(block);
+function removeEmpty(node, stop) {
+  let current = node;
+  while (current && current !== stop && !current.childElementCount && !current.textContent.trim()) {
+    const parent = current.parentElement;
+    current.remove();
+    current = parent;
+  }
+}
 
-  const backdrop = block.classList.contains('background');
-  if (backdrop && !block.classList.contains('light')) block.closest('.section')?.classList.add('dark-background');
-
+function arrange(block) {
   const row = block.firstElementChild;
-  if (row && row.children.length > 1 && !backdrop) {
-    block.classList.add('hero-split');
-  } else {
-    const [picture] = contentImages(block, 'picture');
-    if (picture) {
-      const wrapper = picture.parentElement;
-      block.prepend(picture);
-      if (!wrapper.childElementCount && !wrapper.textContent.trim()) wrapper.remove();
-    }
+  if (!row) return;
+  const columns = row.children.length > 1;
+  const [picture] = contentImages(block, 'picture');
+  if (picture) {
+    const parent = picture.parentElement;
+    picture.remove();
+    removeEmpty(parent, row);
   }
 
+  const [copy = createElement('div'), ...extra] = [...row.children];
+  extra.forEach((cell) => {
+    copy.append(...cell.childNodes);
+    cell.remove();
+  });
+  copy.classList.add('hero-copy');
+  row.append(copy);
+  if (!picture) return;
+
+  if (block.classList.contains('split') || columns) {
+    row.append(createElement('div', { class: 'hero-media' }, picture));
+    if (!block.classList.contains('split')) block.classList.add('hero-columns');
+    return;
+  }
+  block.prepend(picture);
+  block.classList.add('hero-backdrop');
+  if (!block.classList.contains('light')) block.closest('.section')?.classList.add('dark-background');
+}
+
+export default function decorate(block) {
+  normalizeImage(block);
+  arrange(block);
   introVideo(block);
 
   block.querySelectorAll('p > em:only-child').forEach((em) => {

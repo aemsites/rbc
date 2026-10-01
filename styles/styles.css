@@ -436,6 +436,7 @@ main > .section.colored-background :is(h1, h2, h3, h4, h5, h6):first-child {
   margin-top: 0;
 }
 
+
 main > .section.dark-background {
   --text-color: var(--rbc-white);
   --link-color: var(--rbc-white);
@@ -571,7 +572,7 @@ main > .section.overlap {
   position: relative;
 
   @media (width >= 768px) {
-    margin-top: calc(var(--space-2xl) * -1);
+    margin-top: calc(var(--space-3xl) * -1);
   }
 }
 
