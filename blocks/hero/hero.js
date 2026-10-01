@@ -121,7 +121,6 @@ function arrange(block) {
   }
   block.prepend(picture);
   block.classList.add('hero-backdrop');
-  if (!block.classList.contains('light')) block.closest('.section')?.classList.add('dark-background');
 }
 
 export default function decorate(block) {
