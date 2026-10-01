@@ -85,15 +85,15 @@ main > .section.hero-container:has(
   font-size: var(--body-font-size-s);
 }
 
-.dark-background .hero .hero-note {
+:is(.dark-background .hero, .hero.hero-backdrop:not(.light)) .hero-note {
   color: var(--rbc-grey-200);
 }
 
-.dark-background .hero .hero-eyebrow {
+:is(.dark-background .hero, .hero.hero-backdrop:not(.light)) .hero-eyebrow {
   color: var(--rbc-grey-900);
 }
 
-.dark-background .hero .icon svg * {
+:is(.dark-background .hero, .hero.hero-backdrop:not(.light)) .icon svg * {
   fill: var(--rbc-white);
 }
 
@@ -158,6 +158,25 @@ main > .section.hero-container:has(
 
 .hero.split {
   padding: 0;
+}
+
+.hero.hero-backdrop:not(.light) {
+  --text-color: var(--rbc-white);
+  --link-color: var(--rbc-white);
+  --link-hover-color: var(--rbc-yellow);
+
+  color: var(--text-color);
+}
+
+.hero.hero-backdrop:not(.light) a.button.secondary {
+  box-shadow: inset 0 0 0 1px var(--rbc-white);
+  background-color: transparent;
+  color: var(--rbc-white);
+}
+
+.hero.hero-backdrop:not(.light) a.button.secondary:is(:hover, :focus-visible) {
+  background-color: var(--rbc-white);
+  color: var(--rbc-blue);
 }
 
 .hero.hero-backdrop > div {
@@ -318,14 +337,14 @@ main > .section.hero-container:has(
   height: 20px;
 }
 
-.dark-background .hero .hero-video-play {
+:is(.dark-background .hero, .hero.hero-backdrop:not(.light)) .hero-video-play {
   box-shadow: inset 0 0 0 1px var(--rbc-white);
   background-color: transparent;
   color: var(--rbc-white);
 }
 
-.dark-background .hero .hero-video-play:hover,
-.dark-background .hero .hero-video-play:focus-visible {
+:is(.dark-background .hero, .hero.hero-backdrop:not(.light)) .hero-video-play:hover,
+:is(.dark-background .hero, .hero.hero-backdrop:not(.light)) .hero-video-play:focus-visible {
   background-color: var(--rbc-white);
   color: var(--rbc-blue);
 }
