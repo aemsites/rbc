@@ -1,0 +1,11 @@
+{
+  "type": "da",
+  "sites": {
+    "rbc": {
+      "previewOrg": "aemsites",
+      "previewSite": "rbc",
+      "contentHostUrl": "https://content.da.live/aemsites/rbc/",
+      "libraryUrl": "https://main--rbc--aemsites.aem.page/docs/library/blocks.json"
+    }
+  }
+}
