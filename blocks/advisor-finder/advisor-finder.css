@@ -111,6 +111,10 @@
   font: inherit;
   text-align: left;
   cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
 }
 
 .advisor-finder .advisor-finder-more::after {

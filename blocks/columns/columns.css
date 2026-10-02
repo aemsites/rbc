@@ -20,6 +20,10 @@
 
 .columns > div > div {
   order: 1;
+
+  .icon {
+    padding-right: var(--space-2xs);
+  }
 }
 
 .columns > div > .columns-img-col {
@@ -174,4 +178,69 @@
 
 .columns.center p.button-wrapper {
   justify-content: center;
+}
+
+.columns > div + div {
+  margin-top: var(--space-2xl);
+}
+
+.columns.numbered {
+  counter-reset: columns-row;
+}
+
+.columns.numbered > div {
+  counter-increment: columns-row;
+}
+
+.columns.numbered > div > div:first-child > :is(h2, h3, h4):first-child {
+  display: flex;
+  gap: var(--space-xs);
+}
+
+.columns.numbered > div > div:first-child > :is(h2, h3, h4):first-child::before {
+  content: counter(columns-row);
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  margin-top: 0.35em;
+  border: 1px solid var(--rbc-blue);
+  border-radius: 50%;
+  color: var(--rbc-blue);
+  font-family: var(--body-font-family);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.columns.aside > div > div:last-child:not(.columns-img-col) {
+  border-radius: var(--radius-s);
+  padding: var(--space-l);
+  background-color: var(--rbc-white);
+}
+
+.columns.list-row ul:has(> li > .icon:first-child, > li > p:first-child > .icon:first-child) {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+  gap: var(--space-m);
+  padding: 0;
+  list-style: none;
+}
+
+.columns.list-row li > .icon:first-child,
+.columns.list-row li > p:first-child > .icon:first-child {
+  width: 20px;
+  height: 20px;
+  margin-inline-end: var(--space-2xs);
+  vertical-align: -4px;
+}
+
+.columns.list-row ul:not(:has(.icon)) {
+  columns: 2;
+  column-gap: var(--space-xl);
+}
+
+.columns.list-row ul:not(:has(.icon)) > li {
+  break-inside: avoid;
 }
