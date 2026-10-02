@@ -360,6 +360,10 @@ export default function transform(hookName, element, payload) {
   }
 
   if (hookName === H.after) {
+    // The "Find a Branch or ATM Near You" widget after the article is shared site content:
+    // it is authored once as /fragments/branch-finder and referenced from the page.
+    const hasBranchFinder = !!element.querySelector('section.home-map .callout-inner, aside.callout-inner');
+
     // Site chrome and non-authorable widgets.
     WebImporter.DOMUtils.remove(element, [
       'header',
@@ -472,6 +476,16 @@ export default function transform(hookName, element, payload) {
       const src = img.getAttribute('src');
       if (src && !/^(https?:|data:)/i.test(src)) img.setAttribute('src', absUrl(src));
     });
+
+    // Branch finder: a Fragment block in its own section after the article, as on the
+    // site's other pages; the block swaps its section for the fragment's own section.
+    if (hasBranchFinder) {
+      const link = doc.createElement('a');
+      link.setAttribute('href', '/fragments/branch-finder');
+      link.textContent = '/fragments/branch-finder';
+      const fragment = WebImporter.Blocks.createBlock(doc, { name: 'Fragment', cells: [[link]] });
+      element.append(doc.createElement('hr'), fragment);
+    }
 
     // Custom Metadata block wins: keep exactly one, at the very end.
     const metaTables = [...element.querySelectorAll('table')].filter(isMetadataTable);

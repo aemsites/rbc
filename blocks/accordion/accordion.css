@@ -37,7 +37,7 @@
   transition: transform 0.2s;
 }
 
-.accordion .accordion-item[open] .accordion-item-label::after {
+.accordion .accordion-item[open]:not(.closing) .accordion-item-label::after {
   transform: rotate(180deg);
 }
 
@@ -47,6 +47,11 @@
 
 .accordion .accordion-item-body {
   padding-bottom: var(--space-m);
+}
+
+.accordion .accordion-item-body.accordion-item-sliding {
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .accordion .accordion-item-body > *:first-child {

@@ -162,6 +162,12 @@ function markFormulas(sections) {
   });
 }
 
+// a section holding only a fragment (e.g. the branch finder) is shared page content that
+// follows the article at full width; the fragment block later swaps it for its own sections
+function isAfterArticle(section) {
+  return section.children.length === 1 && !!section.querySelector(':scope > .fragment-wrapper');
+}
+
 function buildEnd(ph) {
   const children = [
     createElement('p', { class: 'article-end-title' }, createElement('strong', {}, ph.shareThisArticle || 'Share This Article')),
@@ -193,6 +199,7 @@ export async function decorateArticle(main, options = {}) {
   const header = all.find((s) => s.querySelector('h1'));
   if (!header) return;
   const sections = all.slice(all.indexOf(header) + 1);
+  while (sections.length && isAfterArticle(sections.at(-1))) sections.pop().classList.add('article-after');
 
   const meta = decorateHeader(header, sections, ph, opts);
   sections.forEach((s) => s.classList.add('article-body'));

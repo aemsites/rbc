@@ -20,6 +20,20 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* single-column articles (toc: off) follow production's widths: full width on phones,
+   420px on tablets, then half the window (to 1200px) less 30px of gutter */
+@media (width >= 768px) {
+  .article main {
+    --article-width-single: 420px;
+  }
+}
+
+@media (width >= 992px) {
+  .article main {
+    --article-width-single: calc(min(50vw, var(--content-width)) - 30px);
+  }
+}
+
 /* newcomer articles read wider, with a narrower rail */
 .article.newcomer-article main {
   --article-width: 840px;
@@ -69,7 +83,7 @@ body.article main > .section > .default-content-wrapper p.article-formula,
 }
 
 /* without a contents rail the article is one narrower column */
-.article main.article-single > .section > div {
+.article main.article-single > .section:is(.article-header, .article-body) > div {
   max-width: var(--article-width-single);
 }
 
@@ -81,6 +95,12 @@ body.article main > .section > .default-content-wrapper p.article-formula,
   padding: 0;
 }
 
+/* in a single column the copy sits 15px in from the column's edges, as do tinted promo
+   boxes; the title, image, TLDR card and FAQ panel span the full column */
+.article main.article-single > .section.article-body:not(.callout, .colored-background) > div {
+  max-width: calc(var(--article-width-single) - 2 * var(--article-inset));
+}
+
 /* boxed sections (callouts, tinted panels) stay inside the reading column */
 .article main.article-single > .section.article-body:is(.callout, .colored-background) {
   box-sizing: border-box;
@@ -90,6 +110,10 @@ body.article main > .section > .default-content-wrapper p.article-formula,
   @media (width >= 768px) {
     margin-inline: auto;
   }
+}
+
+.article main.article-single > .section.article-body.colored-background:not(.accordion-container) {
+  max-width: calc(var(--article-width-single) - 2 * var(--article-inset));
 }
 
 /* data tables: compact, light-blue rules; like production they fill about three-quarters
@@ -143,6 +167,21 @@ body.article main > .section > .default-content-wrapper p.article-formula,
 }
 
 .article main > .section.article-body :is(.table.striped, .accordion-item-body) table tbody tr:nth-child(even) {
+  background-color: var(--article-stripe);
+}
+
+/* stack tables read like production's comparison tables: full width, body-size text and a
+   stripe on odd rows, starting with the first account type */
+.article main > .section.article-body .table.stack {
+  width: 100%;
+}
+
+.article main > .section.article-body .table.stack table {
+  font-size: var(--body-font-size-m);
+  line-height: var(--body-line-height);
+}
+
+.article main > .section.article-body .table.stack table tbody tr:nth-child(odd) {
   background-color: var(--article-stripe);
 }
 
@@ -346,27 +385,63 @@ body.article main > .section > .default-content-wrapper p.article-image {
   margin-top: var(--space-s);
 }
 
-/* share and topics after the article */
-.article .article-end p {
-  margin: var(--space-xl) 0 var(--space-xs);
+/* share and topics after the article, centred as on the source */
+.article .article-end .article-end-title {
+  margin: var(--space-3xl) 0 30px;
+  font-size: var(--body-font-size-l);
+  text-align: center;
+}
+
+.article .article-end .article-share {
+  justify-content: center;
 }
 
 .article .article-topics {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: center;
   gap: var(--space-xs);
-  margin-top: var(--space-xl);
+  margin-top: 60px;
+}
+
+/* room before whatever follows the article, e.g. the branch finder's map */
+.article main > .section.article-end {
+  padding-bottom: var(--space-2xl);
 }
 
 .article .article-topics p {
-  margin: 0;
+  margin: 0 var(--space-3xs) 0 0;
+  font-size: var(--body-font-size-l);
+  font-weight: 500;
+}
+
+/* the legal toggle sits just below whatever precedes it, usually the FAQ panel */
+.article main > .section.article-body:has(+ .section.disclaimers-container) {
+  margin-bottom: 0;
+}
+
+.article main > .section.article-body + .section.disclaimers-container {
+  margin-top: 0;
+}
+
+.article .disclaimers summary {
+  padding-top: 15px;
 }
 
 /* inline links in the copy are underlined and keep the text's weight */
 .article main > .section.article-body:not(.article-end) a:any-link:not(.button) {
   font-weight: inherit;
   text-decoration: underline;
+}
+
+/* lists hang just inside the text edge, as on production (TLDR, body copy, FAQ answers) */
+.article main > .section.article-body :is(.default-content-wrapper, .accordion-item-body) ul {
+  padding-left: 15px;
+}
+
+.article main > .section.article-body :is(.default-content-wrapper, .accordion-item-body) ol {
+  padding-left: 20px;
 }
 
 .article main > .section.article-body .default-content-wrapper li + li {
@@ -399,6 +474,10 @@ body.article main > .section > .default-content-wrapper p.article-image {
   .article main.article-has-rail > .section.article-body > div {
     max-width: none;
     padding: 0;
+  }
+
+  .article main.article-has-rail > .section.article-body:has(+ .section.disclaimers-container) {
+    margin-bottom: 0;
   }
 
   .article main > .section.article-rail {
@@ -471,5 +550,24 @@ body.article.newcomer-article main > .section > .default-content-wrapper p.artic
 
   body.article.newcomer-article main > .section > .default-content-wrapper p.article-image {
     order: 0;
+  }
+}
+
+/* a single column's hero image spans the column, as on production */
+.article main.article-single .article-image img {
+  max-width: none;
+}
+
+/* single column, wide screens: the share links stand in a column out in the left margin,
+   level with the date (10% of the window in, as on production) */
+@media (width >= 992px) {
+  .article main.article-single .article-meta .article-share {
+    position: absolute;
+    left: 10vw;
+    flex-direction: column;
+    align-self: flex-start;
+    gap: var(--space-m);
+    border-right: 1px solid var(--rbc-grey-300);
+    padding-right: var(--space-m);
   }
 }

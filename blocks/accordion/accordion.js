@@ -13,6 +13,39 @@ function promoteHeader(table) {
   table.createTHead().append(first);
 }
 
+// the source site's collapse: answers slide open and closed rather than snapping
+const DURATION = 350;
+const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+function animateItem(details) {
+  const summary = details.querySelector(':scope > summary');
+  const body = details.querySelector(':scope > .accordion-item-body');
+  let animation = null;
+  summary.addEventListener('click', (e) => {
+    if (REDUCED_MOTION.matches) return;
+    e.preventDefault();
+    // a click mid-slide reverses it from wherever it is
+    const closing = details.open && !details.classList.contains('closing');
+    const shut = { height: '0px', paddingBottom: '0px' };
+    // a closed item's answer isn't laid out, so its measured height is stale
+    const from = details.open
+      ? { height: `${body.getBoundingClientRect().height}px`, paddingBottom: getComputedStyle(body).paddingBottom }
+      : shut;
+    animation?.cancel();
+    details.classList.toggle('closing', closing);
+    details.open = true;
+    body.classList.add('accordion-item-sliding');
+    const open = { height: `${body.scrollHeight}px`, paddingBottom: getComputedStyle(body).paddingBottom };
+    animation = body.animate([from, closing ? shut : open], { duration: DURATION, easing: 'ease' });
+    animation.onfinish = () => {
+      animation = null;
+      body.classList.remove('accordion-item-sliding');
+      details.classList.remove('closing');
+      if (closing) details.open = false;
+    };
+  });
+}
+
 function buildItem(row) {
   const summary = document.createElement('summary');
   summary.className = 'accordion-item-label';
@@ -24,6 +57,7 @@ function buildItem(row) {
   const details = document.createElement('details');
   details.className = 'accordion-item';
   details.append(summary, body);
+  animateItem(details);
   return details;
 }
 
