@@ -1,10 +1,27 @@
-main > .section.hero-container {
+main > .section.hero-container:not([class*="padding-"]) {
   margin-block: 0;
+  padding-block: 0;
+}
+
+main > .section.hero-container:has(
+  + .section.overlap,
+  + .tab-hidden + .section.overlap,
+  + .tab-hidden + .tab-hidden + .section.overlap,
+  + .tab-hidden + .tab-hidden + .tab-hidden + .section.overlap,
+  + .tab-hidden + .tab-hidden + .tab-hidden + .tab-hidden + .section.overlap,
+  + .tab-hidden + .tab-hidden + .tab-hidden + .tab-hidden + .tab-hidden + .section.overlap
+) {
+  --hero-overlap: var(--space-m);
+
+  @media (width >= 768px) {
+    --hero-overlap: var(--space-2xl);
+  }
 }
 
 .hero-container .hero-wrapper {
   max-width: unset;
   padding: 0;
+  margin-bottom: 0;
 }
 
 .hero {
@@ -12,11 +29,14 @@ main > .section.hero-container {
 
   position: relative;
   background-color: var(--hero-background);
-  padding: var(--space-xl) var(--space-l);
+  padding: var(--space-xl) var(--space-l) calc(var(--space-xl) + var(--hero-overlap, 0px));
+  min-height: 300px;
+  display: flex;
+  align-items: center;
 }
 
 .hero:has(> :is(picture, video)):not(.light) {
-  --hero-background: var(--rbc-navy);
+  --hero-background: var(--rbc-white);
 }
 
 .section[data-background] .hero {
@@ -69,15 +89,15 @@ main > .section.hero-container {
   font-size: var(--body-font-size-s);
 }
 
-.dark-background .hero .hero-note {
+:is(.dark-background .hero, .hero.hero-backdrop:not(.light)) .hero-note {
   color: var(--rbc-grey-200);
 }
 
-.dark-background .hero .hero-eyebrow {
+:is(.dark-background .hero, .hero.hero-backdrop:not(.light)) .hero-eyebrow {
   color: var(--rbc-grey-900);
 }
 
-.dark-background .hero .icon svg * {
+:is(.dark-background .hero, .hero.hero-backdrop:not(.light)) .icon svg * {
   fill: var(--rbc-white);
 }
 
@@ -95,131 +115,165 @@ main > .section.hero-container {
   padding-right: var(--space-3xs);
 }
 
-.hero-split > div {
+.hero-columns > div {
   display: grid;
   gap: var(--space-l);
   align-items: center;
 }
 
-.hero-split > div > div {
+.hero-columns .hero-copy {
   min-width: 0;
 }
 
-.hero-split picture {
+.hero-columns .hero-media img {
   display: block;
+  width: 50%;
+  margin-inline: auto;
 }
 
-.hero-split picture img {
+.hero.split > div {
+  display: grid;
+  max-width: none;
+}
+
+.hero.split .hero-copy {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  min-width: 0;
+  padding: var(--space-2xl) var(--space-l) calc(var(--space-2xl) + var(--hero-overlap, 0px));
+}
+
+.hero.split .hero-copy > .button-wrapper {
+  max-width: 100%;
+}
+
+.hero.split .hero-media picture {
+  display: block;
+  height: 100%;
+}
+
+.hero.split .hero-media img {
   width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .hero.split {
   padding: 0;
 }
 
-.hero.split > div {
-  max-width: none;
-  gap: 0;
-  align-items: stretch;
+.hero.hero-backdrop:not(.light) {
+  --text-color: var(--rbc-white);
+  --link-color: var(--rbc-white);
+  --link-hover-color: var(--rbc-yellow);
+
+  color: var(--text-color);
 }
 
-.hero.background > div {
-  z-index: 1;
+.hero.hero-backdrop:not(.light) a.button.secondary {
+  box-shadow: inset 0 0 0 1px var(--rbc-white);
+  background-color: transparent;
+  color: var(--rbc-white);
+}
+
+.hero.hero-backdrop:not(.light) a.button.secondary:is(:hover, :focus-visible) {
+  background-color: var(--rbc-white);
+  color: var(--rbc-blue);
+}
+
+.hero.hero-backdrop > div {
   width: 100%;
 }
 
-.hero.split > div > div {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: var(--space-2xl) var(--space-l);
-}
-
-.hero.background > div > div {
+.hero.hero-backdrop .hero-copy {
+  position: relative;
+  z-index: 1;
   max-width: 640px;
 }
 
-.hero.condensed > div > div {
-  max-width: 45%;
+.hero.lines::before {
+  @media (width >= 768px) {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 10px;
+    z-index: 1;
+    width: 95%;
+    background: url("lines.png") no-repeat 100% 82%;
+    pointer-events: none;
+  }
 }
 
-.hero.split > div > div:has(picture) {
-  padding: 0;
-}
-
-.hero.split picture {
-  height: 100%;
-}
-
-.hero.split picture img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.hero.background::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-color: rgb(0 0 0 / 40%);
+.hero.lines > div {
+  z-index: 2;
 }
 
 @media (width >= 768px) {
   .hero {
-    padding: var(--space-2xl) var(--space-xl);
+    padding: var(--space-2xl) var(--space-xl) calc(var(--space-2xl) + var(--hero-overlap, 0px));
   }
 
   .hero:has(> :is(picture, video)) {
     min-height: 300px;
   }
 
-  .hero-split > div {
+  .hero-columns > div {
     grid-template-columns: 1fr 1fr;
     gap: var(--space-3xl);
   }
 
+  .hero-columns .hero-media img {
+    width: 100%;
+  }
+
   .hero.split > div {
+    grid-template-columns: 1fr 1fr;
     min-height: 400px;
   }
 
-  .hero.split > div > div {
-    padding: var(--space-3xl) var(--space-xl);
+  .hero.split .hero-copy {
+    padding: var(--space-3xl) var(--space-xl) calc(var(--space-3xl) + var(--hero-overlap, 0px));
     padding-inline-start: max(var(--space-xl), (100vw - var(--content-width)) / 2);
   }
 
-  .hero.background {
+  .hero.split.content-right .hero-media {
+    order: -1;
+  }
+
+  .hero.split.content-right .hero-copy {
+    padding-inline: var(--space-xl) max(var(--space-xl), (100vw - var(--content-width)) / 2);
+  }
+
+  .hero.split.condensed > div {
+    grid-template-columns: 45fr 55fr;
+  }
+
+  .hero.split.condensed.content-right > div {
+    grid-template-columns: 55fr 45fr;
+  }
+
+  .hero.condensed:not(.split) .hero-copy {
+    max-width: 45%;
+  }
+
+  .hero.hero-backdrop {
     display: grid;
     align-content: center;
     min-height: 460px;
   }
-
-  .hero.background::after {
-    background: linear-gradient(90deg, rgb(0 0 0 / 65%), rgb(0 0 0 / 30%) 60%, rgb(0 0 0 / 5%));
-  }
 }
 
-.hero.background.content-right > div > div {
+.hero.hero-backdrop.content-right .hero-copy {
   margin-left: auto;
 }
 
-@media (width >= 768px) {
-  .hero.background.content-right::after {
-    background: linear-gradient(270deg, rgb(0 0 0 / 65%), rgb(0 0 0 / 30%) 60%, rgb(0 0 0 / 5%));
-  }
-}
-
-.hero.background.light {
+.hero.hero-backdrop.light {
   color: var(--text-color);
 }
 
-.hero.background.light::after {
+.hero.hero-backdrop.light::after {
   display: none;
-}
-
-@font-face {
-  font-family: market-pro;
-  src: url("../../fonts/market-pro-regular.woff2") format("woff2");
-  font-display: swap;
 }
 
 .hero.hero-intro {
@@ -282,14 +336,14 @@ main > .section.hero-container {
   height: 20px;
 }
 
-.dark-background .hero .hero-video-play {
+:is(.dark-background .hero, .hero.hero-backdrop:not(.light)) .hero-video-play {
   box-shadow: inset 0 0 0 1px var(--rbc-white);
   background-color: transparent;
   color: var(--rbc-white);
 }
 
-.dark-background .hero .hero-video-play:hover,
-.dark-background .hero .hero-video-play:focus-visible {
+:is(.dark-background .hero, .hero.hero-backdrop:not(.light)) .hero-video-play:hover,
+:is(.dark-background .hero, .hero.hero-backdrop:not(.light)) .hero-video-play:focus-visible {
   background-color: var(--rbc-white);
   color: var(--rbc-blue);
 }
@@ -306,7 +360,7 @@ main > .section.hero-container {
   font-family: market-pro, var(--heading-font-family);
   font-style: normal;
   font-weight: 400;
-  color: #ffba00;
+  color: var(--rbc-orange);;
 }
 
 @media (width >= 768px) {

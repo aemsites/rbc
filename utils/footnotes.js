@@ -172,7 +172,23 @@ function isOtherPageLegal(a) {
   return legal && url.pathname !== window.location.pathname;
 }
 
+function expandAuthoredRefs(root) {
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  while (walker.nextNode()) {
+    const node = walker.currentNode;
+    if (node.textContent.includes('[[') && !node.parentElement.closest('.disclaimers')) nodes.push(node);
+  }
+  nodes.forEach((node) => {
+    const template = document.createElement('template');
+    template.innerHTML = expandRefs(escape(node.textContent));
+    node.replaceWith(template.content);
+  });
+  if (nodes.length) resolveRefLinks(root);
+}
+
 export default function linkFootnotes(root) {
+  expandAuthoredRefs(root);
   root.querySelectorAll('sup a[href], a[href]:has(> sup)').forEach((a) => {
     if (!isOtherPageLegal(a)) return;
     a.target = '_blank';

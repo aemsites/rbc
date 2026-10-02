@@ -269,6 +269,91 @@ sup {
   vertical-align: super;
 }
 
+.tooltip-trigger {
+  border: 0;
+  border-bottom: 1px dotted currentcolor;
+  padding: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.tooltip-trigger.tooltip-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 1.1em;
+  height: 1.1em;
+  margin-inline-start: 0.2em;
+  border: 1px solid var(--link-color);
+  border-radius: 50%;
+  color: var(--link-color);
+  font-size: 0.8em;
+  line-height: 1;
+  vertical-align: 0.1em;
+}
+
+.tooltip-trigger.tooltip-icon::before {
+  content: "?";
+}
+
+.tooltip {
+  position-area: bottom span-right;
+  position-try-fallbacks: flip-block, flip-inline;
+  max-width: min(320px, calc(100vw - 32px));
+  margin: var(--space-2xs) 0;
+  border: 1px solid var(--rbc-grey-200);
+  border-radius: var(--radius-s);
+  padding: var(--space-s);
+  box-shadow: 0 4px 12px rgb(37 37 37 / 15%);
+  background-color: var(--rbc-white);
+  color: var(--rbc-grey-900);
+  font-size: var(--body-font-size-s);
+  font-weight: 400;
+  line-height: 1.5;
+  text-align: start;
+}
+
+.tooltip strong {
+  display: block;
+}
+
+/* disclosures: a "+ label" toggle that opens the copy under it (#44) */
+details.disclosure {
+  margin-block: var(--space-xs);
+}
+
+details.disclosure > summary {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  color: var(--link-color);
+  cursor: pointer;
+  list-style: none;
+}
+
+details.disclosure > summary::-webkit-details-marker {
+  display: none;
+}
+
+details.disclosure > summary::before {
+  content: "";
+  flex: none;
+  width: 12px;
+  height: 12px;
+  background:
+    linear-gradient(currentcolor, currentcolor) center / 100% 2px no-repeat,
+    linear-gradient(currentcolor, currentcolor) center / 2px 100% no-repeat;
+}
+
+details.disclosure[open] > summary::before {
+  background-size: 100% 2px, 0 0;
+}
+
+details.disclosure > :not(summary) {
+  margin-inline-start: calc(12px + var(--space-xs));
+}
+
 sup a:any-link,
 sup a:hover,
 a:has(> sup:only-child) {
@@ -382,6 +467,11 @@ main img {
   width: 24px;
 }
 
+:is(h1, h2, h3, h4, h5, h6) > .icon:first-child {
+  margin-inline-end: var(--space-2xs);
+  vertical-align: -0.15em;
+}
+
 .icon img,
 .icon svg {
   height: 100%;
@@ -395,8 +485,13 @@ main > .section {
 
 main > .section > div {
   max-width: var(--content-width);
-  margin: auto;
+  margin: var(--space-2xl) auto;
   padding: 0 var(--space-l);
+}
+
+main > .section:first-of-type > div {
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
 main > .section:first-of-type {
@@ -436,6 +531,7 @@ main > .section.colored-background :is(h1, h2, h3, h4, h5, h6):first-child {
   margin-top: 0;
 }
 
+
 main > .section.dark-background {
   --text-color: var(--rbc-white);
   --link-color: var(--rbc-white);
@@ -462,11 +558,15 @@ main > .section.dark-background a.button.secondary:focus-visible {
 
 body:not(.style-guide) main > .section > .default-content-wrapper :is(p, h2, h3, h4, h5, h6) {
   text-align: center;
-  margin-bottom: var(--space-2xl);
 }
 
 body:not(.style-guide) main > .section > .default-content-wrapper p.button-wrapper {
   justify-content: center;
+}
+
+body:not(.style-guide) main > .section:not(.left) > .default-content-wrapper > p {
+  max-width: 800px;
+  margin-inline: auto;
 }
 
 body:not(.style-guide) main > .section.left > .default-content-wrapper :is(p, h2, h3, h4, h5, h6) {
@@ -529,6 +629,12 @@ main > .section[data-width="l"] > div {
   max-width: var(--width-l);
 }
 
+main > .section.divider > div:first-child > :first-child {
+  margin-top: 0;
+  border-top: 1px solid var(--rbc-grey-200);
+  padding-top: var(--space-xl);
+}
+
 main > .section.shadow {
   box-shadow: 0 3.591px 7.847px 0 rgb(37 37 37 / 8%);
   border-radius: var(--radius-s);
@@ -560,6 +666,15 @@ main > .section.contained-l {
     }
 }
 
+/* a contained box takes the section's width when one is set */
+main > .section.contained:is([data-width="s"], [data-width="m"], [data-width="l"]) {
+  max-width: var(--section-width);
+}
+
+main > .section.contained[data-width="s"] { --section-width: var(--width-s); }
+main > .section.contained[data-width="m"] { --section-width: var(--width-m); }
+main > .section.contained[data-width="l"] { --section-width: var(--width-l); }
+
 main > .section.contained.colored-background,
 main > .section.contained-l.colored-background {
   border-radius: var(--radius-m);
@@ -571,7 +686,7 @@ main > .section.overlap {
   position: relative;
 
   @media (width >= 768px) {
-    margin-top: calc(var(--space-2xl) * -1);
+    margin-top: calc(var(--space-3xl) * -1);
   }
 }
 
@@ -619,6 +734,11 @@ main > .section.padding-xl { padding-block: var(--space-4xl); }
 main > .section.padding-2xl { padding-block: var(--space-5xl); }
 main > .section.padding-3xl { padding-block: var(--space-6xl); }
 main > .section.padding-4xl { padding-block: var(--space-7xl); }
+
+main > .section.strip > .default-content-wrapper {
+  padding-block: 0;
+  margin: var(--space-2xs) auto;
+}
 
 .checklist ul:not(.block > ul) {
   padding-left: 0;
@@ -694,4 +814,5 @@ main .default-content-wrapper p:has(> :is(picture, img):only-child):has(+ :is(h1
 body:not(.style-guide) main > .section.strip > .default-content-wrapper p {
   margin: 0;
   font-size: var(--body-font-size-xs);
+  max-width: 100%;
 }
