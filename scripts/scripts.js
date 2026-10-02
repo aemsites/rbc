@@ -1,6 +1,8 @@
 import { watchStuck } from '../utils/dom.js';
 import { decorateRateCode, decorateRates } from '../utils/rates.js';
 import linkFootnotes, { revealLegalHash } from '../utils/footnotes.js';
+import decorateTooltips from '../utils/tooltips.js';
+import decorateDisclosures from '../utils/disclosures.js';
 import {
   getMetadata,
   loadHeader,
@@ -247,6 +249,8 @@ export function decorateMain(main) {
   decorateStickyTitle(main);
   decorateSectionBackgrounds(main);
   decorateBlocks(main);
+  decorateTooltips(main);
+  decorateDisclosures(main);
   decorateButtons(main);
   decorateRateCode(main);
   linkFootnotes(main);

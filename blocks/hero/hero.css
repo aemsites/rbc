@@ -1,4 +1,4 @@
-main > .section.hero-container {
+main > .section.hero-container:not([class*="padding-"]) {
   margin-block: 0;
   padding-block: 0;
 }
@@ -21,6 +21,7 @@ main > .section.hero-container:has(
 .hero-container .hero-wrapper {
   max-width: unset;
   padding: 0;
+  margin-bottom: 0;
 }
 
 .hero {
@@ -29,10 +30,13 @@ main > .section.hero-container:has(
   position: relative;
   background-color: var(--hero-background);
   padding: var(--space-xl) var(--space-l) calc(var(--space-xl) + var(--hero-overlap, 0px));
+  min-height: 300px;
+  display: flex;
+  align-items: center;
 }
 
 .hero:has(> :is(picture, video)):not(.light) {
-  --hero-background: var(--rbc-navy);
+  --hero-background: var(--rbc-white);
 }
 
 .section[data-background] .hero {
@@ -189,11 +193,20 @@ main > .section.hero-container:has(
   max-width: 640px;
 }
 
-.hero.hero-backdrop::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-color: rgb(0 0 0 / 40%);
+.hero.lines::before {
+  @media (width >= 768px) {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 10px;
+    z-index: 1;
+    width: 95%;
+    background: url("lines.png") no-repeat 100% 82%;
+    pointer-events: none;
+  }
+}
+
+.hero.lines > div {
+  z-index: 2;
 }
 
 @media (width >= 768px) {
@@ -249,14 +262,6 @@ main > .section.hero-container:has(
     align-content: center;
     min-height: 460px;
   }
-
-  .hero.hero-backdrop::after {
-    background: linear-gradient(90deg, rgb(0 0 0 / 65%), rgb(0 0 0 / 30%) 60%, rgb(0 0 0 / 5%));
-  }
-
-  .hero.hero-backdrop.content-right::after {
-    background: linear-gradient(270deg, rgb(0 0 0 / 65%), rgb(0 0 0 / 30%) 60%, rgb(0 0 0 / 5%));
-  }
 }
 
 .hero.hero-backdrop.content-right .hero-copy {
@@ -269,12 +274,6 @@ main > .section.hero-container:has(
 
 .hero.hero-backdrop.light::after {
   display: none;
-}
-
-@font-face {
-  font-family: market-pro;
-  src: url("../../fonts/market-pro-regular.woff2") format("woff2");
-  font-display: swap;
 }
 
 .hero.hero-intro {
@@ -361,7 +360,7 @@ main > .section.hero-container:has(
   font-family: market-pro, var(--heading-font-family);
   font-style: normal;
   font-weight: 400;
-  color: #ffba00;
+  color: var(--rbc-orange);;
 }
 
 @media (width >= 768px) {

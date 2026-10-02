@@ -58,6 +58,7 @@
     position: sticky;
     top: calc(var(--nav-height) + var(--space-l));
     padding: 0;
+    margin-top: 0;
   }
 
   .product main.rail-left {

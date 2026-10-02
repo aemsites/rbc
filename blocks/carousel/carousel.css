@@ -56,6 +56,10 @@
 .carousel .carousel-slide .carousel-slide-image {
   margin-top: auto;
   line-height: 0;
+
+  > p {
+    margin: 0;
+  }
 }
 
 .carousel .carousel-slide .carousel-slide-image img {
