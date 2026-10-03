@@ -28,3 +28,6 @@ Edge Delivery Services. Read a block first. Omissions are in the repo or known.
   `window.dataLayer`) must bump `RELEASE_DATE` in `scripts/gtm.js` to the current date
   (`YYYY-MM-DD`). This is a manually-maintained field, not derived — update it yourself,
   don't skip it.
+- Keep `SITE_VERSION_NUMBER` in `scripts/gtm.js` aligned with `package.json`'s version.
+  The v2 payload emits `page.site_version` as `<version>-<MMDDYY release date>`,
+  not the legacy `release_date` field.

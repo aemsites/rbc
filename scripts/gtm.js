@@ -3,19 +3,17 @@ import {
   CONSENT_GROUPS, hasConsentGroup, resolveGroups, consentOverride,
 } from './consent-check.js';
 
-// TODO(open question): the DataLayer/GTM guide says the GTM snippet should load "the root GTM
-// container and its child container based on the LOB". If RBC's GTM is on 360, this may already
-// be handled purely via GTM-side "Zones" config keyed off the `lob` value below - confirm with
-// RBC's GTM admin before assuming code changes (e.g. a second container id) are needed here.
+// GTM owns child-container routing; page.lob is pushed before loading the root container.
 const GTM_ID = 'GTM-KPSBBC6';
 const PROD_HOSTS = ['main--rbc--aemsites.aem.live', 'www.rbcroyalbank.com'];
-const CHANNEL = 'public'; // hardcoded per spec, same value for every page
-const CMS_TYPE = 'adobe'; // hardcoded per spec, EDS has no other cms_type value
+const SITE_SECTION = 'public';
+const CMS_TYPE = 'aem';
+const SITE_VERSION_NUMBER = '1.3.0'; // Keep in sync with package.json.
 
 // Manually maintained: update this to the current date (YYYY-MM-DD) any time this file or any
 // other dataLayer-related code is changed. See AGENTS.md ("DataLayer") for why this isn't
 // automated.
-const RELEASE_DATE = '2026-10-01';
+const RELEASE_DATE = '2026-10-02';
 
 const defined = (obj) => Object.fromEntries(
   Object.entries(obj).filter(([, value]) => value !== undefined && value !== null && value !== ''),
@@ -28,27 +26,35 @@ function environment() {
   return 'dev';
 }
 
-// Flat, top-level keys per the "Standard DataLayer GTM Implementation Guide".
+function siteVersion() {
+  const [year, month, day] = RELEASE_DATE.split('-');
+  return `${SITE_VERSION_NUMBER}-${month}${day}${year.slice(-2)}`;
+}
+
+// Nested page keys per the v2 "Standard DataLayer GTM Implementation Guide".
 // lob / page-type / content-group / business-line are page metadata that must be authored
 // per-page or bulk-applied via the metadata sheet (not yet populated - see PR description for
 // the proposed column additions).
 function initialPushData() {
-  return defined({
-    lob: getMetadata('lob'),
-    page_type: getMetadata('page-type'),
-    content_group: getMetadata('content-group'),
-    channel: CHANNEL,
-    cms_type: CMS_TYPE,
-    page_language: (document.documentElement.lang || 'en').split('-')[0],
-    business_line: getMetadata('business-line') || 'personal',
-    env: environment(),
-    release_date: RELEASE_DATE,
-  });
+  return {
+    page: defined({
+      lob: getMetadata('lob'),
+      page_type: getMetadata('page-type'),
+      content_group: getMetadata('content-group'),
+      site_section: SITE_SECTION,
+      cms_type: CMS_TYPE,
+      page_language: (document.documentElement.lang || 'en').split('-')[0],
+      business_line: getMetadata('business-line') || 'personal',
+      environment: environment(),
+      site_version: siteVersion(),
+      error_code: window.isErrorPage ? window.errorCode : undefined,
+    }),
+  };
 }
 
 function marketingData() {
   const params = new URLSearchParams(window.location.search);
-  const utm = defined({
+  const marketing = defined({
     utm_source: params.get('utm_source'),
     utm_medium: params.get('utm_medium'),
     utm_campaign: params.get('utm_campaign'),
@@ -59,10 +65,10 @@ function marketingData() {
   const clickIds = { gclid: params.get('gclid'), fbclid: params.get('fbclid') };
   const [type, id] = Object.entries(clickIds).find(([, value]) => value) || [];
   if (id) {
-    utm.click_id = id;
-    utm.click_id_type = type;
+    marketing.click_id = id;
+    marketing.click_id_type = type.toUpperCase();
   }
-  return Object.keys(utm).length ? { utm } : undefined;
+  return Object.keys(marketing).length ? { marketing } : undefined;
 }
 
 // Group ids confirmed against RBC's live OneTrust config (see consent-check.js):
@@ -102,7 +108,7 @@ function experimentationData() {
   const experiments = Object.entries(sels).map(([agent, arm]) => defined({
     experiment_id: agent,
     experiment_name: ssr.variant,
-    variant_id: `${arm}-${agent}`,
+    variant_id: String(arm),
     variant_name: ssr.variant || 'default',
     is_control: arm === 'A',
     experiment_type: 'personalization',
@@ -136,9 +142,9 @@ function trackClick(event) {
   if (!url) return;
   window.dataLayer.push({
     event: 'element_click',
-    click_url: url,
-    click_text: (clickable.textContent || '').trim(),
-    click_section: clickSection(clickable),
+    element_url: url,
+    element_text: (clickable.textContent || '').trim(),
+    element_section: clickSection(clickable),
     outbound: isOutbound(url),
   });
 }
@@ -160,6 +166,12 @@ function pushGlobalParameters() {
 
   // Pushed as soon as it's available, before the page_view event fires below.
   window.dataLayer.push({
+    user: {
+      user_id: null,
+      user_id_primary: null,
+      user_type: null,
+      login_status: 'guest',
+    },
     ...marketingData(),
     ...consentData(),
     ...experimentationData(),
