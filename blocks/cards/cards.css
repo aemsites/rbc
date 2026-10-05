@@ -100,6 +100,19 @@ main > .section > .cards-wrapper + .default-content-wrapper {
   object-position: top;
 }
 
+/* logos: the whole mark sits on a tinted panel instead of cropping to fill */
+.cards.logos > ul > li > .cards-card-image {
+  padding: var(--space-l);
+  background-color: var(--rbc-grey-100);
+}
+
+.cards.logos > ul > li > .cards-card-image img {
+  height: 160px;
+  aspect-ratio: auto;
+  object-fit: contain;
+  object-position: center;
+}
+
 .cards:not(.product, .checklist) .cards-card-body ul {
   padding-left: var(--space-m);
   list-style: disc;
