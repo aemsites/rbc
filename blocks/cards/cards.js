@@ -3,13 +3,14 @@ import {
 } from '../../scripts/aem.js';
 import { escapeHtml, safeUrl } from '../../utils/dom.js';
 import {
+  footnoteSup, expandRefs, stripRefs, refIds, resolveRefLinks,
+} from '../../utils/footnotes.js';
+import {
   getProduct, getProducts, monthlyFees, pickHighlights, keyList, offerLegalPage, isPrice, zeroPrice,
 } from '../../utils/products.js';
 import fetchLocalPlaceholders from '../../utils/placeholders.js';
 import { rateSpan } from '../../utils/rates.js';
-import {
-  footnoteSup, expandRefs, stripRefs, refIds, resolveRefLinks,
-} from '../../utils/footnotes.js';
+
 
 import decorateTile, { tileWords } from './tiles.js';
 

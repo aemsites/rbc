@@ -12,6 +12,7 @@ function normalizeImage(block) {
   if (!img) return;
   if (img.closest('picture')) {
     img.loading = 'eager';
+    img.fetchPriority = 'high';
     return;
   }
   img.replaceWith(createOptimizedPicture(img.src, img.alt, true));
