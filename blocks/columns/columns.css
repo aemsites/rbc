@@ -131,6 +131,32 @@
   height: 40px;
 }
 
+.columns.logos p:has(> :is(picture, img) + :is(picture, img)) {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-l);
+  place-items: center;
+}
+
+.columns.logos p:has(> :is(picture, img) + :is(picture, img)) img {
+  width: auto;
+  max-width: 120px;
+  max-height: 56px;
+}
+
+.columns.logos > div > div:last-child p {
+  margin: 0;
+  border-bottom: 1px solid var(--rbc-grey-200);
+  padding-block: var(--space-l);
+}
+
+.columns.logos > div > div:last-child .icon {
+  width: 32px;
+  height: 32px;
+  margin-inline-end: var(--space-s);
+  vertical-align: middle;
+}
+
 /* overlap: the copy sits in a bordered panel that the image column overlaps */
 .columns.overlap > div > div:not(.columns-img-col) {
   border: 1px solid var(--rbc-grey-300);
