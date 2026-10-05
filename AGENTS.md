@@ -17,7 +17,6 @@ Edge Delivery Services. Read a block first. Omissions are in the repo or known.
 - `fstab.yaml`, `helix-query.yaml`, `paths.json` are retired. Config lives at tools.aem.live.
 
 ## Remember
-- Ask before modifying `README.md`, unless the user explicitly requests that change.
 - `npx -y @adobe/aem-cli up`: local code, previewed content.
 - Merging `main` ships code; content publishes separately.
 - A PR without a `{branch}--{repo}--{owner}.aem.page/{path}` link is rejected.
