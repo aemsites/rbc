@@ -46,8 +46,7 @@ function priceLine(product, ph) {
 
 function cardLabel(product, ph, label) {
   if (label === 'none') return '';
-  const type = label === 'type' && ph[toCamelCase(`category-${product.category}`)];
-  return `<p>${type || product.categoryLabel}</p>`;
+  return `<p>${ph[toCamelCase(`category-${product.category}`)] || product.categoryLabel}</p>`;
 }
 
 function productBody(product, ph, variant, keys = [], options = {}) {
@@ -107,7 +106,7 @@ async function renderProductRows(block) {
   settings.forEach((row) => row.remove());
   const options = {
     cta: config.cta,
-    label: ['none', 'type'].find((word) => block.classList.contains(word === 'none' ? 'no-label' : 'type-label')),
+    label: block.classList.contains('no-label') ? 'none' : undefined,
   };
   const rows = [...block.children].filter((row) => {
     const a = row.firstElementChild?.querySelector('a[href*="/products/"]');
