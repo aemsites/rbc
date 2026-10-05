@@ -279,8 +279,9 @@ export default async function decorate(block) {
       return;
     }
     if (handoff) {
-      const url = new URL(config.handoff || '/', window.location.href);
-      new URLSearchParams(new FormData(form)).forEach((v, k) => url.searchParams.set(k, v));
+      const resolved = new URL(config.handoff || '/', window.location.href);
+      // Reject off-origin handoff URLs to prevent open redirect via external sheet data.
+      const url = resolved.origin === window.location.origin ? resolved : new URL('/', window.location.href);      new URLSearchParams(new FormData(form)).forEach((v, k) => url.searchParams.set(k, v));
       window.location.assign(url);
       return;
     }
