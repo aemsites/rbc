@@ -139,7 +139,7 @@ test('exact v2 page metadata and unchanged initialization order', async () => {
       page_language: 'fr',
       business_line: 'commercial',
       environment: 'prod',
-      site_version: '1.3.0-100226',
+      site_version: '1.0.0-100526',
     },
   });
   assert.equal(pushes[2].event, 'gtm.js');
@@ -179,7 +179,7 @@ test('missing metadata, language defaults, and environment detection are preserv
         page_language: 'en',
         business_line: 'personal',
         environment,
-        site_version: '1.3.0-100226',
+        site_version: '1.0.0-100526',
       },
     });
   }));
@@ -188,7 +188,7 @@ test('missing metadata, language defaults, and environment detection are preserv
 test('site version uses independent DataLayer SemVer and an MMDDYY date stamp', async () => {
   const state = await initialize();
   const { site_version: version } = state.snapshot()[0].page;
-  assert.equal(version, '1.3.0-100226');
+  assert.equal(version, '1.0.0-100526');
   assert.match(version, /^\d+\.\d+\.\d+-\d{6}$/);
   const source = gtmSource.replace(
     /const SITE_VERSION_NUMBER = '[^']+';/,
@@ -196,7 +196,7 @@ test('site version uses independent DataLayer SemVer and an MMDDYY date stamp', 
   );
   assert.notEqual(source, gtmSource);
   const independent = await initialize({ source });
-  assert.equal(independent.snapshot()[0].page.site_version, '2.4.1-100226');
+  assert.equal(independent.snapshot()[0].page.site_version, '2.4.1-100526');
 });
 
 test('error codes are nested under page only for known error pages', async () => {

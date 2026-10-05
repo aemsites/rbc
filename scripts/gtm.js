@@ -9,8 +9,8 @@ const PROD_HOSTS = ['main--rbc--aemsites.aem.live', 'www.rbcroyalbank.com'];
 const SITE_SECTION = 'public';
 const CMS_TYPE = 'aem';
 // Independent DataLayer SemVer and date stamp; see AGENTS.md for bump rules.
-const SITE_VERSION_NUMBER = '1.3.0';
-const SITE_VERSION_DATE = '2026-10-02';
+const SITE_VERSION_NUMBER = '1.0.0';
+const SITE_VERSION_DATE = '2026-10-05';
 
 const defined = (obj) => Object.fromEntries(
   Object.entries(obj).filter(([, value]) => value !== undefined && value !== null && value !== ''),

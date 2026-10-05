@@ -17,6 +17,7 @@ Edge Delivery Services. Read a block first. Omissions are in the repo or known.
 - `fstab.yaml`, `helix-query.yaml`, `paths.json` are retired. Config lives at tools.aem.live.
 
 ## Remember
+- Ask before modifying `README.md`, unless the user explicitly requests that change.
 - `npx -y @adobe/aem-cli up`: local code, previewed content.
 - Merging `main` ships code; content publishes separately.
 - A PR without a `{branch}--{repo}--{owner}.aem.page/{path}` link is rejected.
@@ -34,3 +35,7 @@ Edge Delivery Services. Read a block first. Omissions are in the repo or known.
 - When bumping the DataLayer version, update `SITE_VERSION_DATE` to the current date
   (`YYYY-MM-DD`). The v2 payload emits `page.site_version` as `<semver>-<MMDDYY>`;
   do not emit the legacy `release_date` field.
+
+## Unit tests
+- `npm test` runs all unit tests under `test/` named `*.test.js`, `*.test.mjs`, or
+  `*.test.cjs`, including nested directories. New test files do not need new npm scripts.
