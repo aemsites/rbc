@@ -73,12 +73,22 @@ function longDate(iso) {
 }
 
 // eyebrow and body cells of a product's current offer, as the rail and the offer block show it
-export function offerCells(product, ph) {
+export function offerCells(product, ph, { disclose = false } = {}) {
   if (!product.offerHeadline) return null;
   const image = product.offerImage
     ? createOptimizedPicture(product.offerImage, product.offerImageAlt, false, [{ width: '750' }]).outerHTML : '';
   const ends = product.offerEndDate ? `${ph.offerEnds || 'Offer ends'} ${longDate(product.offerEndDate)}. ` : '';
   const offerPage = offerLegalPage(product);
+  // the rail tucks the conditions and the offer page link behind a "View Offer Details" toggle
+  if (disclose) {
+    const url = product.offerDetailsUrl;
+    const here = url && new URL(url, window.location.href).pathname === window.location.pathname;
+    const more = url && !here ? `<p class="link-wrapper"><a href="${url}" target="_blank" rel="noopener">${ph.learnMore || 'Learn More'}</a></p>` : '';
+    return [
+      `<p>${product.offerEyebrow || ph.offer || 'Offer'}</p>`,
+      `${image}<p>${expandRefs(product.offerHeadline, offerPage)}</p><details class="disclosure"><summary>${ph.viewOfferDetails || 'View Offer Details'}</summary><p>${ends}${product.offerConditions || ''}</p>${more}</details>`,
+    ];
+  }
   // rbcroyalbank.com doesn't link off-site offers (e.g. the investments HISA page)
   const details = offerPage === product.offerDetailsUrl ? `<p class="link-wrapper"><a href="${product.offerDetailsUrl}" target="_blank" rel="noopener">${ph.viewOfferDetails || 'View Offer Details'}</a></p>` : '';
   return [

@@ -23,7 +23,7 @@ function railRows(product, ph) {
   if (product.cardImage) {
     rows.push(row(picture(product.cardImage, product.cardImageAlt), `<p>${product.categoryLabel}</p>`));
   }
-  const offer = offerCells(product, ph);
+  const offer = offerCells(product, ph, { disclose: true });
   if (offer) rows.push(row(...offer));
   if (product.rateFallbackValue) {
     const value = product.rateRateCode
@@ -64,16 +64,22 @@ function stickyBar(block, ph) {
 
 export default async function decorate(block) {
   const ph = await fetchLocalPlaceholders();
-  const link = block.querySelector('a[href*="/products/"]');
-  if (link && block.textContent.trim() === link.textContent.trim()) {
+  // a record link in the first row builds the rail; rows after it are page copy for above the CTA
+  const [lead, ...extra] = [...block.children];
+  const link = lead?.querySelector('a[href*="/products/"]');
+  if (link && lead.textContent.trim() === link.textContent.trim()) {
     const product = await getProduct(link.getAttribute('href'));
-    if (product) block.innerHTML = railRows(product, ph);
+    if (product) {
+      block.innerHTML = railRows(product, ph);
+      block.lastElementChild.before(...extra);
+    }
     await resolveRefLinks(block);
   }
   [...block.children].forEach((r) => {
     const [first, second] = [...r.children];
     if (!second) {
       r.className = r.querySelector('a.button') ? 'product-rail-cta' : 'product-rail-note';
+      if (r.querySelector('ul')) r.classList.add('checklist');
       return;
     }
     if (first.querySelector('picture') && !first.textContent.trim()) {

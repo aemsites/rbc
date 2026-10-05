@@ -152,3 +152,14 @@
 .product-rail .product-rail-cta a.button {
   width: 100%;
 }
+
+.product-rail .product-rail-note.checklist {
+  margin-top: 0;
+  color: var(--text-color);
+  font-size: var(--body-font-size-s);
+}
+
+.product-rail .product-rail-note.checklist p:first-child {
+  margin: 0 0 var(--space-xs);
+  font-weight: 500;
+}

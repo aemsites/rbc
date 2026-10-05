@@ -105,6 +105,8 @@ export async function resolveRefLinks(root) {
   }));
   sups.forEach((sup) => {
     const links = [...sup.querySelectorAll('a')];
+    // labels are numbered per page, so a record's ref order can come out as "3,2"
+    if (links.every((a) => /^\d+$/.test(a.textContent))) links.sort((a, b) => a.textContent - b.textContent);
     if (!links.length) sup.remove();
     else sup.replaceChildren(...links.flatMap((a, i) => (i ? [',', a] : [a])));
   });

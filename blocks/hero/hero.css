@@ -101,7 +101,7 @@ main > .section.hero-container:has(
 }
 
 :is(.dark-background .hero, .hero.hero-backdrop:not(.light)) .hero-eyebrow {
-  background-color: var(--rbc-yellow);
+  background-color: var(--rbc-orange);
   color: var(--rbc-grey-900);
 }
 
