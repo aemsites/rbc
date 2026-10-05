@@ -8,12 +8,9 @@ const GTM_ID = 'GTM-KPSBBC6';
 const PROD_HOSTS = ['main--rbc--aemsites.aem.live', 'www.rbcroyalbank.com'];
 const SITE_SECTION = 'public';
 const CMS_TYPE = 'aem';
-const SITE_VERSION_NUMBER = '1.3.0'; // Keep in sync with package.json.
-
-// Manually maintained: update this to the current date (YYYY-MM-DD) any time this file or any
-// other dataLayer-related code is changed. See AGENTS.md ("DataLayer") for why this isn't
-// automated.
-const RELEASE_DATE = '2026-10-02';
+// Independent DataLayer SemVer and date stamp; see AGENTS.md for bump rules.
+const SITE_VERSION_NUMBER = '1.3.0';
+const SITE_VERSION_DATE = '2026-10-02';
 
 const defined = (obj) => Object.fromEntries(
   Object.entries(obj).filter(([, value]) => value !== undefined && value !== null && value !== ''),
@@ -27,7 +24,7 @@ function environment() {
 }
 
 function siteVersion() {
-  const [year, month, day] = RELEASE_DATE.split('-');
+  const [year, month, day] = SITE_VERSION_DATE.split('-');
   return `${SITE_VERSION_NUMBER}-${month}${day}${year.slice(-2)}`;
 }
 

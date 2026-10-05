@@ -16,6 +16,7 @@ async function initialize({
   isErrorPage = false,
   errorCode,
   dataLayer = [],
+  source = gtmSource,
 } = {}) {
   const location = new URL(href);
   const listeners = new Map();
@@ -69,7 +70,7 @@ async function initialize({
       return consented;
     },
   });
-  const gtm = new SourceTextModule(gtmSource, { context });
+  const gtm = new SourceTextModule(source, { context });
   await gtm.link((specifier) => {
     if (specifier === './aem.js') return aem;
     assert.equal(specifier, './consent-check.js');
@@ -184,12 +185,18 @@ test('missing metadata, language defaults, and environment detection are preserv
   }));
 });
 
-test('site version uses the declared project version and MMDDYY release date', async () => {
-  const packageInfo = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'));
+test('site version uses independent DataLayer SemVer and an MMDDYY date stamp', async () => {
   const state = await initialize();
   const { site_version: version } = state.snapshot()[0].page;
-  assert.equal(version, `${packageInfo.version}-100226`);
+  assert.equal(version, '1.3.0-100226');
   assert.match(version, /^\d+\.\d+\.\d+-\d{6}$/);
+  const source = gtmSource.replace(
+    /const SITE_VERSION_NUMBER = '[^']+';/,
+    "const SITE_VERSION_NUMBER = '2.4.1';",
+  );
+  assert.notEqual(source, gtmSource);
+  const independent = await initialize({ source });
+  assert.equal(independent.snapshot()[0].page.site_version, '2.4.1-100226');
 });
 
 test('error codes are nested under page only for known error pages', async () => {

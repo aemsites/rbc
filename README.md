@@ -40,10 +40,13 @@ npm run lint
 
 Implementation choices for the guide's unspecified details:
 
-- `page.site_version` uses the repository's declared package version plus the
-  manually maintained `RELEASE_DATE`, formatted as `<version>-MMDDYY`.
-  The current value is `1.3.0-100226`. Keep `SITE_VERSION_NUMBER` synchronized
-  with `package.json`; regression checks enforce this. The legacy top-level
+- `page.site_version` uses an independent DataLayer SemVer (`SITE_VERSION_NUMBER`)
+  plus `SITE_VERSION_DATE`, formatted as `<semver>-MMDDYY`.
+  The current value is `1.3.0-100226`; it is not tied to `package.json`.
+  Agents choose MAJOR for incompatible payload/event changes, MINOR for
+  backward-compatible additions, and PATCH for contract-preserving fixes.
+  Update the date stamp when bumping the version. Documentation, tests, and
+  behavior-preserving refactors do not require a bump. The legacy top-level
   `release_date` is no longer emitted.
 - The guide lists `error_code` alongside page attributes but omits it from its
   sample push. It is emitted as `page.error_code` when `window.isErrorPage` is
