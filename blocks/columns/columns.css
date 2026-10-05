@@ -81,12 +81,32 @@
   object-fit: cover;
 }
 
+.columns.shadow > div > .columns-img-col:last-child:not(:first-child) {
+  align-self: center;
+  padding: var(--space-xl);
+}
+
 @media (width >= 768px) {
   .columns.shadow > div {
     column-gap: 0;
     align-items: stretch;
   }
 }
+
+.columns:is(.orange, .light-blue) > div > div:first-child {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.columns:is(.orange, .light-blue):not(.shadow) > div > div:first-child {
+  padding: var(--space-l) var(--space-xl);
+}
+
+.columns.orange > div > div:first-child { background-color: var(--rbc-orange); }
+.columns.light-blue > div > div:first-child { background-color: var(--rbc-light-blue); }
 
 .columns.rules > div > div + div {
   border-top: 1px solid var(--rbc-grey-200);
@@ -111,36 +131,62 @@
   height: 40px;
 }
 
-/* card: the copy sits in a bordered card that the image column overlaps */
-.columns.card > div > div:not(.columns-img-col) {
+/* overlap: the copy sits in a bordered panel that the image column overlaps */
+.columns.overlap > div > div:not(.columns-img-col) {
   border: 1px solid var(--rbc-grey-300);
   border-radius: var(--radius-s);
   padding: var(--space-xl);
   background-color: var(--rbc-white);
 }
 
-.columns.card > div > div:not(.columns-img-col) p > picture img {
+.columns.overlap > div > div:not(.columns-img-col) p > picture img {
   max-height: 56px;
   vertical-align: middle;
 }
 
-.columns.card hr {
+/* app rating: icon beside a gold star, the score, and a small label */
+.columns.overlap p:has(> :is(picture, img) + .icon-star) {
+  display: flow-root;
+  font-size: var(--body-font-size-xs);
+}
+
+.columns.overlap p:has(> :is(picture, img) + .icon-star) > :is(picture, img) {
+  float: left;
+  margin-right: var(--space-s);
+}
+
+.columns.overlap p:has(> :is(picture, img) + .icon-star) strong {
+  font-size: var(--heading-font-size-s);
+}
+
+.columns.overlap .icon-star {
+  width: 24px;
+  height: 24px;
+  vertical-align: text-bottom;
+}
+
+.columns.overlap .icon-star svg path {
+  fill: var(--rbc-orange);
+  stroke: none;
+}
+
+.columns.overlap hr {
   margin-block: var(--space-l);
   border: 0;
   border-top: 1px solid var(--rbc-grey-200);
 }
 
 @media (width >= 768px) {
-  .columns.card > div {
+  .columns.overlap > div {
     column-gap: 0;
   }
 
-  .columns.card > div > .columns-img-col {
+  .columns.overlap > div > .columns-img-col {
     position: relative;
     z-index: 1;
   }
 
-  .columns.card > div > .columns-img-col + div {
+  .columns.overlap > div > .columns-img-col + div {
     margin-left: -80px;
     padding: var(--space-3xl) var(--space-2xl) var(--space-3xl) calc(80px + var(--space-2xl));
   }

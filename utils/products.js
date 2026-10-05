@@ -1,5 +1,6 @@
 import { createOptimizedPicture, getMetadata } from '../scripts/aem.js';
-import { expandRefs } from './footnotes.js';
+import { expandRefs, footnoteSup } from './footnotes.js';
+import { createElement, fragment } from './dom.js';
 
 const INDEX = '/products/query-index.json';
 // one index holds every language; records live under the language root, e.g. /fr/products/
@@ -86,14 +87,14 @@ export function offerCells(product, ph, { disclose = false } = {}) {
     const more = url && !here ? `<p class="link-wrapper"><a href="${url}" target="_blank" rel="noopener">${ph.learnMore || 'Learn More'}</a></p>` : '';
     return [
       `<p>${product.offerEyebrow || ph.offer || 'Offer'}</p>`,
-      `${image}<p>${expandRefs(product.offerHeadline, offerPage)}</p><details class="disclosure"><summary>${ph.viewOfferDetails || 'View Offer Details'}</summary><p>${ends}${product.offerConditions || ''}</p>${more}</details>`,
+      `${image}<p>${expandRefs(product.offerHeadline, offerPage)}</p><details class="disclosure"><summary>${ph.viewOfferDetails || 'View Offer Details'}</summary><p>${ends}${expandRefs(product.offerConditions, offerPage)}</p>${more}</details>`,
     ];
   }
   // rbcroyalbank.com doesn't link off-site offers (e.g. the investments HISA page)
   const details = offerPage === product.offerDetailsUrl ? `<p class="link-wrapper"><a href="${product.offerDetailsUrl}" target="_blank" rel="noopener">${ph.viewOfferDetails || 'View Offer Details'}</a></p>` : '';
   return [
     `<p>${product.offerEyebrow || ph.offer || 'Offer'}</p>`,
-    `${image}<p>${expandRefs(product.offerHeadline, offerPage)}</p><p>${ends}${product.offerConditions || ''}</p>${details}`,
+    `${image}<p>${expandRefs(product.offerHeadline, offerPage)}</p><p>${ends}${expandRefs(product.offerConditions, offerPage)}</p>${details}`,
   ];
 }
 
@@ -114,4 +115,15 @@ export function monthlyFees(product) {
     regularFootnotes: regular?.footnotes || '',
     rebateFootnotes: rebate?.footnotes || '',
   };
+}
+
+export const isCreditCard = (product) => product.category === 'credit-card';
+
+// a credit card's fee lines after the annual fee are its rates, shown as a row of label/value pairs
+export function cardStats(product, className) {
+  if (!isCreditCard(product) || product.fees.length < 2) return null;
+  return createElement('dl', { class: className }, product.fees.slice(1).map((fee) => createElement('div', {}, [
+    createElement('dt', {}, fee.label),
+    createElement('dd', {}, [fee.displayValue, fragment(footnoteSup(fee.footnotes, product.productPage))]),
+  ])));
 }

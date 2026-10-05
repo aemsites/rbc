@@ -32,6 +32,12 @@ export function createElement(tag, props, children) {
 
 export default createElement;
 
+export function fragment(html) {
+  const template = document.createElement('template');
+  template.innerHTML = html;
+  return template.content;
+}
+
 // calls back with true when the element reaches the top of the viewport, false once it is below
 export function watchStuck(element, callback) {
   let stuck = null;

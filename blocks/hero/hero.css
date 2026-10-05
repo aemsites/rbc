@@ -139,7 +139,7 @@ main > .section.hero-container:has(
   margin-inline: auto;
 }
 
-.hero .hero-copy picture img {
+.hero .hero-copy :is(picture img, p:has(> img + img) img) {
   width: auto;
   max-height: 32px;
 }

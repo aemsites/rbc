@@ -82,7 +82,7 @@ function productBody(product, ph, variant, keys = [], options = {}) {
     <p class="link-wrapper"><a href="${product.productPage}">${ph.viewMoreAccountBenefits || 'View More Account Benefits'}</a></p>`;
 }
 
-const CONFIG_KEYS = ['category', 'persona', 'cta', 'label'];
+const CONFIG_KEYS = ['category', 'persona', 'cta'];
 const words = (value) => String(value || '').split(',').map((v) => v.trim().toLowerCase()).filter(Boolean);
 
 async function expandFilterRows(anchor, config) {
@@ -105,18 +105,41 @@ async function renderProductRows(block) {
     && CONFIG_KEYS.includes(toClassName(row.firstElementChild.textContent)));
   if (settings.length) await expandFilterRows(settings[0], config);
   settings.forEach((row) => row.remove());
-  const options = { cta: config.cta, label: config.label && toClassName(config.label) };
+  const options = {
+    cta: config.cta,
+    label: ['none', 'type'].find((word) => block.classList.contains(word === 'none' ? 'no-label' : 'type-label')),
+  };
   const rows = [...block.children].filter((row) => {
-    const cell = row.firstElementChild;
-    const a = cell?.querySelector('a[href*="/products/"]');
-    return a && row.children.length <= 2 && cell.textContent.trim() === a.textContent.trim();
+    const a = row.firstElementChild?.querySelector('a[href*="/products/"]');
+    const alone = a?.parentElement.textContent.trim() === a?.textContent.trim();
+    return a && alone && row.children.length <= 2;
   });
   if (!rows.length) return;
   const ph = await fetchLocalPlaceholders();
-  const variant = ['compact', 'picture'].find((word) => block.classList.contains(word));
+  const variant = ['compact', 'picture', 'featured'].find((word) => block.classList.contains(word));
+  const featured = variant === 'featured' && await import('./featured.js');
   await Promise.all(rows.map(async (row) => {
-    const product = await getProduct(row.querySelector('a').getAttribute('href'));
+    const link = row.querySelector('a');
+    const product = await getProduct(link.getAttribute('href'));
     if (!product) { row.remove(); return; }
+    if (featured) {
+      const highlights = pickHighlights(product, keyList(row.children[1]))
+        .map((h) => ({ icon: h.icon, html: claim(h.text, h.url, product.productPage) }));
+      const label = options.label === 'none' ? '' : product.categoryLabel;
+      const { picture, cta, lines } = featured.rowExtras(row.firstElementChild, link);
+      const banded = block.classList.contains('banded');
+      const body = featured.default(product, ph, highlights, {
+        cta,
+        lines,
+        ctaText: options.cta,
+        banded,
+        offer: !block.classList.contains('no-offer'),
+        button: !block.classList.contains('no-cta'),
+      });
+      const art = banded ? null : featured.featuredArt(product, label, picture);
+      row.replaceChildren(...[art, body].filter(Boolean));
+      return;
+    }
     const body = document.createElement('div');
     body.innerHTML = productBody(product, ph, variant, keyList(row.children[1]), options);
     if (variant !== 'compact') body.dataset.category = product.category;
@@ -212,7 +235,7 @@ export default async function decorate(block) {
       ul.append(li);
       return;
     }
-    [...li.children].forEach((div) => {
+    [...li.children].filter((div) => !div.className).forEach((div) => {
       const media = div.querySelector('picture, img, .icon');
       const copy = div.textContent.replace(media?.textContent || '', '').trim();
       const only = div.children.length === 1 && media && !copy;
@@ -243,5 +266,7 @@ export default async function decorate(block) {
   });
   block.replaceChildren(ul);
 
-  if (block.classList.contains('product')) ul.querySelectorAll(':scope > li').forEach(decorateProduct);
+  if (block.classList.contains('product') && !block.classList.contains('featured')) {
+    ul.querySelectorAll(':scope > li').forEach(decorateProduct);
+  }
 }

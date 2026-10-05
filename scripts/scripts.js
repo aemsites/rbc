@@ -243,6 +243,13 @@ async function inlineIcon(span) {
   svg.querySelectorAll('[class]').forEach((node) => {
     node.setAttribute('class', [...node.classList].map((name) => `${prefix}-${name}`).join(' '));
   });
+  svg.querySelectorAll('[id]').forEach((node) => { node.id = `${prefix}-${node.id}`; });
+  svg.querySelectorAll('*').forEach((node) => {
+    [...node.attributes].forEach((attr) => {
+      const ref = /href$/.test(attr.name) ? /^(#)(.+)/ : /(url\(#)([^)]+)/g;
+      attr.value = attr.value.replace(ref, `$1${prefix}-$2`);
+    });
+  });
   svg.setAttribute('aria-hidden', 'true');
   svg.setAttribute('focusable', 'false');
   img.replaceWith(svg);

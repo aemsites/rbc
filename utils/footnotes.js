@@ -74,7 +74,7 @@ function remoteLabels(page) {
 }
 
 // numbers each placeholder from its tab's list; ids this page doesn't list link to the row
-// on the record's own page, in a new tab, with that page's number
+// on the record's own page (when it is on this site), in a new tab, with that page's number
 export async function resolveRefLinks(root) {
   const pending = [...root.querySelectorAll('a[data-ref]')];
   const sups = new Set(pending.map((a) => a.closest('sup')).filter(Boolean));
@@ -87,7 +87,7 @@ export async function resolveRefLinks(root) {
       a.href = `#${legalId(local)}`;
       a.textContent = local;
     } else {
-      const remoteLabel = page && !samePath(page, window.location.pathname)
+      const remoteLabel = page?.startsWith('/') && !samePath(page, window.location.pathname)
         ? (await remoteLabels(page)).get(id) : '';
       if (!remoteLabel) {
         // eslint-disable-next-line no-console

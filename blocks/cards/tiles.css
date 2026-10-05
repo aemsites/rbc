@@ -34,6 +34,18 @@
   color: var(--text-color);
 }
 
+.tile:is(.tile-blue, .tile-navy, .tile-blue-gradient, .tile-teal, .tile-maroon, .tile-purple, .tile-red, .tile-violet, .tile-scrim) a.button.secondary {
+  box-shadow: inset 0 0 0 1px var(--rbc-white);
+  background-color: transparent;
+  color: var(--rbc-white);
+
+  &:hover,
+  &:focus-visible {
+    background-color: var(--rbc-white);
+    color: var(--rbc-blue);
+  }
+}
+
 .tile .tile-content {
   position: relative;
   z-index: 1;
@@ -82,7 +94,7 @@
 
 .tile .tile-image {
   position: absolute;
-  right: var(--space-m);
+  right: 0;
   bottom: 0;
   z-index: 1;
   width: 45%;
