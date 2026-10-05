@@ -24,7 +24,13 @@ Edge Delivery Services. Read a block first. Omissions are in the repo or known.
 - Skills: `/plugin marketplace add adobe/skills`, then `aem-edge-delivery-services` (24 skills, incl. `docs-search`).
 
 ## DataLayer (`scripts/gtm.js`, `scripts/consent-check.js`)
-- Any edit to dataLayer-related code (`gtm.js`, `consent-check.js`, or anything feeding
-  `window.dataLayer`) must bump `RELEASE_DATE` in `scripts/gtm.js` to the current date
-  (`YYYY-MM-DD`). This is a manually-maintained field, not derived — update it yourself,
-  don't skip it.
+- Manage `SITE_VERSION_NUMBER` in `scripts/gtm.js` as the DataLayer's own SemVer
+  (`MAJOR.MINOR.PATCH`), independent of `package.json`.
+- Choose the bump from the actual DataLayer changes: MAJOR for incompatible payload
+  or event changes, MINOR for backward-compatible additions, PATCH for fixes that
+  preserve the existing contract.
+- Documentation, tests, and refactors with no payload or behavior changes do not
+  require a version bump.
+- When bumping the DataLayer version, update `SITE_VERSION_DATE` to the current date
+  (`YYYY-MM-DD`). The v2 payload emits `page.site_version` as `<semver>-<MMDDYY>`;
+  do not emit the legacy `release_date` field.
