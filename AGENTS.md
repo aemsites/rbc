@@ -35,7 +35,3 @@ Edge Delivery Services. Read a block first. Omissions are in the repo or known.
 - When bumping the DataLayer version, update `SITE_VERSION_DATE` to the current date
   (`YYYY-MM-DD`). The v2 payload emits `page.site_version` as `<semver>-<MMDDYY>`;
   do not emit the legacy `release_date` field.
-
-## Unit tests
-- `npm test` runs all unit tests under `test/` named `*.test.js`, `*.test.mjs`, or
-  `*.test.cjs`, including nested directories. New test files do not need new npm scripts.
