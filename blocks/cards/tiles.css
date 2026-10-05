@@ -82,7 +82,7 @@
 
 .tile .tile-image {
   position: absolute;
-  right: 0;
+  right: var(--space-m);
   bottom: 0;
   z-index: 1;
   width: 45%;
@@ -221,6 +221,11 @@
     position: static;
     width: 60%;
     margin-left: auto;
+    transform: none;
+  }
+
+  .tile.tile-art-center .tile-image {
+    margin-right: auto;
   }
 }
 
