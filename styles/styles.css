@@ -875,6 +875,11 @@ body:not(.style-guide) main > .section.left > .default-content-wrapper > p:has(>
 }
 
 body:not(.style-guide).library-page > main > .section > .default-content-wrapper :is(h1, h2, h3, h4, h5, h6, p, ul, ol, li) {
-    text-align: left;
-    max-width: initial;
+  text-align: left;
+  max-width: initial;
+}
+
+body:not(.style-guide).library-page > main > .section > .default-content-wrapper :is(h2, h3) {
+  background: var(--rbc-cool-white);
+  padding: var(--space-m);
 }

@@ -250,6 +250,13 @@
     margin: var(--space-3xl) var(--space-4xl);
   }
 
+  /* full bleed, so line the copy up with the content edge of the sections around it */
+  .carousel.single:not(.dark) .carousel-slide .carousel-slide-content {
+    --slide-content-width: min(50%, var(--content-width) / 2);
+
+    margin-inline: max(var(--space-xl), (100% - var(--content-width)) / 2);
+  }
+
   .carousel.single .carousel-navigation-buttons {
     left: var(--space-l);
     right: var(--space-l);
