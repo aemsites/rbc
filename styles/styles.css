@@ -873,3 +873,8 @@ body:not(.style-guide) main > .section > .default-content-wrapper > p:has(> stro
 body:not(.style-guide) main > .section.left > .default-content-wrapper > p:has(> strong:only-child):has(+ :is(h2, h3)) {
   margin-left: 0;
 }
+
+body:not(.style-guide).library-page > main > .section > .default-content-wrapper :is(h1, h2, h3, h4, h5, h6, p, ul, ol, li) {
+    text-align: left;
+    max-width: initial;
+}
