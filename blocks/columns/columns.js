@@ -26,10 +26,16 @@ export default function decorate(block) {
     });
   });
 
-  // a short bold-only line straight above a heading is a tag, as in the newcomer feature lists
+  block.querySelectorAll('p > .icon:only-child').forEach((icon) => {
+    if (!icon.parentElement.textContent.replace(icon.textContent, '').trim()) icon.parentElement.classList.add('columns-icon');
+  });
+
+  // a short bold-only line above a heading or a link is a tag (newcomer feature lists, NEW! pills)
   block.querySelectorAll('p:has(> strong:only-child)').forEach((p) => {
     const next = p.nextElementSibling;
-    if (next?.matches('h2, h3, h4, h5, h6') && p.textContent.trim().length <= 24) p.classList.add('columns-tag');
+    const { length } = p.textContent.trim();
+    const aboveHeading = next?.matches('h2, h3, h4, h5, h6') && length <= 24;
+    if (aboveHeading || (next?.querySelector('a') && length <= 12)) p.classList.add('columns-tag');
   });
 
   // slide-in: the first column enters from the left, the rest from the right, once in view

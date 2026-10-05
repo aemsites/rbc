@@ -160,6 +160,7 @@ function decorateProduct(li) {
   });
 }
 
+// a third cell holding only a colour paints the image cell with it
 let detailCount = 0;
 
 function decorateDetail(li, detail, ph) {
@@ -213,7 +214,8 @@ export default async function decorate(block) {
     }
     [...li.children].forEach((div) => {
       const media = div.querySelector('picture, img, .icon');
-      const only = div.children.length === 1 && media && !div.textContent.trim();
+      const copy = div.textContent.replace(media?.textContent || '', '').trim();
+      const only = div.children.length === 1 && media && !copy;
       div.className = only ? 'cards-card-image' : 'cards-card-body';
     });
     if (detail) decorateDetail(li, detail, ph);
@@ -224,12 +226,12 @@ export default async function decorate(block) {
     const optimized = createOptimizedPicture(img.src, img.alt, false, [{ width: '750' }]);
     (img.closest('picture') || img).replaceWith(optimized);
   });
-  if (block.classList.contains('yellow-eyebrow')) {
+  if (!block.classList.contains('product')) {
     ul.querySelectorAll(':scope > li').forEach((li) => {
       const eyebrow = li.querySelector('.cards-card-body > p:first-child:not(:has(a:not(.footnote), picture))');
       if (!eyebrow?.nextElementSibling?.matches('h2, h3, h4, h5, h6')) return;
       eyebrow.className = 'cards-card-eyebrow';
-      li.prepend(eyebrow);
+      if (block.classList.contains('yellow-eyebrow')) li.prepend(eyebrow);
     });
   }
   ul.querySelectorAll('h2, h3, h4, h5, h6').forEach((heading) => {

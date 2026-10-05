@@ -9,7 +9,9 @@ function fetchTooltips() {
   tooltips = tooltips || fetch('/tooltips.json')
     .then((resp) => (resp.ok ? resp.json() : {}))
     .then((json) => {
-      const rows = (json[SHEETS[getMetadata('lang')]] || json.data)?.data || [];
+      const rows = Array.isArray(json.data)
+        ? json.data
+        : (json[SHEETS[getMetadata('lang')]] || json.data || {}).data || [];
       return new Map(rows.map((row) => [row.Key, row]));
     })
     .catch(() => new Map());

@@ -61,6 +61,7 @@
 }
 
 .columns.shadow {
+  overflow: hidden;
   box-shadow: 0 3.591px 7.847px 0 rgb(37 37 37 / 8%);
   border-radius: var(--radius-s);
   background: var(--rbc-white);
@@ -70,13 +71,30 @@
   }
 }
 
+.columns.shadow > div > .columns-img-col:first-child picture,
+.columns.shadow > div > .columns-img-col:first-child img {
+  display: block;
+  height: 100%;
+}
+
+.columns.shadow > div > .columns-img-col:first-child img {
+  object-fit: cover;
+}
+
+@media (width >= 768px) {
+  .columns.shadow > div {
+    column-gap: 0;
+    align-items: stretch;
+  }
+}
+
 .columns.rules > div > div + div {
   border-top: 1px solid var(--rbc-grey-200);
   padding-top: var(--space-l);
 }
 
 @media (width >= 768px) {
-  .columns:is(.rules, .align-top) > div {
+  .columns:is(.rules, .align-top, .checklist) > div {
     align-items: start;
   }
 
@@ -88,7 +106,7 @@
   }
 }
 
-.columns p > .icon:only-child {
+.columns p.columns-icon > .icon {
   width: 40px;
   height: 40px;
 }
@@ -158,7 +176,7 @@
   border-radius: var(--radius-s);
   padding: 2px var(--space-2xs);
   background-color: var(--rbc-light-blue);
-  color: #456B86;
+  color: #456b86;
   font-size: var(--body-font-size-xs);
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -184,6 +202,10 @@
   margin-top: var(--space-2xl);
 }
 
+.columns.checklist > div + div {
+  margin-top: var(--space-s);
+}
+
 .columns.numbered {
   counter-reset: columns-row;
 }
@@ -192,12 +214,12 @@
   counter-increment: columns-row;
 }
 
-.columns.numbered > div > div:first-child > :is(h2, h3, h4):first-child {
+.columns.numbered > div > div:first-child > :is(h2, h3, h4, p):first-child {
   display: flex;
   gap: var(--space-xs);
 }
 
-.columns.numbered > div > div:first-child > :is(h2, h3, h4):first-child::before {
+.columns.numbered > div > div:first-child > :is(h2, h3, h4, p):first-child::before {
   content: counter(columns-row);
   display: grid;
   flex: none;
@@ -220,7 +242,7 @@
   background-color: var(--rbc-white);
 }
 
-.columns.list-row ul:has(> li > .icon:first-child, > li > p:first-child > .icon:first-child) {
+.columns.list-row ul:has(> li > .icon:first-child, > li > p:first-child > .icon:first-child, > li > a:first-child > .icon:first-child, > li > p:first-child > a:first-child > .icon:first-child) {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
   gap: var(--space-m);
@@ -229,7 +251,9 @@
 }
 
 .columns.list-row li > .icon:first-child,
-.columns.list-row li > p:first-child > .icon:first-child {
+.columns.list-row li > p:first-child > .icon:first-child,
+.columns.list-row li > a:first-child > .icon:first-child,
+.columns.list-row li > p:first-child > a:first-child > .icon:first-child {
   width: 20px;
   height: 20px;
   margin-inline-end: var(--space-2xs);

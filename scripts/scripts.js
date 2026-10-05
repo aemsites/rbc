@@ -56,6 +56,18 @@ async function loadFonts() {
 }
 
 /**
+ * Turns a paragraph holding only an .mp4 link in default content into a video block.
+ * @param {Element} main The container element
+ */
+function buildVideoAutoBlocks(main) {
+  main.querySelectorAll(':scope > div > p > a[href*=".mp4"]').forEach((link) => {
+    const p = link.parentElement;
+    if (p.textContent.trim() !== link.textContent.trim() || p.children.length !== 1) return;
+    p.replaceWith(buildBlock('video', { elems: [link] }));
+  });
+}
+
+/**
  * Turns `/widgets/...` links into widget blocks.
  * @param {Element} main The container element
  */
@@ -106,6 +118,7 @@ function buildAutoBlocks(main) {
       });
     }
     buildWidgetAutoBlocks(main);
+    buildVideoAutoBlocks(main);
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error('Auto Blocking failed', error);
@@ -222,6 +235,13 @@ async function inlineIcon(span) {
     [...node.attributes]
       .filter((attr) => attr.name.toLowerCase().startsWith('on'))
       .forEach((attr) => node.removeAttribute(attr.name));
+  });
+  const prefix = img.dataset.iconName;
+  svg.querySelectorAll('style').forEach((style) => {
+    style.textContent = style.textContent.replace(/\.(-?[_a-zA-Z][\w-]*)/g, `.${prefix}-$1`);
+  });
+  svg.querySelectorAll('[class]').forEach((node) => {
+    node.setAttribute('class', [...node.classList].map((name) => `${prefix}-${name}`).join(' '));
   });
   svg.setAttribute('aria-hidden', 'true');
   svg.setAttribute('focusable', 'false');

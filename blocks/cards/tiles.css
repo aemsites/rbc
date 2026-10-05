@@ -1,4 +1,8 @@
 .tile:not(.block) {
+  --text-color: var(--rbc-grey-900);
+  --link-color: var(--rbc-blue);
+  --link-hover-color: var(--rbc-blue-dark);
+
   position: relative;
   display: flex;
   flex-direction: column;
@@ -204,6 +208,20 @@
 .tile.tile-art-inset .tile-image {
   right: var(--space-l);
   bottom: var(--space-l);
+}
+
+/* narrow tiles: the art follows the copy instead of sharing its width */
+@media (width < 600px) {
+  .tile:has(.tile-image) .tile-content,
+  .tile.tile-narrow .tile-content {
+    max-width: none;
+  }
+
+  .tile:not(.block, .tile-art-top, .tile-art-top-center) .tile-image {
+    position: static;
+    width: 60%;
+    margin-left: auto;
+  }
 }
 
 .cards.tile.padding-bottom-s > ul > .tile { padding-bottom: var(--space-l); }

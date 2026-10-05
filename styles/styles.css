@@ -255,7 +255,7 @@ a:any-link {
   color: var(--link-color);
   text-decoration: none;
   overflow-wrap: break-word;
-  font-weight: 400;
+  font-weight: 300;
 }
 
 a:hover {
@@ -269,32 +269,52 @@ sup {
   vertical-align: super;
 }
 
+sub {
+  font-size: 0.75em;
+  line-height: 0;
+  vertical-align: sub;
+}
+
+/* fine print: a line that is only <sub> reads as small grey copy under what it qualifies */
+p > sub:only-child {
+  display: block;
+  line-height: var(--body-line-height);
+  color: var(--rbc-grey-600);
+  font-size: var(--body-font-size-xs);
+}
+
+main > .section.dark-background p > sub:only-child {
+  color: var(--rbc-grey-200);
+}
+
 .tooltip-trigger {
   border: 0;
-  border-bottom: 1px dotted currentcolor;
   padding: 0;
   background: none;
-  color: inherit;
+  color: var(--link-color);
   font: inherit;
   cursor: pointer;
 }
 
-.tooltip-trigger.tooltip-icon {
+.tooltip-trigger:is(:hover, :focus-visible) {
+  text-decoration: underline;
+}
+
+.tooltip-trigger::after {
+  content: "i";
   display: inline-grid;
   place-items: center;
   width: 1.1em;
   height: 1.1em;
-  margin-inline-start: 0.2em;
-  border: 1px solid var(--link-color);
+  margin-inline-start: 0.25em;
+  border: 1px solid currentcolor;
   border-radius: 50%;
-  color: var(--link-color);
+  font-family: var(--body-font-family);
   font-size: 0.8em;
+  font-style: normal;
   line-height: 1;
-  vertical-align: 0.1em;
-}
-
-.tooltip-trigger.tooltip-icon::before {
-  content: "?";
+  text-decoration: none;
+  vertical-align: 0.05em;
 }
 
 .tooltip {
@@ -330,6 +350,10 @@ details.disclosure > summary {
   color: var(--link-color);
   cursor: pointer;
   list-style: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
 }
 
 details.disclosure > summary::-webkit-details-marker {
@@ -498,7 +522,7 @@ main > .section:first-of-type {
   margin-top: 0;
 }
 
-main > .section:first-of-type h1 {
+main > .section:first-of-type > :where(.default-content-wrapper) h1 {
   color: var(--rbc-blue);
   margin-top: var(--space-s);
 }
@@ -506,6 +530,14 @@ main > .section:first-of-type h1 {
 @media (width >= 768px) {
   main > .section > div {
     padding: 0 var(--space-xl);
+  }
+}
+
+main > .section p.link-wrapper a {
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
   }
 }
 
@@ -615,6 +647,15 @@ main > .section[data-layout] > .default-content-wrapper:nth-last-child(2) :is(p,
   main > .section[data-layout="50-50"] { grid-template-columns: 1fr 1fr; }
   main > .section[data-layout="66-33"] { grid-template-columns: 2fr 1fr; }
   main > .section[data-layout="33-66"] { grid-template-columns: 1fr 2fr; }
+
+  /* heading | block, then a closing line: the line stays under the block */
+  main > .section[data-layout] > div:first-child:has(+ div + .default-content-wrapper:last-child) {
+    grid-column: auto;
+  }
+
+  main > .section[data-layout] > .default-content-wrapper:nth-child(3):last-child {
+    grid-column: 2;
+  }
 }
 
 main > .section[data-width="s"] > div {

@@ -53,7 +53,21 @@
   background-color: var(--rbc-light-blue);
 }
 
+.table table td ul {
+  margin: 0;
+  padding-left: 0;
+  list-style: none;
+}
+
+.table table td li + li {
+  margin-top: 0.25em;
+}
+
 .table.bordered table th,
 .table.bordered table td {
   border: 1px solid #dadada;
+}
+
+.table.striped tbody td:first-child {
+  font-weight: 500;
 }
