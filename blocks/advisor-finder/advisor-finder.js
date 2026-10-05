@@ -1,6 +1,7 @@
 import fetchLocalPlaceholders from '../../utils/placeholders.js';
 import { createOptimizedPicture } from '../../scripts/aem.js';
 import { createModal } from '../modal/modal.js';
+import { escapeHtml } from '../../utils/dom.js';
 
 function paragraphs(text) {
   return text.split(/\n\s*\n/).map((chunk) => {
@@ -17,10 +18,10 @@ function card(person, ph) {
   const first = person.Nickname || person.Name.split(' ')[0];
   li.append(createOptimizedPicture(person.Image, person.Name, false, [{ width: '320' }]));
   const body = document.createElement('div');
-  body.innerHTML = `<h3>${person.Name}<span>${person.Location}</span></h3>
-    <p><strong>${ph.arrived || 'Arrived in Canada'}:</strong> ${person.Arrived}</p>
-    <p><strong>${ph.speaks || 'Speaks'}:</strong> ${person.Speaks}</p>
-    <p class="advisor-finder-quote">${person.Quote}</p>`;
+  body.innerHTML = `<h3>${escapeHtml(person.Name)}<span>${escapeHtml(person.Location)}</span></h3>
+    <p><strong>${ph.arrived || 'Arrived in Canada'}:</strong> ${escapeHtml(person.Arrived)}</p>
+    <p><strong>${ph.speaks || 'Speaks'}:</strong> ${escapeHtml(person.Speaks)}</p>
+    <p class="advisor-finder-quote">${escapeHtml(person.Quote)}</p>`;
   if (person.Bio) {
     const more = document.createElement('button');
     more.type = 'button';

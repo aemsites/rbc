@@ -1,7 +1,7 @@
 import {
   createOptimizedPicture, readBlockConfig, toCamelCase, toClassName,
 } from '../../scripts/aem.js';
-import decorateTile, { tileWords } from './tiles.js';
+import { escapeHtml, safeUrl } from '../../utils/dom.js';
 import {
   getProduct, getProducts, monthlyFees, pickHighlights, keyList, offerLegalPage, isPrice, zeroPrice,
 } from '../../utils/products.js';
@@ -10,6 +10,8 @@ import { rateSpan } from '../../utils/rates.js';
 import {
   footnoteSup, expandRefs, stripRefs, refIds, resolveRefLinks,
 } from '../../utils/footnotes.js';
+
+import decorateTile, { tileWords } from './tiles.js';
 
 function button(text, href, kind) {
   return `<p class="button-wrapper"><a class="button ${kind}" href="${href}">${text}</a></p>`;
@@ -94,7 +96,7 @@ async function expandFilterRows(anchor, config) {
   const products = (await getProducts()).filter(wanted);
   anchor.before(...products.map((p) => {
     const row = document.createElement('div');
-    row.innerHTML = `<div><a href="${p.path}">${p.path}</a></div>`;
+    row.innerHTML = `<div><a href="${safeUrl(p.path)}">${escapeHtml(p.path)}</a></div>`;
     return row;
   }));
 }

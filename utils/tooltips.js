@@ -27,7 +27,9 @@ async function fill(button, popover, key) {
   if (button.classList.contains('tooltip-icon')) {
     button.setAttribute('aria-label', tip.Title || ph.moreInformation || 'More information');
   }
-  // sheet copy is authored, like page copy, and may carry links and emphasis
+  // tip.Text is authored HTML from the AEM sheet — same trust as page copy.
+  // If the sheet authoring pipeline changes to accept untrusted input,
+  // sanitize here with DOMPurify.
   popover.innerHTML = `${tip.Title ? `<strong>${tip.Title}</strong> ` : ''}${tip.Text}`;
 }
 
