@@ -1,5 +1,6 @@
 import applyConfig from '../../scripts/config.js';
 import { getMetadata } from '../../scripts/aem.js';
+import { trackProduct } from '../../scripts/ecommerce-analytics.js';
 import {
   getProduct, getProducts, pickHighlights, isPrice,
 } from '../../utils/products.js';
@@ -221,7 +222,17 @@ export default async function decorate(block) {
   const text = (key) => results.querySelector(`[data-key="${key}"]`).textContent;
   let products = [];
   if (!handoff) products = refs.length ? await Promise.all(refs.map(getProduct)) : await getProducts({ category: 'chequing', persona: 'everyone' });
-  cards.append(...products.filter(Boolean).map((product) => productCard(product, text)));
+  const tracking = new Map();
+  cards.append(...products.filter(Boolean).map((product) => {
+    const card = productCard(product, text);
+    tracking.set(card, product);
+    return card;
+  }));
+  const listTitle = heading.firstElementChild.textContent.trim();
+  const trackCards = () => [...cards.children].forEach((card, index) => {
+    trackProduct(card, tracking.get(card), { list: cards, listTitle, index });
+  });
+  trackCards();
   resolveRefLinks(cards);
 
   const prefill = new URLSearchParams(window.location.search);
@@ -293,6 +304,7 @@ export default async function decorate(block) {
       if (hit) cards.prepend(li);
     });
     heading.lastElementChild.textContent = cards.querySelector('.recommended')?.dataset.name || '';
+    trackCards();
     form.hidden = true;
     results.hidden = false;
     results.scrollIntoView({ behavior: 'smooth' });

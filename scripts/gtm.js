@@ -1,4 +1,5 @@
 import { getMetadata, loadScript } from './aem.js';
+import { initEcommerce } from './ecommerce-analytics.js';
 import {
   CONSENT_GROUPS, hasConsentGroup, resolveGroups, consentOverride,
 } from './consent-check.js';
@@ -9,7 +10,7 @@ const PROD_HOSTS = ['main--rbc--aemsites.aem.live', 'www.rbcroyalbank.com'];
 const SITE_SECTION = 'public';
 const CMS_TYPE = 'aem';
 // Independent DataLayer SemVer and date stamp; see AGENTS.md for bump rules.
-const SITE_VERSION_NUMBER = '1.0.0';
+const SITE_VERSION_NUMBER = '1.1.0';
 const SITE_VERSION_DATE = '2026-10-05';
 
 const defined = (obj) => Object.fromEntries(
@@ -182,6 +183,7 @@ function pushGlobalParameters() {
   });
 
   initClickTracking();
+  initEcommerce();
 }
 
 pushGlobalParameters();

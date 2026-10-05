@@ -6,6 +6,7 @@ import {
   getProduct, getProducts, monthlyFees, pickHighlights, keyList, offerLegalPage, isPrice, zeroPrice,
 } from '../../utils/products.js';
 import fetchLocalPlaceholders from '../../utils/placeholders.js';
+import { trackProduct } from '../../scripts/ecommerce-analytics.js';
 import { rateSpan } from '../../utils/rates.js';
 import {
   footnoteSup, expandRefs, stripRefs, refIds, resolveRefLinks,
@@ -100,6 +101,7 @@ async function expandFilterRows(anchor, config) {
 }
 
 async function renderProductRows(block) {
+  const records = new Map();
   const config = readBlockConfig(block);
   const settings = [...block.children].filter((row) => row.children.length === 2
     && CONFIG_KEYS.includes(toClassName(row.firstElementChild.textContent)));
@@ -111,12 +113,13 @@ async function renderProductRows(block) {
     const a = cell?.querySelector('a[href*="/products/"]');
     return a && row.children.length <= 2 && cell.textContent.trim() === a.textContent.trim();
   });
-  if (!rows.length) return;
+  if (!rows.length) return records;
   const ph = await fetchLocalPlaceholders();
   const variant = ['compact', 'picture'].find((word) => block.classList.contains(word));
   await Promise.all(rows.map(async (row) => {
     const product = await getProduct(row.querySelector('a').getAttribute('href'));
     if (!product) { row.remove(); return; }
+    records.set(row, product);
     const body = document.createElement('div');
     body.innerHTML = productBody(product, ph, variant, keyList(row.children[1]), options);
     if (variant !== 'compact') body.dataset.category = product.category;
@@ -128,6 +131,7 @@ async function renderProductRows(block) {
     }
   }));
   await resolveRefLinks(block);
+  return records;
 }
 
 function decorateProduct(li) {
@@ -197,12 +201,14 @@ function decorateDetail(li, detail, ph) {
 
 export default async function decorate(block) {
   if (block.classList.contains('tinted-alternate')) block.classList.add('tinted');
-  if (block.classList.contains('product')) await renderProductRows(block);
+  const records = block.classList.contains('product') ? await renderProductRows(block) : new Map();
+  const products = new Map();
   const expandable = block.classList.contains('expandable');
   const ph = expandable ? await fetchLocalPlaceholders() : {};
   const ul = document.createElement('ul');
   [...block.children].forEach((row) => {
     const li = document.createElement('li');
+    if (records.has(row)) products.set(li, records.get(row));
     while (row.firstElementChild) li.append(row.firstElementChild);
     const detail = expandable && li.children.length > 2 ? li.lastElementChild : null;
     detail?.remove();
@@ -242,4 +248,7 @@ export default async function decorate(block) {
   block.replaceChildren(ul);
 
   if (block.classList.contains('product')) ul.querySelectorAll(':scope > li').forEach(decorateProduct);
+  products.forEach((product, li) => trackProduct(li, product, {
+    list: block, index: [...ul.children].indexOf(li),
+  }));
 }

@@ -1,5 +1,6 @@
 import { getProduct, monthlyFees } from '../../utils/products.js';
 import fetchLocalPlaceholders from '../../utils/placeholders.js';
+import { trackProduct, isProductDetail } from '../../scripts/ecommerce-analytics.js';
 import { footnoteSup, resolveRefLinks } from '../../utils/footnotes.js';
 
 // first row links a /products/ record; the remaining rows are the authored feature columns
@@ -34,4 +35,7 @@ export default async function decorate(block) {
     <p class="product-summary-more link-wrapper"><a href="${product.productPage}">${ph.viewMoreAccountBenefits || 'View More Account Benefits'}</a></p>`;
   block.querySelector('.product-summary-head').after(list);
   await resolveRefLinks(block);
+  trackProduct(block, product, {
+    detail: isProductDetail() && !document.querySelector('main .product-rail'),
+  });
 }

@@ -1,6 +1,7 @@
 import { createOptimizedPicture } from '../../scripts/aem.js';
 import { getProduct, offerLegalPage } from '../../utils/products.js';
 import fetchLocalPlaceholders from '../../utils/placeholders.js';
+import { trackProduct, isProductDetail } from '../../scripts/ecommerce-analytics.js';
 import { rateSpan } from '../../utils/rates.js';
 import {
   footnoteSup, expandRefs, resolveRefLinks, normalizeLabel,
@@ -61,7 +62,7 @@ function railRows(product, ph) {
 function stickyBar(block, ph) {
   const apply = block.querySelector('.product-rail-cta a.button');
   const title = document.querySelector('main h1');
-  if (!apply || !title) return;
+  if (!apply || !title) return undefined;
   const bar = document.createElement('div');
   bar.className = 'product-rail-bar';
   bar.innerHTML = `<p class="product-rail-bar-title" aria-hidden="true">${title.textContent}</p>
@@ -71,14 +72,19 @@ function stickyBar(block, ph) {
   new IntersectionObserver(([entry]) => {
     bar.classList.toggle('visible', !entry.isIntersecting && entry.boundingClientRect.top < 0);
   }).observe(section);
+  return bar;
 }
 
 export default async function decorate(block) {
   const ph = await fetchLocalPlaceholders();
+  let record;
   const link = block.querySelector('a[href*="/products/"]');
   if (link && block.textContent.trim() === link.textContent.trim()) {
     const product = await getProduct(link.getAttribute('href'));
-    if (product) block.innerHTML = railRows(product, ph);
+    if (product) {
+      record = product;
+      block.innerHTML = railRows(product, ph);
+    }
     await resolveRefLinks(block);
   }
   [...block.children].forEach((r) => {
@@ -100,5 +106,12 @@ export default async function decorate(block) {
     }
     r.className = 'product-rail-fee';
   });
-  stickyBar(block, ph);
+  const bar = stickyBar(block, ph);
+  if (record) {
+    trackProduct(block, record, { detail: isProductDetail() });
+    if (bar) {
+      bar.dataset.blockName = 'product-rail';
+      trackProduct(bar, record);
+    }
+  }
 }
