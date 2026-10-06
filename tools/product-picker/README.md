@@ -65,8 +65,10 @@ The separate promotion-analytics implementation must be deployed for hero tracki
 Content language defaults to French for `/fr/` documents and English otherwise;
 authors can switch explicitly. No cross-language fallback is performed. Search
 matches names, short names, paths, product codes, and offer identities. Category
-and persona filters include variants. Use Arrow Up/Down to select visible results,
-then Tab to the insertion button; Enter/Space activate native buttons.
+and persona filters include variants. The Insert button stays in the top action
+bar, alongside a ready-to-insert status or the reason insertion is unavailable.
+Use Arrow Up/Down to select visible results, then Tab to reach Insert for a valid
+selection; Enter/Space activate native buttons.
 
 Refresh clears the selection and reloads the index. Invalid product records are
 reported under **Skipped index records**. Loading failures show a retry message,

@@ -80,11 +80,19 @@ test('product insertion uses relative link text and can be repeated while the pi
   find('.picker-list button[data-key="/products/signature:products:0"]').click();
   const button = find('.picker-insert');
   assert.equal(button.disabled, false);
+  assert.ok(button.closest('.picker-actionbar'));
+  assert.match(find('.picker-selection').textContent, /Ready to insert product: Signature/);
+  const result = find('.picker-list button[data-key="/products/signature:products:0"]');
+  result.focus();
+  const { KeyboardEvent } = result.ownerDocument.defaultView;
+  result.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true }));
+  assert.equal(result.ownerDocument.activeElement, button);
   assert.equal(find('.picker-detail-content pre').textContent, '/products/signature');
   button.click();
   assert.equal(button.disabled, true);
   await flush();
   assert.equal(button.disabled, false);
+  assert.match(find('.picker-selection').textContent, /Ready to insert product: Signature/);
   button.click();
   await flush();
   assert.deepEqual(calls, [
@@ -104,6 +112,7 @@ test('valid offer insertion can be repeated; incomplete offers remain disabled',
   find('.picker-list button[data-key="/products/signature:offers:0"]').click();
   const button = find('.picker-insert');
   assert.equal(button.disabled, false);
+  assert.match(find('.picker-selection').textContent, /Ready to insert offer: Offer: summer:summer/);
   button.click();
   await flush();
   assert.equal(button.disabled, false);
@@ -115,6 +124,7 @@ test('valid offer insertion can be repeated; incomplete offers remain disabled',
   ]);
   find('.picker-list button[data-key="/products/incomplete:offers:0"]').click();
   assert.equal(button.disabled, true);
+  assert.match(find('.picker-selection').textContent, /Cannot insert: Offer name and ID are required/);
 });
 
 test('pending insertion prevents double sends and enables Insert after completion', async () => {

@@ -44,9 +44,20 @@ function addDetail(list, label, value) {
 function renderDetails() {
   const content = find('detail-content');
   const button = find('insert');
+  const selection = find('selection');
   const isOffer = mode() === 'offers';
   button.textContent = isOffer ? 'Insert Offer' : 'Insert Product';
   button.disabled = !state.selected || state.loading || state.inserting;
+  selection.classList.remove('picker-invalid');
+  if (state.inserting) {
+    selection.textContent = 'Sending selection to the editor...';
+  } else if (state.loading) {
+    selection.textContent = 'Connecting or loading records...';
+  } else if (!state.loaded) {
+    selection.textContent = 'Load the catalog with Refresh before inserting.';
+  } else if (!state.selected) {
+    selection.textContent = `Select ${isOffer ? 'an offer' : 'a product'} to enable Insert.`;
+  }
   find('instructions').textContent = isOffer
     ? 'Place the cursor in the value cell of a promo or offer Section Metadata row. Only Name:ID is inserted; no row, copy, or CTA is created. Existing values do not update automatically.'
     : 'Products insert a structured product link, not a product page link.';
@@ -81,8 +92,13 @@ function renderDetails() {
     const output = offer ? offerValue(offer) : product.path;
     if (!offer) addDetail(details, 'Link destination', productURL(product.path));
     content.append(createElement('h3', {}, 'Exact insertion output'), createElement('pre', {}, output));
+    if (!state.loading && !state.inserting) {
+      selection.textContent = `Ready to insert ${isOffer ? 'offer' : 'product'}: ${offer ? output : product.shortName || product.name || product.path}`;
+    }
   } catch (error) {
     button.disabled = true;
+    selection.textContent = `Cannot insert: ${error.message}`;
+    selection.classList.add('picker-invalid');
     content.append(createElement('p', { class: 'picker-invalid' }, error.message));
   }
 }
@@ -256,6 +272,7 @@ async function init() {
   } catch (error) {
     console.error('RBC picker: initialization failed', error);
     find('status').textContent = 'Editor connection unavailable.';
+    find('selection').textContent = 'Cannot insert: editor connection unavailable.';
     showError(error.message);
   } finally {
     clearTimeout(timeout);
@@ -276,6 +293,11 @@ root.querySelectorAll('[name="mode"]').forEach((input) => input.addEventListener
 find('refresh').addEventListener('click', refresh);
 find('insert').addEventListener('click', insert);
 find('list').addEventListener('keydown', (event) => {
+  if (event.key === 'Tab' && !event.shiftKey && !find('insert').disabled) {
+    event.preventDefault();
+    find('insert').focus();
+    return;
+  }
   if (!['ArrowDown', 'ArrowUp'].includes(event.key)) return;
   const buttons = [...find('list').querySelectorAll('button')];
   if (!buttons.length) return;

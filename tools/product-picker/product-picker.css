@@ -29,8 +29,31 @@
   flex-shrink: 0;
 }
 
+.rbc-picker .picker-actionbar {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--picker-border);
+  background: var(--picker-background);
+  flex-shrink: 0;
+}
+
+.rbc-picker .picker-action-heading {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.rbc-picker .picker-selection {
+  margin: 8px 0 0;
+  overflow-wrap: anywhere;
+}
+
 .rbc-picker h1 {
-  margin: 0 0 12px;
+  margin: 0;
   font-size: 22px;
 }
 
@@ -191,7 +214,6 @@
   background: var(--picker-blue);
   border-color: var(--picker-blue);
   color: #fff;
-  margin-top: 16px;
 }
 
 .rbc-picker .picker-instructions,
