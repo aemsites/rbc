@@ -71,25 +71,7 @@
 }
 
 .product-rail .product-rail-offer {
-  position: relative;
   margin-bottom: var(--space-l);
-  border: 1px solid var(--rbc-yellow);
-  border-radius: var(--radius-s);
-  padding: var(--space-l) var(--space-s) var(--space-s);
-  background-color: #fffbe6;
-}
-
-.product-rail .product-rail-eyebrow {
-  position: absolute;
-  top: calc(var(--space-2xs) * -1);
-  left: var(--space-s);
-  grid-column: 1 / -1;
-  padding: 0 var(--space-2xs);
-  background-color: var(--rbc-yellow);
-  font-size: var(--body-font-size-xs);
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
 }
 
 .product-rail .product-rail-offer > div:last-child {
@@ -151,4 +133,15 @@
 
 .product-rail .product-rail-cta a.button {
   width: 100%;
+}
+
+.product-rail .product-rail-note.checklist {
+  margin-top: 0;
+  color: var(--text-color);
+  font-size: var(--body-font-size-s);
+}
+
+.product-rail .product-rail-note.checklist p:first-child {
+  margin: 0 0 var(--space-xs);
+  font-weight: 500;
 }

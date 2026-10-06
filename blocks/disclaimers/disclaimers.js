@@ -9,11 +9,21 @@ export default async function decorate(block) {
   const summary = document.createElement('summary');
   summary.textContent = ph.legalDisclaimers || 'Legal Disclaimers';
 
-  // labels aren't sequential (they skip numbers and include symbols like * and †), so each row
-  // carries its own label rather than one derived from position
   const list = document.createElement('ul');
   [...block.children].forEach((row) => {
     const [labelCell, textCell, idCell] = [...row.children];
+
+    if (!textCell) {
+      const heading = labelCell?.querySelector(':scope > :is(h1, h2, h3, h4, h5, h6):only-child');
+      if (heading) {
+        summary.textContent = heading.textContent.trim();
+      } else if (labelCell?.textContent.trim()) {
+        const li = document.createElement('li');
+        li.append(...labelCell.childNodes);
+        list.append(li);
+      }
+      return;
+    }
     const label = normalizeLabel(labelCell.textContent);
     const li = document.createElement('li');
     li.id = legalId(label, tab);

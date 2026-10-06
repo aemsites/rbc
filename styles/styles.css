@@ -16,6 +16,7 @@
   --rbc-blue-dark: #0051a5;
   --rbc-navy: #003168;
   --rbc-light-blue: #edf7fc;
+  --rbc-tag-blue: #e4eeff;
   --rbc-yellow: #fedf01;
   --rbc-yellow-dark: #e8cf00;
   --rbc-yellow-light: #fae487;
@@ -255,7 +256,7 @@ a:any-link {
   color: var(--link-color);
   text-decoration: none;
   overflow-wrap: break-word;
-  font-weight: 400;
+  font-weight: 300;
 }
 
 a:hover {
@@ -269,32 +270,52 @@ sup {
   vertical-align: super;
 }
 
+sub {
+  font-size: 0.75em;
+  line-height: 0;
+  vertical-align: sub;
+}
+
+/* fine print: a line that is only <sub> reads as small grey copy under what it qualifies */
+p > sub:only-child {
+  display: block;
+  line-height: var(--body-line-height);
+  color: var(--rbc-grey-600);
+  font-size: var(--body-font-size-xs);
+}
+
+main > .section.dark-background p > sub:only-child {
+  color: var(--rbc-grey-200);
+}
+
 .tooltip-trigger {
   border: 0;
-  border-bottom: 1px dotted currentcolor;
   padding: 0;
   background: none;
-  color: inherit;
+  color: var(--link-color);
   font: inherit;
   cursor: pointer;
 }
 
-.tooltip-trigger.tooltip-icon {
+.tooltip-trigger:is(:hover, :focus-visible) {
+  text-decoration: underline;
+}
+
+.tooltip-trigger::after {
+  content: "i";
   display: inline-grid;
   place-items: center;
   width: 1.1em;
   height: 1.1em;
-  margin-inline-start: 0.2em;
-  border: 1px solid var(--link-color);
+  margin-inline-start: 0.25em;
+  border: 1px solid currentcolor;
   border-radius: 50%;
-  color: var(--link-color);
+  font-family: var(--body-font-family);
   font-size: 0.8em;
+  font-style: normal;
   line-height: 1;
-  vertical-align: 0.1em;
-}
-
-.tooltip-trigger.tooltip-icon::before {
-  content: "?";
+  text-decoration: none;
+  vertical-align: 0.05em;
 }
 
 .tooltip {
@@ -330,6 +351,10 @@ details.disclosure > summary {
   color: var(--link-color);
   cursor: pointer;
   list-style: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
 }
 
 details.disclosure > summary::-webkit-details-marker {
@@ -498,7 +523,7 @@ main > .section:first-of-type {
   margin-top: 0;
 }
 
-main > .section:first-of-type h1 {
+main > .section:first-of-type > :where(.default-content-wrapper) h1 {
   color: var(--rbc-blue);
   margin-top: var(--space-s);
 }
@@ -506,6 +531,14 @@ main > .section:first-of-type h1 {
 @media (width >= 768px) {
   main > .section > div {
     padding: 0 var(--space-xl);
+  }
+}
+
+main > .section p.link-wrapper a {
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
   }
 }
 
@@ -536,6 +569,7 @@ main > .section.dark-background {
   --text-color: var(--rbc-white);
   --link-color: var(--rbc-white);
   --link-hover-color: var(--rbc-yellow);
+  --icon-color: var(--rbc-white);
 
   color: var(--text-color);
 }
@@ -554,6 +588,10 @@ main > .section.dark-background a.button.secondary:hover,
 main > .section.dark-background a.button.secondary:focus-visible {
   background-color: var(--rbc-white);
   color: var(--rbc-blue);
+}
+
+main > .section.dark-background .icon svg * {
+  fill: var(--icon-color);
 }
 
 body:not(.style-guide) main > .section > .default-content-wrapper :is(p, h2, h3, h4, h5, h6) {
@@ -615,6 +653,15 @@ main > .section[data-layout] > .default-content-wrapper:nth-last-child(2) :is(p,
   main > .section[data-layout="50-50"] { grid-template-columns: 1fr 1fr; }
   main > .section[data-layout="66-33"] { grid-template-columns: 2fr 1fr; }
   main > .section[data-layout="33-66"] { grid-template-columns: 1fr 2fr; }
+
+  /* heading | block, then a closing line: the line stays under the block */
+  main > .section[data-layout] > div:first-child:has(+ div + .default-content-wrapper:last-child) {
+    grid-column: auto;
+  }
+
+  main > .section[data-layout] > .default-content-wrapper:nth-child(3):last-child {
+    grid-column: 2;
+  }
 }
 
 main > .section[data-width="s"] > div {
@@ -815,4 +862,80 @@ body:not(.style-guide) main > .section.strip > .default-content-wrapper p {
   margin: 0;
   font-size: var(--body-font-size-xs);
   max-width: 100%;
+}
+
+body:not(.style-guide) main > .section > .default-content-wrapper > p.label {
+  display: block;
+  width: fit-content;
+  margin: 0 auto var(--space-xs);
+}
+
+body:not(.style-guide) main > .section.left > .default-content-wrapper > p.label {
+  margin-left: 0;
+}
+
+/* labels above headings: plain, light-blue tag (bold) or promotional tag (italic) */
+.label {
+  display: inline-block;
+  margin: 0 0 var(--space-2xs);
+  font-size: var(--body-font-size-s);
+  font-weight: 500;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+
+:is(.label, .offer-label) :is(u, strong, b, em, i) {
+  font-style: normal;
+  font-weight: inherit;
+  text-decoration: none;
+}
+
+.label-tag {
+  border-radius: var(--radius-s);
+  padding: 2px var(--space-2xs);
+  background-color: var(--rbc-tag-blue);
+  color: #456b86;
+  font-size: var(--body-font-size-xs);
+  letter-spacing: 0.06em;
+}
+
+.label-promo {
+  padding: 2px var(--space-2xs);
+  background-color: var(--rbc-orange);
+  color: var(--rbc-grey-900);
+  font-size: var(--body-font-size-xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+/* an offer: a cream box with its label notched into the top border */
+.offer-box {
+  position: relative;
+  border: 1px solid var(--rbc-orange);
+  border-radius: var(--radius-s);
+  padding: var(--space-l) var(--space-s) var(--space-s);
+  background-color: #fffbe6;
+}
+
+.offer-box > .offer-label {
+  position: absolute;
+  top: calc(var(--space-2xs) * -1);
+  left: var(--space-s);
+  margin: 0;
+  padding: 0 var(--space-2xs);
+  background-color: var(--rbc-orange);
+  font-size: var(--body-font-size-xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+body:not(.style-guide).library-page > main > .section > .default-content-wrapper :is(h1, h2, h3, h4, h5, h6, p, ul, ol, li) {
+  text-align: left;
+  max-width: initial;
+}
+
+body:not(.style-guide).library-page > main > .section > .default-content-wrapper :is(h2, h3) {
+  background: var(--rbc-cool-white);
+  padding: var(--space-m);
 }

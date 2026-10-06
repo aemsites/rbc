@@ -28,9 +28,24 @@ main > .section > .cards-wrapper + .default-content-wrapper {
   }
 }
 
-/* five or six cards read better as 3+2 or 3+3 than with an orphan */
 .cards > ul:has(> li:nth-child(5):last-child, > li:nth-child(6):last-child) {
   --cards-max: 3;
+}
+
+.cards:has(> ul > li:nth-child(4):last-child) {
+  container-type: inline-size;
+}
+
+.cards > ul:where(:has(> li:nth-child(4):last-child)) {
+  @media (width >= 768px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@container (width >= 960px) {
+  .cards > ul:where(:has(> li:nth-child(4):last-child)) {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
 
 .cards > ul:has(> li:only-child) {
@@ -64,7 +79,6 @@ main > .section > .cards-wrapper + .default-content-wrapper {
   margin-top: 0;
 }
 
-
 .cards .cards-card-body .cards-card-title {
   font-size: var(--heading-font-size-m);
 }
@@ -80,8 +94,28 @@ main > .section > .cards-wrapper + .default-content-wrapper {
 
 .cards > ul > li > .cards-card-image img {
   width: 100%;
+  max-height: 220px;
   aspect-ratio: 4 / 3;
   object-fit: cover;
+  object-position: top;
+}
+
+/* logos: the whole mark sits on a tinted panel instead of cropping to fill */
+.cards.logos > ul > li > .cards-card-image {
+  padding: var(--space-l);
+  background-color: var(--rbc-grey-100);
+}
+
+.cards.logos > ul > li > .cards-card-image img {
+  height: 160px;
+  aspect-ratio: auto;
+  object-fit: contain;
+  object-position: center;
+}
+
+.cards:not(.product, .checklist) .cards-card-body ul {
+  padding-left: var(--space-m);
+  list-style: disc;
 }
 
 .cards .cards-card-body p.button-wrapper {
@@ -149,6 +183,13 @@ main > .section > .cards-wrapper + .default-content-wrapper {
   color: var(--rbc-blue);
 }
 
+.cards.icons .cards-card-title > .icon:first-child {
+  width: 24px;
+  height: 24px;
+  margin-right: var(--space-2xs);
+  vertical-align: -4px;
+}
+
 .cards.icons > ul > li > .cards-card-image .icon svg [fill]:not([fill="none"], [fill="white"]) {
   fill: currentcolor;
 }
@@ -162,7 +203,47 @@ main > .section > .cards-wrapper + .default-content-wrapper {
   line-height: 0;
 }
 
-/* list: one full-width row per card, icon left */
+.cards.icons.bordered > ul {
+  @media (width >= 768px) {
+    grid-template-columns: repeat(auto-fit, minmax(max(min(300px, 100%), var(--cards-cap)), 1fr));
+  }
+}
+
+.cards.icons.bordered > ul:has(> li:nth-child(4):last-child) {
+  @media (width >= 768px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.cards.icons.bordered > ul > li {
+  border: 1px solid var(--rbc-grey-200);
+  border-radius: var(--radius-s);
+  padding: var(--space-l);
+  background-color: var(--rbc-white);
+}
+
+.cards.icons.bordered > ul > li > .cards-card-image {
+  margin-bottom: var(--space-xs);
+}
+
+.cards.icons > ul > li > .cards-card-image .icon[class*="icon-number"] {
+  width: 28px;
+  height: 28px;
+}
+
+.cards .cards-card-eyebrow {
+  display: inline-block;
+  margin: 0 0 var(--space-2xs);
+  border-radius: var(--radius-s);
+  padding: 2px var(--space-2xs);
+  background-color: var(--rbc-tag-blue);
+  color: #456b86;
+  font-size: var(--body-font-size-xs);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
 .cards.list > ul {
   grid-template-columns: 1fr;
   gap: 0;
@@ -235,6 +316,7 @@ main > .section > .cards-wrapper + .default-content-wrapper {
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+  color: var(--text-color);
 }
 
 .cards.yellow-eyebrow .cards-card-eyebrow .icon {
@@ -257,35 +339,18 @@ main > .section > .cards-wrapper + .default-content-wrapper {
   background-color: var(--rbc-light-blue);
 }
 
-/* plain: a picture and a caption, no card chrome; for partner logos that carry their own colour */
-.cards.plain > ul {
-  grid-template-columns: 1fr;
+main > .section.dark-background .cards:not(.dark, .tile) > ul > li {
+  --text-color: var(--rbc-grey-900);
+  --link-color: var(--rbc-blue);
+  --link-hover-color: var(--rbc-blue-dark);
 
-  @media (width >= 768px) {
-    grid-template-columns: repeat(auto-fit, minmax(max(min(180px, 100%), var(--cards-cap)), 1fr));
-  }
+  color: var(--text-color);
 }
 
-.cards.plain > ul > li {
-  border: 0;
-  background-color: transparent;
+main > .section.dark-background .cards.tinted:not(.tile) > ul > li {
+  background-color: var(--rbc-white);
 }
 
-.cards.plain > ul > li > .cards-card-image img {
-  aspect-ratio: auto;
-  border-radius: var(--radius-s);
-}
-
-.cards.plain .cards-card-body {
-  padding: var(--space-s) 0 0;
-}
-
-.cards.plain .cards-card-body p {
-  margin: 0;
-  font-weight: 500;
-}
-
-/* tinted: soft light-blue panels; tinted-alternate swaps every other one to cool white */
 .cards.tinted > ul > li {
   border: 0;
   background-color: var(--rbc-light-blue);
@@ -300,8 +365,11 @@ main > .section > .cards-wrapper + .default-content-wrapper {
   padding: var(--space-l);
 }
 
-/* icons inside a tinted panel are small marks, not illustrations */
-.cards.icons.tinted > ul > li > .cards-card-image img {
+.cards.icons.tinted > ul > li > .cards-card-image:not(:has(.icon)) {
+  padding: var(--space-l) var(--space-l) 0;
+}
+
+.cards.icons.tinted:not(.medium, .large) > ul > li > .cards-card-image img {
   max-height: 48px;
 }
 
@@ -311,7 +379,21 @@ main > .section > .cards-wrapper + .default-content-wrapper {
   padding: var(--space-m) 0 0 var(--space-m);
 }
 
-/* dark: navy tiles, for white-on-brand logos */
+.cards.icons.tinted > ul > li > .cards-card-image .icon[class*="icon-number"] {
+  width: 32px;
+  height: 32px;
+  margin: var(--space-l) 0 0 var(--space-l);
+  padding: 0;
+}
+
+.cards.icons > ul > li > .cards-card-image:has(.icon[class*="icon-number"]) {
+  margin-bottom: 0;
+}
+
+.cards.icons.tinted > ul > li > .cards-card-image:has(.icon[class*="icon-number"]) + .cards-card-body {
+  padding-top: var(--space-xs);
+}
+
 .cards.dark:not(.tile) > ul {
   grid-template-columns: 1fr;
 
@@ -337,7 +419,6 @@ main > .section > .cards-wrapper + .default-content-wrapper {
   width: 60%;
 }
 
-/* horizontal: image beside copy, in authored order */
 .cards.horizontal > ul {
   grid-template-columns: 1fr;
 
@@ -354,16 +435,17 @@ main > .section > .cards-wrapper + .default-content-wrapper {
 .cards.horizontal > ul > li > .cards-card-image {
   flex: 0 0 40%;
   align-self: stretch;
+  padding: var(--space-m);
 }
 
 .cards.horizontal > ul > li > .cards-card-image img {
   height: 100%;
+  max-height: none;
   aspect-ratio: auto;
   object-fit: contain;
   object-position: bottom;
 }
 
-/* icons horizontal: a small mark beside short copy, several to a row */
 .cards.icons.horizontal > ul {
   grid-template-columns: 1fr;
 
@@ -391,8 +473,7 @@ main > .section > .cards-wrapper + .default-content-wrapper {
   padding: var(--space-m);
 }
 
-/* image-bottom: the image sits on the card's bottom edge (e.g. a phone cut off by the card) */
-@media (width > 600px) {
+@media (width > 768px) {
   .cards.horizontal.image-bottom > ul > li > .cards-card-image {
     align-self: end;
     padding-bottom: 0;
@@ -403,7 +484,21 @@ main > .section > .cards-wrapper + .default-content-wrapper {
   }
 }
 
-/* product: account cards */
+.cards.image-bottom:not(.horizontal) > ul > li > .cards-card-image {
+  margin-top: auto;
+  padding-top: var(--space-m);
+  text-align: center;
+}
+
+.cards.image-bottom:not(.horizontal) > ul > li > .cards-card-image img {
+  width: auto;
+  max-width: 80%;
+  max-height: 320px;
+  aspect-ratio: auto;
+  object-fit: contain;
+  object-position: bottom;
+}
+
 .cards.product > ul {
   grid-template-columns: 1fr;
   justify-content: center;
@@ -737,7 +832,7 @@ main > .section > .cards-wrapper + .default-content-wrapper {
   width: auto;
 }
 
-@media (width <= 600px) {
+@media (width <= 768px) {
   .cards.horizontal > ul > li {
     flex-direction: column;
   }
@@ -764,6 +859,33 @@ main > .section > .cards-wrapper + .default-content-wrapper {
   min-height: 360px;
   border: 0;
   border-radius: var(--radius-m);
+}
+
+.cards.tile.compact > ul > li {
+  min-height: 0;
+}
+
+.cards.tile.bento > ul {
+  grid-auto-flow: dense;
+}
+
+.cards.tile.bento > ul > li {
+  min-height: 0;
+}
+
+@media (width >= 768px) {
+  .cards.tile.bento > ul {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .cards.tile.bento > ul > li:has(.tile-background) {
+    grid-row: span 2;
+  }
+
+  .cards.tile.bento > ul > li:last-child:has(.tile-background) {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
 }
 
 .cards.tile.bordered > ul > li {
@@ -946,4 +1068,11 @@ main > .section.left .cards.product > ul {
 
 .cards.expandable .cards-card-close::before {
   content: "\00d7";
+}
+
+/* last, so two per row wins over each variant's own grid */
+.cards.split > ul {
+  @media (width >= 768px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }

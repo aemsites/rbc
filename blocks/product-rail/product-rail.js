@@ -1,16 +1,11 @@
 import { createOptimizedPicture } from '../../scripts/aem.js';
-import { getProduct, offerLegalPage } from '../../utils/products.js';
+import { getProduct, offerCells } from '../../utils/products.js';
 import fetchLocalPlaceholders from '../../utils/placeholders.js';
 import { rateSpan } from '../../utils/rates.js';
 import {
   footnoteSup, expandRefs, resolveRefLinks, normalizeLabel,
 } from '../../utils/footnotes.js';
 import { escapeHtml, safeUrl } from '../../utils/dom.js';
-
-function longDate(iso) {
-  return new Intl.DateTimeFormat(document.documentElement.lang || 'en-CA', { dateStyle: 'long' })
-    .format(new Date(`${iso}T12:00:00`));
-}
 
 const picture = (src, alt) => createOptimizedPicture(src, alt, false, [{ width: '750' }]).outerHTML;
 const cell = (html) => `<div>${html}</div>`;
@@ -29,14 +24,8 @@ function railRows(product, ph) {
   if (product.cardImage) {
     rows.push(row(picture(product.cardImage, product.cardImageAlt), `<p>${escapeHtml(product.categoryLabel)}</p>`));
   }
-  if (product.offerHeadline) {
-    const image = product.offerImage ? picture(product.offerImage, product.offerImageAlt) : '';
-    const ends = product.offerEndDate ? `${escapeHtml(ph.offerEnds || 'Offer ends')} ${escapeHtml(longDate(product.offerEndDate))}. ` : '';
-    const offerPage = offerLegalPage(product);
-    // rbcroyalbank.com rails don't link off-site offers (e.g. the investments HISA page)
-    const details = offerPage === product.offerDetailsUrl ? `<p class="link-wrapper"><a href="${safeUrl(product.offerDetailsUrl)}" target="_blank" rel="noopener">${escapeHtml(ph.viewOfferDetails || 'View Offer Details')}</a></p>` : '';
-    rows.push(row(`<p>${escapeHtml(product.offerEyebrow || ph.offer || 'Offer')}</p>`, `${image}<p>${expandRefs(escapeHtml(product.offerHeadline), offerPage)}</p><p>${ends}${escapeHtml(product.offerConditions || '')}</p>${details}`));
-  }
+  const offer = offerCells(product, ph, { disclose: true });
+  if (offer) rows.push(row(...offer));
   if (product.rateFallbackValue) {
     const value = product.rateRateCode
       ? rateSpan(product.rateRateCode, product.rateFallbackValue)
@@ -77,16 +66,22 @@ function stickyBar(block, ph) {
 
 export default async function decorate(block) {
   const ph = await fetchLocalPlaceholders();
-  const link = block.querySelector('a[href*="/products/"]');
-  if (link && block.textContent.trim() === link.textContent.trim()) {
+  // a record link in the first row builds the rail; rows after it are page copy for above the CTA
+  const [lead, ...extra] = [...block.children];
+  const link = lead?.querySelector('a[href*="/products/"]');
+  if (link && lead.textContent.trim() === link.textContent.trim()) {
     const product = await getProduct(link.getAttribute('href'));
-    if (product) block.innerHTML = railRows(product, ph);
+    if (product) {
+      block.innerHTML = railRows(product, ph);
+      block.lastElementChild.before(...extra);
+    }
     await resolveRefLinks(block);
   }
   [...block.children].forEach((r) => {
     const [first, second] = [...r.children];
     if (!second) {
       r.className = r.querySelector('a.button') ? 'product-rail-cta' : 'product-rail-note';
+      if (r.querySelector('ul')) r.classList.add('checklist');
       return;
     }
     if (first.querySelector('picture') && !first.textContent.trim()) {
@@ -96,8 +91,8 @@ export default async function decorate(block) {
     }
     // footnote links sit on fee values too, so they don't make a row an offer
     if (second.querySelector('picture, a:not(sup a)') || second.children.length > 1 || second.textContent.trim().length > 60) {
-      r.className = 'product-rail-offer';
-      first.className = 'product-rail-eyebrow';
+      r.className = 'product-rail-offer offer-box';
+      first.className = 'product-rail-eyebrow offer-label';
       return;
     }
     r.className = 'product-rail-fee';

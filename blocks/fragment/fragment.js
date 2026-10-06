@@ -53,6 +53,14 @@ export default async function decorate(block) {
 
   if (section && section.children.length === 1) {
     // fragment is the ONLY child of its section; replace the whole section
+    // which tab shows the section is the host page's call, so it carries over
+    const { tab } = section.dataset;
+    if (tab) {
+      fragment.querySelectorAll(':scope > .section').forEach((fragSection) => {
+        fragSection.dataset.tab = tab;
+        fragSection.classList.toggle('tab-hidden', section.classList.contains('tab-hidden'));
+      });
+    }
     section.replaceWith(...fragment.childNodes);
   } else {
     // fragment shares section with other children; flatten children into it

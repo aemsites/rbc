@@ -1,4 +1,8 @@
-import { getMetadata } from '../scripts/aem.js';
+import { createOptimizedPicture, getMetadata } from '../scripts/aem.js';
+import { expandRefs, footnoteSup } from './footnotes.js';
+import {
+  createElement, escapeHtml, fragment, safeUrl,
+} from './dom.js';
 
 const INDEX = '/products/query-index.json';
 // one index holds every language; records live under the language root, e.g. /fr/products/
@@ -66,6 +70,36 @@ export const keyList = (cell) => (cell?.textContent || '').split(',').map((k) =>
 export const offerLegalPage = (product) => (product.offerDetailsUrl?.startsWith('/')
   ? product.offerDetailsUrl : product.productPage);
 
+function longDate(iso) {
+  return new Intl.DateTimeFormat(document.documentElement.lang || 'en-CA', { dateStyle: 'long' })
+    .format(new Date(`${iso}T12:00:00`));
+}
+
+// label and body cells of a product's current offer, as the rail and featured cards show it
+export function offerCells(product, ph, { disclose = false } = {}) {
+  if (!product.offerHeadline) return null;
+  const image = product.offerImage
+    ? createOptimizedPicture(product.offerImage, product.offerImageAlt, false, [{ width: '750' }]).outerHTML : '';
+  const ends = product.offerEndDate ? `${escapeHtml(ph.offerEnds || 'Offer ends')} ${escapeHtml(longDate(product.offerEndDate))}. ` : '';
+  const offerPage = offerLegalPage(product);
+  const label = `<p class="offer-label">${escapeHtml(product.offerEyebrow || ph.offer || 'Offer')}</p>`;
+  const headline = `<p>${expandRefs(escapeHtml(product.offerHeadline), offerPage)}</p>`;
+  const conditions = `<p>${ends}${expandRefs(escapeHtml(product.offerConditions || ''), offerPage)}</p>`;
+  // the rail tucks the conditions and the offer page link behind a "View Offer Details" toggle
+  if (disclose) {
+    const url = product.offerDetailsUrl;
+    const here = url && new URL(url, window.location.href).pathname === window.location.pathname;
+    const more = url && !here ? `<p class="link-wrapper"><a href="${safeUrl(url)}" target="_blank" rel="noopener">${escapeHtml(ph.learnMore || 'Learn More')}</a></p>` : '';
+    return [
+      label,
+      `${image}${headline}<details class="disclosure"><summary>${escapeHtml(ph.viewOfferDetails || 'View Offer Details')}</summary>${conditions}${more}</details>`,
+    ];
+  }
+  // rbcroyalbank.com doesn't link off-site offers (e.g. the investments HISA page)
+  const details = offerPage === product.offerDetailsUrl ? `<p class="link-wrapper"><a href="${safeUrl(product.offerDetailsUrl)}" target="_blank" rel="noopener">${escapeHtml(ph.viewOfferDetails || 'View Offer Details')}</a></p>` : '';
+  return [label, `${image}${headline}${conditions}${details}`];
+}
+
 // a dollar amount in either order: "$4" (en) or "4 $" (fr)
 export const isPrice = (value = '') => /^\$\s?\d|\d\s?\$/.test(value);
 
@@ -83,4 +117,15 @@ export function monthlyFees(product) {
     regularFootnotes: regular?.footnotes || '',
     rebateFootnotes: rebate?.footnotes || '',
   };
+}
+
+export const isCreditCard = (product) => product.category === 'credit-card';
+
+// a credit card's fee lines after the annual fee are its rates, shown as a row of label/value pairs
+export function cardStats(product, className) {
+  if (!isCreditCard(product) || product.fees.length < 2) return null;
+  return createElement('dl', { class: className }, product.fees.slice(1).map((fee) => createElement('div', {}, [
+    createElement('dt', {}, fee.label),
+    createElement('dd', {}, [fee.displayValue, fragment(footnoteSup(fee.footnotes, product.productPage))]),
+  ])));
 }

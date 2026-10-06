@@ -1,7 +1,7 @@
 import {
   createOptimizedPicture, readBlockConfig, toCamelCase, toClassName,
 } from '../../scripts/aem.js';
-import { escapeHtml, safeUrl } from '../../utils/dom.js';
+import { escapeHtml, labelKind, safeUrl } from '../../utils/dom.js';
 import {
   footnoteSup, expandRefs, stripRefs, refIds, resolveRefLinks,
 } from '../../utils/footnotes.js';
@@ -10,25 +10,24 @@ import {
 } from '../../utils/products.js';
 import fetchLocalPlaceholders from '../../utils/placeholders.js';
 import { rateSpan } from '../../utils/rates.js';
-
-
 import decorateTile, { tileWords } from './tiles.js';
 
 function button(text, href, kind) {
-  return `<p class="button-wrapper"><a class="button ${kind}" href="${href}">${text}</a></p>`;
+  return `<p class="button-wrapper"><a class="button ${kind}" href="${safeUrl(href)}">${escapeHtml(text)}</a></p>`;
 }
 
 function claim(text, href, page) {
-  if (!href) return expandRefs(text, page);
+  if (!href) return expandRefs(escapeHtml(text), page);
+  const link = (copy) => `<a href="${safeUrl(href)}">${escapeHtml(copy)}</a>`;
   const end = text.lastIndexOf(']]');
-  if (end < 0) return `<a href="${href}">${text}</a>`;
+  if (end < 0) return link(text);
   const [, lead, tail] = text.slice(end + 2).match(/^([^\w$]*)([\s\S]*)$/);
-  if (!tail) return `<a href="${href}">${stripRefs(text)}</a>${footnoteSup(refIds(text), page)}`;
-  return `${expandRefs(text.slice(0, end + 2), page)}${lead}<a href="${href}">${tail}</a>`;
+  if (!tail) return `${link(stripRefs(text))}${footnoteSup(refIds(text), page)}`;
+  return `${expandRefs(escapeHtml(text.slice(0, end + 2)), page)}${escapeHtml(lead)}${link(tail)}`;
 }
 
 function offerLink(product, text) {
-  return product.offerDetailsUrl ? `<a href="${product.offerDetailsUrl}" target="_blank" rel="noopener">${text}</a>` : text;
+  return product.offerDetailsUrl ? `<a href="${safeUrl(product.offerDetailsUrl)}" target="_blank" rel="noopener">${escapeHtml(text)}</a>` : escapeHtml(text);
 }
 
 function priceLine(product, ph) {
@@ -36,21 +35,20 @@ function priceLine(product, ph) {
     regular, rebate, regularFootnotes, rebateFootnotes,
   } = monthlyFees(product);
   if (!regular) return '';
-  const per = (value) => (isPrice(value) ? ph.perMonth || '/mo' : '');
+  const per = (value) => (isPrice(value) ? escapeHtml(ph.perMonth || '/mo') : '');
   const sup = (value) => footnoteSup(value, product.productPage);
   const price = product.fees[0]?.amount === 0 && !isPrice(regular) ? zeroPrice() : regular;
-  const amount = (value, footnotes) => `<span class="cards-product-amount"><strong>${value}</strong>${per(value)}${sup(footnotes)}</span>`;
+  const amount = (value, footnotes) => `<span class="cards-product-amount"><strong>${escapeHtml(value)}</strong>${per(value)}${sup(footnotes)}</span>`;
   if (!rebate) return `<p class="cards-product-price">${amount(price, regularFootnotes)}</p>`;
   return `<p class="cards-product-price cards-product-price-split">${amount(price, regularFootnotes)}
-    <em class="cards-product-or">${ph.or || 'or'}</em>
+    <em class="cards-product-or">${escapeHtml(ph.or || 'or')}</em>
     <span class="cards-product-rebate">${amount(rebate, rebateFootnotes)}
-    <span class="cards-product-rebate-label">${ph.withTheValueProgram || 'with the Value Program'}</span></span></p>`;
+    <span class="cards-product-rebate-label">${escapeHtml(ph.withTheValueProgram || 'with the Value Program')}</span></span></p>`;
 }
 
 function cardLabel(product, ph, label) {
   if (label === 'none') return '';
-  const type = label === 'type' && ph[toCamelCase(`category-${product.category}`)];
-  return `<p>${type || product.categoryLabel}</p>`;
+  return `<p>${escapeHtml(ph[toCamelCase(`category-${product.category}`)] || product.categoryLabel)}</p>`;
 }
 
 function productBody(product, ph, variant, keys = [], options = {}) {
@@ -59,33 +57,35 @@ function productBody(product, ph, variant, keys = [], options = {}) {
   const sup = (value) => footnoteSup(value, page);
   const showRate = product.rateFallbackValue && (!keys.length || keys.includes('rate'));
   const rate = showRate
-    ? `<li>${expandRefs(product.rateLabel, page)}: ${product.rateRateCode ? rateSpan(product.rateRateCode, product.rateFallbackValue) : product.rateFallbackValue}</li>` : '';
+    ? `<li>${expandRefs(escapeHtml(product.rateLabel), page)}: ${product.rateRateCode ? rateSpan(product.rateRateCode, product.rateFallbackValue) : escapeHtml(product.rateFallbackValue)}</li>` : '';
   const highlights = pickHighlights(product, keys.filter((k) => k !== 'rate'))
     .map((h) => `<li>${claim(h.text, h.url, page)}</li>`).join('') + rate;
-  const note = product.note ? `<p>${expandRefs(product.note, page)}</p>` : '';
+  const note = product.note ? `<p>${expandRefs(escapeHtml(product.note), page)}</p>` : '';
   const [fee] = product.fees;
   const feeSup = sup(fee?.footnotes);
+  const name = escapeHtml(product.name);
+  const productLink = safeUrl(product.productPage);
   if (variant === 'compact') {
-    return `<h3>${product.name}</h3><p class="cards-product-price">${fee?.label || ''} <span class="cards-product-amount"><strong>${fee?.displayValue || ''}</strong>${feeSup}</span></p>
-      <p class="link-wrapper"><a href="${product.productPage}">${ph.viewAccount || 'View Account'}</a></p>`;
+    return `<h3>${name}</h3><p class="cards-product-price">${escapeHtml(fee?.label)} <span class="cards-product-amount"><strong>${escapeHtml(fee?.displayValue)}</strong>${feeSup}</span></p>
+      <p class="link-wrapper"><a href="${productLink}">${escapeHtml(ph.viewAccount || 'View Account')}</a></p>`;
   }
   if (variant === 'picture') {
-    return `${cardLabel(product, ph, options.label)}<h3><a href="${product.productPage}">${product.name}</a></h3>
-      <p>${ph.monthlyFee || 'Monthly Fee'}: ${fee?.displayValue || ''}${feeSup}</p>${note}<ul>${highlights}</ul>
-      <p class="button-wrapper"><a class="button primary" href="${product.productPage}">${ph.learnMore || 'Learn More'}</a>${product.applyUrl ? ` <a class="button secondary" href="${product.applyUrl}">${cta}</a>` : ''}</p>`;
+    return `${cardLabel(product, ph, options.label)}<h3><a href="${productLink}">${name}</a></h3>
+      <p>${escapeHtml(ph.monthlyFee || 'Monthly Fee')}: ${escapeHtml(fee?.displayValue)}${feeSup}</p>${note}<ul>${highlights}</ul>
+      <p class="button-wrapper"><a class="button primary" href="${productLink}">${escapeHtml(ph.learnMore || 'Learn More')}</a>${product.applyUrl ? ` <a class="button secondary" href="${safeUrl(product.applyUrl)}">${escapeHtml(cta)}</a>` : ''}</p>`;
   }
   const offerPage = offerLegalPage(product);
   const badge = product.offerBadge
     ? `<p><em>${offerLink(product, stripRefs(product.offerBadge))}${footnoteSup(refIds(product.offerBadge), offerPage)}</em></p>` : '';
   const caption = product.offerBadge && product.offerCaption
-    ? `<p class="cards-product-caption"><em>${expandRefs(product.offerCaption, offerPage)}</em></p>` : '';
-  return `${cardLabel(product, ph, options.label)}<h3>${product.name}</h3><p>${product.tagline}</p><ul>${highlights}</ul>
+    ? `<p class="cards-product-caption"><em>${expandRefs(escapeHtml(product.offerCaption), offerPage)}</em></p>` : '';
+  return `${cardLabel(product, ph, options.label)}<h3>${name}</h3><p>${escapeHtml(product.tagline)}</p><ul>${highlights}</ul>
     ${note}${badge}${caption}${priceLine(product, ph)}
     ${product.applyUrl ? button(cta, product.applyUrl, 'primary') : ''}
-    <p class="link-wrapper"><a href="${product.productPage}">${ph.viewMoreAccountBenefits || 'View More Account Benefits'}</a></p>`;
+    <p class="link-wrapper"><a href="${productLink}">${escapeHtml(ph.viewMoreAccountBenefits || 'View More Account Benefits')}</a></p>`;
 }
 
-const CONFIG_KEYS = ['category', 'persona', 'cta', 'label'];
+const CONFIG_KEYS = ['category', 'persona', 'cta'];
 const words = (value) => String(value || '').split(',').map((v) => v.trim().toLowerCase()).filter(Boolean);
 
 async function expandFilterRows(anchor, config) {
@@ -108,18 +108,41 @@ async function renderProductRows(block) {
     && CONFIG_KEYS.includes(toClassName(row.firstElementChild.textContent)));
   if (settings.length) await expandFilterRows(settings[0], config);
   settings.forEach((row) => row.remove());
-  const options = { cta: config.cta, label: config.label && toClassName(config.label) };
+  const options = {
+    cta: config.cta,
+    label: block.classList.contains('no-label') ? 'none' : undefined,
+  };
   const rows = [...block.children].filter((row) => {
-    const cell = row.firstElementChild;
-    const a = cell?.querySelector('a[href*="/products/"]');
-    return a && row.children.length <= 2 && cell.textContent.trim() === a.textContent.trim();
+    const a = row.firstElementChild?.querySelector('a[href*="/products/"]');
+    const alone = a?.parentElement.textContent.trim() === a?.textContent.trim();
+    return a && alone && row.children.length <= 2;
   });
   if (!rows.length) return;
   const ph = await fetchLocalPlaceholders();
-  const variant = ['compact', 'picture'].find((word) => block.classList.contains(word));
+  const variant = ['compact', 'picture', 'featured'].find((word) => block.classList.contains(word));
+  const featured = variant === 'featured' && await import('./featured.js');
   await Promise.all(rows.map(async (row) => {
-    const product = await getProduct(row.querySelector('a').getAttribute('href'));
+    const link = row.querySelector('a');
+    const product = await getProduct(link.getAttribute('href'));
     if (!product) { row.remove(); return; }
+    if (featured) {
+      const highlights = pickHighlights(product, keyList(row.children[1]))
+        .map((h) => ({ icon: h.icon, html: claim(h.text, h.url, product.productPage) }));
+      const label = options.label === 'none' ? '' : product.categoryLabel;
+      const { picture, cta, lines } = featured.rowExtras(row.firstElementChild, link);
+      const banded = block.classList.contains('banded');
+      const body = featured.default(product, ph, highlights, {
+        cta,
+        lines,
+        ctaText: options.cta,
+        banded,
+        offer: !block.classList.contains('no-offer'),
+        button: !block.classList.contains('no-cta'),
+      });
+      const art = banded ? null : featured.featuredArt(product, label, picture);
+      row.replaceChildren(...[art, body].filter(Boolean));
+      return;
+    }
     const body = document.createElement('div');
     body.innerHTML = productBody(product, ph, variant, keyList(row.children[1]), options);
     if (variant !== 'compact') body.dataset.category = product.category;
@@ -163,6 +186,7 @@ function decorateProduct(li) {
   });
 }
 
+// a third cell holding only a colour paints the image cell with it
 let detailCount = 0;
 
 function decorateDetail(li, detail, ph) {
@@ -214,9 +238,10 @@ export default async function decorate(block) {
       ul.append(li);
       return;
     }
-    [...li.children].forEach((div) => {
+    [...li.children].filter((div) => !div.className).forEach((div) => {
       const media = div.querySelector('picture, img, .icon');
-      const only = div.children.length === 1 && media && !div.textContent.trim();
+      const copy = div.textContent.replace(media?.textContent || '', '').trim();
+      const only = div.children.length === 1 && media && !copy;
       div.className = only ? 'cards-card-image' : 'cards-card-body';
     });
     if (detail) decorateDetail(li, detail, ph);
@@ -227,12 +252,18 @@ export default async function decorate(block) {
     const optimized = createOptimizedPicture(img.src, img.alt, false, [{ width: '750' }]);
     (img.closest('picture') || img).replaceWith(optimized);
   });
-  if (block.classList.contains('yellow-eyebrow')) {
+  if (!block.classList.contains('product')) {
+    const yellow = block.classList.contains('yellow-eyebrow');
     ul.querySelectorAll(':scope > li').forEach((li) => {
       const eyebrow = li.querySelector('.cards-card-body > p:first-child:not(:has(a:not(.footnote), picture))');
       if (!eyebrow?.nextElementSibling?.matches('h2, h3, h4, h5, h6')) return;
-      eyebrow.className = 'cards-card-eyebrow';
-      li.prepend(eyebrow);
+      if (yellow) {
+        eyebrow.className = 'cards-card-eyebrow';
+        li.prepend(eyebrow);
+        return;
+      }
+      const kind = labelKind(eyebrow);
+      if (kind) eyebrow.className = `label label-${kind}`;
     });
   }
   ul.querySelectorAll('h2, h3, h4, h5, h6').forEach((heading) => {
@@ -244,5 +275,7 @@ export default async function decorate(block) {
   });
   block.replaceChildren(ul);
 
-  if (block.classList.contains('product')) ul.querySelectorAll(':scope > li').forEach(decorateProduct);
+  if (block.classList.contains('product') && !block.classList.contains('featured')) {
+    ul.querySelectorAll(':scope > li').forEach(decorateProduct);
+  }
 }

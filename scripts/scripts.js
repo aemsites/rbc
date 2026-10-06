@@ -1,4 +1,4 @@
-import { watchStuck } from '../utils/dom.js';
+import { labelKind, watchStuck } from '../utils/dom.js';
 import { decorateRateCode, decorateRates } from '../utils/rates.js';
 import linkFootnotes, { revealLegalHash } from '../utils/footnotes.js';
 import decorateTooltips from '../utils/tooltips.js';
@@ -56,6 +56,18 @@ async function loadFonts() {
 }
 
 /**
+ * Turns a paragraph holding only an .mp4 link in default content into a video block.
+ * @param {Element} main The container element
+ */
+function buildVideoAutoBlocks(main) {
+  main.querySelectorAll(':scope > div > p > a[href*=".mp4"]').forEach((link) => {
+    const p = link.parentElement;
+    if (p.textContent.trim() !== link.textContent.trim() || p.children.length !== 1) return;
+    p.replaceWith(buildBlock('video', { elems: [link] }));
+  });
+}
+
+/**
  * Turns `/widgets/...` links into widget blocks.
  * @param {Element} main The container element
  */
@@ -94,7 +106,10 @@ function buildAutoBlocks(main) {
           try {
             const { pathname } = new URL(fragment.href);
             const frag = await loadFragment(pathname);
-            fragment.parentElement.replaceWith(...frag.children);
+            // an inline link (e.g. in a column) takes the fragment's content, not its sections
+            const content = [...frag.children].flatMap((section) => [...section.children]);
+            const host = fragment.parentElement.tagName === 'P' ? fragment.parentElement : fragment;
+            host.replaceWith(...content);
           } catch (error) {
             // eslint-disable-next-line no-console
             console.error('Fragment loading failed', error);
@@ -103,6 +118,7 @@ function buildAutoBlocks(main) {
       });
     }
     buildWidgetAutoBlocks(main);
+    buildVideoAutoBlocks(main);
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error('Auto Blocking failed', error);
@@ -177,7 +193,9 @@ function decorateSectionBackgrounds(main) {
     if (!background) return;
     if (IMAGE_EXT_RE.test(background)) {
       const imageUrl = new URL(background, window.location.href);
-      section.style.backgroundImage = `url(${imageUrl.href})`;
+      // white copy on a photo needs a scrim; a bright sky or highlight would swallow it
+      const scrim = section.classList.contains('dark-background') ? 'linear-gradient(rgb(0 0 0 / 45%), rgb(0 0 0 / 45%)), ' : '';
+      section.style.backgroundImage = `${scrim}url(${imageUrl.href})`;
       section.style.backgroundSize = 'cover';
       section.style.backgroundPosition = section.dataset.backgroundPosition || 'center';
     } else {
@@ -185,6 +203,17 @@ function decorateSectionBackgrounds(main) {
     }
     section.classList.add('colored-background');
     section.classList.add(isDarkBackground(background) ? 'dark-background' : 'light-background');
+  });
+}
+
+function decorateFocalPoints(main) {
+  main.querySelectorAll('img[data-title*="data-focal"], img[title*="data-focal"]').forEach((img) => {
+    const value = img.dataset.title || img.title;
+    const [x, y] = value.split(':')[1].split(',').map((n) => parseFloat(n));
+    img.removeAttribute('data-title');
+    img.removeAttribute('title');
+    if (Number.isNaN(x) || Number.isNaN(y)) return;
+    img.style.objectPosition = `${x}% ${y}%`;
   });
 }
 
@@ -220,6 +249,20 @@ async function inlineIcon(span) {
       .filter((attr) => attr.name.toLowerCase().startsWith('on'))
       .forEach((attr) => node.removeAttribute(attr.name));
   });
+  const prefix = img.dataset.iconName;
+  svg.querySelectorAll('style').forEach((style) => {
+    style.textContent = style.textContent.replace(/\.(-?[_a-zA-Z][\w-]*)/g, `.${prefix}-$1`);
+  });
+  svg.querySelectorAll('[class]').forEach((node) => {
+    node.setAttribute('class', [...node.classList].map((name) => `${prefix}-${name}`).join(' '));
+  });
+  svg.querySelectorAll('[id]').forEach((node) => { node.id = `${prefix}-${node.id}`; });
+  svg.querySelectorAll('*').forEach((node) => {
+    [...node.attributes].forEach((attr) => {
+      const ref = /href$/.test(attr.name) ? /^(#)(.+)/ : /(url\(#)([^)]+)/g;
+      attr.value = attr.value.replace(ref, `$1${prefix}-$2`);
+    });
+  });
   svg.setAttribute('aria-hidden', 'true');
   svg.setAttribute('focusable', 'false');
   img.replaceWith(svg);
@@ -240,6 +283,13 @@ function decorateStickyTitle(main) {
   watchStuck(section, (stuck) => section.classList.toggle('is-stuck', stuck));
 }
 
+function decorateLabels(main) {
+  main.querySelectorAll('.default-content-wrapper > p:has(+ :is(h2, h3))').forEach((p) => {
+    const kind = labelKind(p);
+    if (kind) p.classList.add('label', `label-${kind}`);
+  });
+}
+
 // eslint-disable-next-line import/prefer-default-export
 export function decorateMain(main) {
   decorateIcons(main);
@@ -248,7 +298,9 @@ export function decorateMain(main) {
   decorateSections(main);
   decorateStickyTitle(main);
   decorateSectionBackgrounds(main);
+  decorateFocalPoints(main);
   decorateBlocks(main);
+  decorateLabels(main);
   decorateTooltips(main);
   decorateDisclosures(main);
   decorateButtons(main);
@@ -293,6 +345,10 @@ async function loadEager(doc) {
     await loadTemplate(main);
     document.body.classList.add('appear');
     await loadSection(main.querySelector('.section'), waitForFirstImage);
+  }
+
+  if (window.location.href.includes('/docs/library')) {
+    document.body.classList.add('library-page');
   }
 
   try {

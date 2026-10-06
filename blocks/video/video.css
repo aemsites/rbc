@@ -1,0 +1,50 @@
+.video {
+  position: relative;
+}
+
+.video video {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-m);
+  background-color: var(--rbc-grey-100);
+}
+
+.video .video-toggle {
+  position: absolute;
+  right: var(--space-s);
+  bottom: var(--space-s);
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  margin: 0;
+  border: 0;
+  border-radius: 50%;
+  padding: 0;
+  background-color: rgb(0 0 0 / 60%);
+  color: var(--rbc-white);
+  cursor: pointer;
+}
+
+.video .video-toggle::before {
+  content: "";
+  width: 0;
+  height: 0;
+  margin-left: 3px;
+  border-block: 7px solid transparent;
+  border-left: 11px solid currentcolor;
+}
+
+.video .video-toggle.is-playing::before {
+  width: 3px;
+  height: 12px;
+  margin-left: 0;
+  border: 0;
+  border-inline: 2px solid currentcolor;
+}
+
+.video .video-toggle:focus-visible {
+  outline: 2px solid var(--rbc-white);
+  outline-offset: 2px;
+}
