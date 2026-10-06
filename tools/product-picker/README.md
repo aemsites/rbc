@@ -5,19 +5,16 @@ identities. Plain ES modules; no build step. DA configuration is managed manuall
 
 ## Registration
 
-Add this entry to the DA site configuration's library sheet once code is available
-on the branch:
+Add this entry to the DA site configuration's library sheet:
 
 | title | path | experience |
 | --- | --- | --- |
-| RBC Products & Offers | `https://feat-da-product-offer-picker--rbc--aemsites.aem.live/tools/product-picker/product-picker.html` | `fullsize-dialog` |
+| RBC Products & Offers | `https://main--rbc--aemsites.aem.live/tools/product-picker/product-picker.html` | `fullsize-dialog` |
 
-After merging, change the plugin URL to
-`https://main--rbc--aemsites.aem.live/tools/product-picker/product-picker.html`.
 Opening that URL directly does not connect to the editor: launch through DA.
 
 The plugin fetches same-origin `/products/query-index.json`, including all index
-pages. Verify that endpoint is available on the branch before registering.
+pages. Verify that endpoint is available before registering.
 Product links always point to main, regardless of where the plugin is hosted.
 Only the `aemsites/rbc` DA context is accepted.
 
