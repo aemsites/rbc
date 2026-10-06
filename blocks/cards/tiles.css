@@ -223,7 +223,7 @@
 }
 
 /* narrow tiles: the art follows the copy instead of sharing its width */
-@media (width < 600px) {
+@media (width < 768px) {
   .tile:has(.tile-image) .tile-content,
   .tile.tile-narrow .tile-content {
     max-width: none;

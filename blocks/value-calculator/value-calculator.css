@@ -214,7 +214,7 @@
   }
 }
 
-@media (width < 600px) {
+@media (width < 768px) {
   .value-calculator .value-calculator-results,
   .value-calculator.single .value-calculator-categories {
     grid-template-columns: 1fr;
