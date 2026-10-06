@@ -326,7 +326,8 @@ export function trackProduct(element, record, {
 }
 
 export function isProductDetail() {
-  return getMetadata('template') === 'product' || getMetadata('page-type') === 'product';
+  return getMetadata('template') === 'product'
+    || ['product', 'product detail'].includes(getMetadata('page-type'));
 }
 
 export function selectProduct(element) {
