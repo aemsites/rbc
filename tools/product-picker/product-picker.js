@@ -233,20 +233,11 @@ async function insert() {
       const url = productURL(product.path);
       await state.actions.sendHTML(createElement('a', { href: url }, product.path).outerHTML);
     }
+    // The SDK sends a message without an editor acknowledgement.
+    find('status').textContent = 'Insertion sent to the editor.';
   } catch (error) {
     console.error('RBC picker: insertion failed', error);
     showError(`Could not insert the selection: ${error.message}`);
-    state.inserting = false;
-    renderDetails();
-    return;
-  }
-  // The SDK sends a message without an editor acknowledgement.
-  find('status').textContent = 'Insertion sent to the editor.';
-  try {
-    await state.actions.closeLibrary();
-  } catch (error) {
-    console.error('RBC picker: library close failed', error);
-    showError('Insertion was sent, but the picker could not close. Check the document before inserting again.');
   } finally {
     state.inserting = false;
     renderDetails();
@@ -266,7 +257,7 @@ async function init() {
       }),
     ]);
     if (context?.org !== 'aemsites' || context?.repo !== 'rbc') throw new Error('This picker is configured for aemsites/rbc.');
-    if (['sendHTML', 'sendText', 'closeLibrary'].some((name) => typeof actions?.[name] !== 'function')) {
+    if (['sendHTML', 'sendText'].some((name) => typeof actions?.[name] !== 'function')) {
       throw new Error('The editor does not provide the required insertion actions.');
     }
     state.actions = actions;
@@ -282,6 +273,11 @@ async function init() {
   }
 }
 
+function resetFilters() {
+  ['search', 'category', 'persona'].forEach((name) => { find(name).value = ''; });
+  renderResults();
+}
+
 controls.forEach((name) => find(name).addEventListener(name === 'search' ? 'input' : 'change', () => {
   if (name === 'language') {
     state.selected = null;
@@ -291,11 +287,10 @@ controls.forEach((name) => find(name).addEventListener(name === 'search' ? 'inpu
 }));
 root.querySelectorAll('[name="mode"]').forEach((input) => input.addEventListener('change', () => {
   state.selected = null;
-  renderResults();
+  resetFilters();
 }));
 find('clear').addEventListener('click', () => {
-  ['search', 'category', 'persona'].forEach((name) => { find(name).value = ''; });
-  renderResults();
+  resetFilters();
   find('search').focus();
 });
 find('retry').addEventListener('click', refresh);

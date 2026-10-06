@@ -111,8 +111,34 @@ test('Clear filters resets search/category/persona without changing language, mo
   assert.equal(find('.picker-search').ownerDocument.activeElement, find('.picker-search'));
 });
 
-test('product insertion uses relative link text and can be repeated while the picker stays open', async () => {
-  const { find, calls, flush } = await picker();
+test('switching modes resets filters and selection in both directions while preserving language', async () => {
+  const { find, changeMode } = await picker({}, '/fr/bank-accounts');
+  find('.picker-list button').click();
+  find('.picker-search').value = 'signature';
+  find('.picker-category').value = 'chequing';
+  find('.picker-persona').value = 'everyone';
+  changeMode('offers');
+  assert.equal(find('.picker-search').value, '');
+  assert.equal(find('.picker-category').value, '');
+  assert.equal(find('.picker-persona').value, '');
+  assert.equal(find('.picker-language').value, 'fr');
+  assert.equal(find('.picker-actionbar').hidden, true);
+  assert.match(find('.picker-list').textContent, /Offre: été/);
+  find('.picker-list button').click();
+  find('.picker-search').value = 'no matching offer';
+  find('.picker-category').value = 'chequing';
+  find('.picker-persona').value = 'everyone';
+  changeMode('products');
+  assert.equal(find('.picker-search').value, '');
+  assert.equal(find('.picker-category').value, '');
+  assert.equal(find('.picker-persona').value, '');
+  assert.equal(find('.picker-language').value, 'fr');
+  assert.equal(find('.picker-actionbar').hidden, true);
+  assert.match(find('.picker-list').textContent, /Signature/);
+});
+
+test('product insertion uses relative link text and stays open without requiring a close action', async () => {
+  const { find, calls, flush } = await picker({ closeLibrary: undefined });
   assert.equal(find('.picker-insert').disabled, true);
   assert.equal(find('.picker-actionbar').hidden, true);
   find('.picker-list button[data-key="/products/signature:products:0"]').click();
@@ -127,6 +153,7 @@ test('product insertion uses relative link text and can be repeated while the pi
   result.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true }));
   assert.equal(result.ownerDocument.activeElement, button);
   assert.equal(find('.picker-detail-content pre').textContent, '/products/signature');
+  assert.deepEqual(calls, []);
   button.click();
   assert.equal(button.disabled, true);
   await flush();
@@ -136,9 +163,7 @@ test('product insertion uses relative link text and can be repeated while the pi
   await flush();
   assert.deepEqual(calls, [
     { action: 'html', value: '<a href="https://main--rbc--aemsites.aem.live/products/signature">/products/signature</a>' },
-    { action: 'close' },
     { action: 'html', value: '<a href="https://main--rbc--aemsites.aem.live/products/signature">/products/signature</a>' },
-    { action: 'close' },
   ]);
 });
 
@@ -160,8 +185,8 @@ test('valid offer insertion can be repeated; incomplete offers remain disabled',
   button.click();
   await flush();
   assert.deepEqual(calls, [
-    { action: 'text', value: 'Offer: summer:summer' }, { action: 'close' },
-    { action: 'text', value: 'Offer: summer:summer' }, { action: 'close' },
+    { action: 'text', value: 'Offer: summer:summer' },
+    { action: 'text', value: 'Offer: summer:summer' },
   ]);
   find('.picker-list button[data-key="/products/incomplete:offers:0"]').click();
   assert.equal(button.disabled, true);
@@ -190,7 +215,7 @@ test('pending insertion prevents double sends and enables Insert after completio
   assert.equal(button.disabled, false);
 });
 
-test('failed insertion or library close never leaves a valid selection permanently disabled', async () => {
+test('failed insertion re-enables Insert and successful insertion never tries to close the dialog', async () => {
   const failed = await picker({ sendHTML: () => { throw new Error('Insertion failed'); } });
   failed.find('.picker-list button').click();
   failed.find('.picker-insert').click();
@@ -204,7 +229,7 @@ test('failed insertion or library close never leaves a valid selection permanent
   open.find('.picker-insert').click();
   await open.flush();
   assert.equal(open.find('.picker-insert').disabled, false);
-  assert.match(open.find('.picker-error').textContent, /could not close/);
+  assert.equal(open.find('.picker-error').hidden, true);
   assert.equal(open.calls.length, 1);
 });
 

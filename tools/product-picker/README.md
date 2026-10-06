@@ -25,7 +25,7 @@ Only the `aemsites/rbc` DA context is accepted.
 
 Place the cursor in a product-reference cell, open the plugin, select a product,
 review the exact output, and click **Insert Product**. The picker sends a link and
-closes:
+stays open for further selections and insertions:
 
 ```html
 <a href="https://main--rbc--aemsites.aem.live/products/signature-no-limit">/products/signature-no-limit</a>
@@ -39,7 +39,7 @@ EDS URL. Product variants remain separate records.
 
 Create a Section Metadata row named `promo` or `offer` and put the cursor in its
 value cell. Choose **Offers**, select an association, and click **Insert Offer**.
-Only plain text is sent:
+Only plain text is sent, and the dialog stays open:
 
 ```text
 Test offer name for signature no limit:test_offer_sig_no_limit
@@ -74,6 +74,8 @@ selection; Enter/Space activate native buttons.
 
 **Clear filters** resets search, category, and persona without reloading the
 catalog or changing the content language, Products/Offers mode, or selection.
+Switching between Products and Offers also resets search, category, and persona,
+and clears the selection; the content language is preserved in both directions.
 Invalid product records are reported under **Skipped index records**. Loading
 failures show **Retry loading**, not an empty catalog. Retrying reloads the index
 and clears the selection. SDK insertion is a message to the editor, not an
@@ -81,7 +83,7 @@ acknowledged save; confirm the result in the document.
 
 Insert is disabled while loading or sending an insertion, without a selection,
 or when the selected offer identity is invalid. It is enabled again after the
-insertion/close attempt if the picker remains open and the selection is valid.
+insertion attempt if the selection is valid. Close the dialog manually when done.
 The picker does not validate the cursor location or enforce offer dates.
 
 ## Development
