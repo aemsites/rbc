@@ -193,7 +193,9 @@ function decorateSectionBackgrounds(main) {
     if (!background) return;
     if (IMAGE_EXT_RE.test(background)) {
       const imageUrl = new URL(background, window.location.href);
-      section.style.backgroundImage = `url(${imageUrl.href})`;
+      // white copy on a photo needs a scrim; a bright sky or highlight would swallow it
+      const scrim = section.classList.contains('dark-background') ? 'linear-gradient(rgb(0 0 0 / 45%), rgb(0 0 0 / 45%)), ' : '';
+      section.style.backgroundImage = `${scrim}url(${imageUrl.href})`;
       section.style.backgroundSize = 'cover';
       section.style.backgroundPosition = section.dataset.backgroundPosition || 'center';
     } else {
@@ -201,6 +203,17 @@ function decorateSectionBackgrounds(main) {
     }
     section.classList.add('colored-background');
     section.classList.add(isDarkBackground(background) ? 'dark-background' : 'light-background');
+  });
+}
+
+function decorateFocalPoints(main) {
+  main.querySelectorAll('img[data-title*="data-focal"], img[title*="data-focal"]').forEach((img) => {
+    const value = img.dataset.title || img.title;
+    const [x, y] = value.split(':')[1].split(',').map((n) => parseFloat(n));
+    img.removeAttribute('data-title');
+    img.removeAttribute('title');
+    if (Number.isNaN(x) || Number.isNaN(y)) return;
+    img.style.objectPosition = `${x}% ${y}%`;
   });
 }
 
@@ -285,6 +298,7 @@ export function decorateMain(main) {
   decorateSections(main);
   decorateStickyTitle(main);
   decorateSectionBackgrounds(main);
+  decorateFocalPoints(main);
   decorateBlocks(main);
   decorateLabels(main);
   decorateTooltips(main);

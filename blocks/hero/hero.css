@@ -35,7 +35,7 @@ main > .section.hero-container:has(
   align-items: center;
 }
 
-.hero:has(> :is(picture, video)):not(.light) {
+.hero.dark:has(> :is(picture, video)) {
   --hero-background: var(--rbc-white);
 }
 
@@ -89,16 +89,16 @@ main > .section.hero-container:has(
   font-size: var(--body-font-size-s);
 }
 
-:is(.dark-background .hero, .hero.hero-backdrop:not(.light)) .hero-note {
+.dark-background .hero .hero-note {
   color: var(--rbc-grey-200);
 }
 
-:is(.dark-background .hero, .hero.hero-backdrop:not(.light)) .hero-eyebrow {
+.dark-background .hero .hero-eyebrow {
   background-color: var(--rbc-orange);
   color: var(--rbc-grey-900);
 }
 
-:is(.dark-background .hero, .hero.hero-backdrop:not(.light)) .icon svg * {
+.dark-background .hero .icon svg * {
   fill: var(--rbc-white);
 }
 
@@ -199,25 +199,6 @@ main > .section.hero-container:has(
   padding: 0;
 }
 
-.hero.hero-backdrop:not(.light) {
-  --text-color: var(--rbc-white);
-  --link-color: var(--rbc-white);
-  --link-hover-color: var(--rbc-yellow);
-
-  color: var(--text-color);
-}
-
-.hero.hero-backdrop:not(.light) a.button.secondary {
-  box-shadow: inset 0 0 0 1px var(--rbc-white);
-  background-color: transparent;
-  color: var(--rbc-white);
-}
-
-.hero.hero-backdrop:not(.light) a.button.secondary:is(:hover, :focus-visible) {
-  background-color: var(--rbc-white);
-  color: var(--rbc-blue);
-}
-
 .hero.hero-backdrop > div {
   width: 100%;
 }
@@ -310,15 +291,7 @@ main > .section.hero-container:has(
   margin-left: auto;
 }
 
-.hero.hero-backdrop.light {
-  color: var(--text-color);
-}
-
-.hero.hero-backdrop.light::after {
-  display: none;
-}
-
-.hero.hero-backdrop.light.gradient::after {
+.hero.hero-backdrop.gradient::after {
   content: "";
   display: block;
   position: absolute;
@@ -392,14 +365,13 @@ main > .section.hero-container:has(
   height: 20px;
 }
 
-:is(.dark-background .hero, .hero.hero-backdrop:not(.light)) .hero-video-play {
+.dark-background .hero .hero-video-play {
   box-shadow: inset 0 0 0 1px var(--rbc-white);
   background-color: transparent;
   color: var(--rbc-white);
 }
 
-:is(.dark-background .hero, .hero.hero-backdrop:not(.light)) .hero-video-play:hover,
-:is(.dark-background .hero, .hero.hero-backdrop:not(.light)) .hero-video-play:focus-visible {
+.dark-background .hero .hero-video-play:is(:hover, :focus-visible) {
   background-color: var(--rbc-white);
   color: var(--rbc-blue);
 }
@@ -469,7 +441,80 @@ main > .section.hero-container:has(
   margin: 0;
 }
 
-.hero.hero-backdrop:not(.light) :is(h1, h2, h3) em {
+.hero.hero-backdrop.dark :is(h1, h2, h3) em {
   font-style: normal;
-  color: var(--rbc-yellow);
+}
+
+@media (width < 768px) {
+  .hero.hero-backdrop {
+    flex-direction: column;
+    align-items: stretch;
+    padding-top: 0;
+  }
+
+  .hero.hero-backdrop:has(> picture) {
+    --hero-background: #f3f7f8;
+  }
+
+  .hero.hero-backdrop > picture {
+    display: block;
+    position: static;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    margin: 0 calc(var(--space-l) * -1) var(--space-l);
+  }
+
+  .hero.hero-backdrop > picture img {
+    mask-image: linear-gradient(to bottom, #000 55%, transparent);
+  }
+
+  .hero.hero-backdrop:not(.dark) > picture img {
+    object-position: right center;
+  }
+
+  .hero.hero-backdrop.content-right:not(.dark) > picture img {
+    object-position: left center;
+  }
+
+  .hero.hero-backdrop.gradient::after {
+    display: none;
+  }
+}
+
+@media (width >= 768px) {
+  .hero.hero-backdrop.dark {
+    --text-color: var(--rbc-white);
+    --link-color: var(--rbc-white);
+    --link-hover-color: var(--rbc-yellow);
+
+    color: var(--text-color);
+  }
+
+  .hero.hero-backdrop.dark a.button.secondary,
+  .hero.hero-backdrop.dark .hero-video-play {
+    box-shadow: inset 0 0 0 1px var(--rbc-white);
+    background-color: transparent;
+    color: var(--rbc-white);
+  }
+
+  .hero.hero-backdrop.dark :is(a.button.secondary, .hero-video-play):is(:hover, :focus-visible) {
+    background-color: var(--rbc-white);
+    color: var(--rbc-blue);
+  }
+
+  .hero.hero-backdrop.dark .hero-note {
+    color: var(--rbc-grey-200);
+  }
+
+  .hero.hero-backdrop.dark .hero-eyebrow {
+    color: var(--rbc-grey-900);
+  }
+
+  .hero.hero-backdrop.dark .icon svg * {
+    fill: var(--rbc-white);
+  }
+
+  .hero.hero-backdrop.dark :is(h1, h2, h3) em {
+    color: var(--rbc-yellow);
+  }
 }

@@ -14,7 +14,9 @@ function normalizeImage(block) {
     img.loading = 'eager';
     return;
   }
-  img.replaceWith(createOptimizedPicture(img.src, img.alt, true));
+  const picture = createOptimizedPicture(img.src, img.alt, true);
+  picture.querySelector('img').style.objectPosition = img.style.objectPosition;
+  img.replaceWith(picture);
 }
 
 // plays once over the whole hero, then fades to reveal the image, copy and a replay button
