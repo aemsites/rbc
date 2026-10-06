@@ -473,7 +473,7 @@ main > .section.dark-background .cards.tinted:not(.tile) > ul > li {
   padding: var(--space-m);
 }
 
-@media (width > 600px) {
+@media (width > 768px) {
   .cards.horizontal.image-bottom > ul > li > .cards-card-image {
     align-self: end;
     padding-bottom: 0;
@@ -832,7 +832,7 @@ main > .section.dark-background .cards.tinted:not(.tile) > ul > li {
   width: auto;
 }
 
-@media (width <= 600px) {
+@media (width <= 768px) {
   .cards.horizontal > ul > li {
     flex-direction: column;
   }
