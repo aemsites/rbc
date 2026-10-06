@@ -2,6 +2,7 @@ import {
   getProduct, monthlyFees, pickHighlights, keyList, isPrice,
 } from '../../utils/products.js';
 import fetchLocalPlaceholders from '../../utils/placeholders.js';
+import { trackProduct, selectProduct } from '../../scripts/ecommerce-analytics.js';
 import { footnoteSup, expandRefs, resolveRefLinks } from '../../utils/footnotes.js';
 import { escapeHtml, safeUrl } from '../../utils/dom.js';
 
@@ -41,12 +42,14 @@ export default async function decorate(block) {
   if (!products.length) return;
 
   const list = document.createElement('div');
+  const tracking = new Map();
   list.className = 'product-picker-list';
   if (intro) {
     intro.className = 'product-picker-intro';
     intro.replaceChildren(...intro.firstElementChild.childNodes);
     list.append(intro);
   }
+  const listTitle = intro?.querySelector('h2, h3')?.textContent.trim();
   const group = document.createElement('div');
   group.className = 'product-picker-options';
   group.setAttribute('role', 'radiogroup');
@@ -65,8 +68,11 @@ export default async function decorate(block) {
       <span class="product-picker-option-price">${escapeHtml(regular)}${escapeHtml(per)}</span>`;
     option.querySelector('input').addEventListener('change', () => {
       card.innerHTML = detail(product, keys.get(product), ph);
+      trackProduct(card, product, { index: i });
+      selectProduct(option);
       resolveRefLinks(card);
     });
+    tracking.set(option, product);
     group.append(option);
   });
   group.setAttribute('aria-label', intro?.querySelector('h2, h3')?.textContent || ph.chooseAnAccount || 'Choose an account');
@@ -74,4 +80,8 @@ export default async function decorate(block) {
   card.innerHTML = detail(products[0], keys.get(products[0]), ph);
   block.replaceChildren(list, card);
   await resolveRefLinks(card);
+  tracking.forEach((product, option) => trackProduct(option, product, {
+    list: block, listTarget: group, listTitle, index: [...group.children].indexOf(option),
+  }));
+  trackProduct(card, products[0]);
 }

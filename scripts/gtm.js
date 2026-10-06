@@ -1,4 +1,5 @@
 import { getMetadata, loadScript } from './aem.js';
+import { initEcommerce } from './ecommerce-analytics.js';
 import {
   CONSENT_GROUPS, hasConsentGroup, resolveGroups, consentOverride,
 } from './consent-check.js';
@@ -8,9 +9,8 @@ const GTM_ID = 'GTM-KPSBBC6';
 const PROD_HOSTS = ['main--rbc--aemsites.aem.live', 'www.rbcroyalbank.com'];
 const SITE_SECTION = 'public';
 const CMS_TYPE = 'aem';
-// Independent DataLayer SemVer and date stamp; see AGENTS.md for bump rules.
-const SITE_VERSION_NUMBER = '1.0.0';
-const SITE_VERSION_DATE = '2026-10-05';
+// Manually maintained DataLayer change date (MMDDYYYY); see AGENTS.md.
+const LAST_UPDATED = '10062026';
 
 const defined = (obj) => Object.fromEntries(
   Object.entries(obj).filter(([, value]) => value !== undefined && value !== null && value !== ''),
@@ -23,13 +23,8 @@ function environment() {
   return 'dev';
 }
 
-function siteVersion() {
-  const [year, month, day] = SITE_VERSION_DATE.split('-');
-  return `${SITE_VERSION_NUMBER}-${month}${day}${year.slice(-2)}`;
-}
-
-// Nested page keys per the v2 "Standard DataLayer GTM Implementation Guide".
-// lob / page-type / content-group / business-line are page metadata that must be authored
+// Nested page keys follow the canonical v3 reference table.
+// lob / page-type / content-group / business-segment are page metadata that must be authored
 // per-page or bulk-applied via the metadata sheet (not yet populated - see PR description for
 // the proposed column additions).
 function initialPushData() {
@@ -41,9 +36,9 @@ function initialPushData() {
       site_section: SITE_SECTION,
       cms_type: CMS_TYPE,
       page_language: (document.documentElement.lang || 'en').split('-')[0],
-      business_line: getMetadata('business-line') || 'personal',
+      business_segment: getMetadata('business-segment'),
       environment: environment(),
-      site_version: siteVersion(),
+      last_updated: LAST_UPDATED,
       error_code: window.isErrorPage ? window.errorCode : undefined,
     }),
   };
@@ -182,6 +177,7 @@ function pushGlobalParameters() {
   });
 
   initClickTracking();
+  initEcommerce();
 }
 
 pushGlobalParameters();

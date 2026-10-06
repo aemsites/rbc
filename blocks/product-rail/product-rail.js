@@ -1,6 +1,7 @@
 import { createOptimizedPicture } from '../../scripts/aem.js';
 import { getProduct, offerCells } from '../../utils/products.js';
 import fetchLocalPlaceholders from '../../utils/placeholders.js';
+import { trackProduct, trackPromotion, isProductDetail } from '../../scripts/ecommerce-analytics.js';
 import { rateSpan } from '../../utils/rates.js';
 import {
   footnoteSup, expandRefs, resolveRefLinks, normalizeLabel,
@@ -21,11 +22,15 @@ function noteMarker() {
 // the rail an author would otherwise write row by row, built from the product record
 function railRows(product, ph) {
   const rows = [];
+  let offerIndex;
   if (product.cardImage) {
     rows.push(row(picture(product.cardImage, product.cardImageAlt), `<p>${escapeHtml(product.categoryLabel)}</p>`));
   }
   const offer = offerCells(product, ph, { disclose: true });
-  if (offer) rows.push(row(...offer));
+  if (offer) {
+    offerIndex = rows.length;
+    rows.push(row(...offer));
+  }
   if (product.rateFallbackValue) {
     const value = product.rateRateCode
       ? rateSpan(product.rateRateCode, product.rateFallbackValue)
@@ -44,7 +49,7 @@ function railRows(product, ph) {
   }
   const apply = product.applyUrl ? `<p class="button-wrapper"><a class="button primary" href="${safeUrl(product.applyUrl)}">${escapeHtml(ph.openAccountOnline || 'Open Account Online')}</a></p>` : '';
   rows.push(row(`${apply}<p class="link-wrapper"><a href="#legal-disclaimers">${escapeHtml(ph.viewLegalDisclaimers || 'View legal disclaimers')}</a></p>`));
-  return rows.join('');
+  return { html: rows.join(''), offerIndex };
 }
 
 // once the rail scrolls away, a bar with the page title keeps its apply button in reach;
@@ -52,7 +57,7 @@ function railRows(product, ph) {
 function stickyBar(block, ph) {
   const apply = block.querySelector('.product-rail-cta a.button');
   const title = document.querySelector('main h1');
-  if (!apply || !title) return;
+  if (!apply || !title) return undefined;
   const bar = document.createElement('div');
   bar.className = 'product-rail-bar';
   bar.innerHTML = `<p class="product-rail-bar-title" aria-hidden="true">${escapeHtml(title.textContent)}</p>
@@ -62,17 +67,23 @@ function stickyBar(block, ph) {
   new IntersectionObserver(([entry]) => {
     bar.classList.toggle('visible', !entry.isIntersecting && entry.boundingClientRect.top < 0);
   }).observe(section);
+  return bar;
 }
 
 export default async function decorate(block) {
   const ph = await fetchLocalPlaceholders();
+  let record;
+  let offerRow;
   // a record link in the first row builds the rail; rows after it are page copy for above the CTA
   const [lead, ...extra] = [...block.children];
   const link = lead?.querySelector('a[href*="/products/"]');
   if (link && lead.textContent.trim() === link.textContent.trim()) {
     const product = await getProduct(link.getAttribute('href'));
     if (product) {
-      block.innerHTML = railRows(product, ph);
+      record = product;
+      const { html, offerIndex } = railRows(product, ph);
+      block.innerHTML = html;
+      offerRow = block.children[offerIndex];
       block.lastElementChild.before(...extra);
     }
     await resolveRefLinks(block);
@@ -97,5 +108,19 @@ export default async function decorate(block) {
     }
     r.className = 'product-rail-fee';
   });
-  stickyBar(block, ph);
+  const bar = stickyBar(block, ph);
+  if (record) {
+    trackProduct(block, record, { detail: isProductDetail() });
+    if (offerRow) {
+      trackPromotion(
+        offerRow,
+        { id: record.offerId, name: record.offerName },
+        offerRow.querySelector(':scope > div:last-child > details.disclosure > p.link-wrapper > a'),
+      );
+    }
+    if (bar) {
+      bar.dataset.blockName = 'product-rail';
+      trackProduct(bar, record);
+    }
+  }
 }

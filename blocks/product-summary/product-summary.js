@@ -4,6 +4,7 @@ import {
   cardStats, getProduct, isCreditCard, monthlyFees, offerCells, pickHighlights,
 } from '../../utils/products.js';
 import fetchLocalPlaceholders from '../../utils/placeholders.js';
+import { trackProduct, isProductDetail } from '../../scripts/ecommerce-analytics.js';
 import { expandRefs, footnoteSup, resolveRefLinks } from '../../utils/footnotes.js';
 
 const button = (text, href) => createElement('p', { class: 'button-wrapper' }, createElement('a', { class: 'button primary', href: safeUrl(href) }, text));
@@ -89,4 +90,7 @@ export default async function decorate(block) {
   block.replaceChildren(...(card
     ? cardSummary(product, ph, features, background) : accountSummary(product, ph, features)));
   await resolveRefLinks(block);
+  trackProduct(block, product, {
+    detail: isProductDetail() && !document.querySelector('main .product-rail'),
+  });
 }

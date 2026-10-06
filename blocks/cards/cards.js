@@ -9,6 +9,7 @@ import {
   getProduct, getProducts, monthlyFees, pickHighlights, keyList, offerLegalPage, isPrice, zeroPrice,
 } from '../../utils/products.js';
 import fetchLocalPlaceholders from '../../utils/placeholders.js';
+import { trackProduct, trackPromotion } from '../../scripts/ecommerce-analytics.js';
 import { rateSpan } from '../../utils/rates.js';
 import decorateTile, { tileWords } from './tiles.js';
 
@@ -76,7 +77,7 @@ function productBody(product, ph, variant, keys = [], options = {}) {
   }
   const offerPage = offerLegalPage(product);
   const badge = product.offerBadge
-    ? `<p><em>${offerLink(product, stripRefs(product.offerBadge))}${footnoteSup(refIds(product.offerBadge), offerPage)}</em></p>` : '';
+    ? `<p class="cards-product-badge"><em>${offerLink(product, stripRefs(product.offerBadge))}${footnoteSup(refIds(product.offerBadge), offerPage)}</em></p>` : '';
   const caption = product.offerBadge && product.offerCaption
     ? `<p class="cards-product-caption"><em>${expandRefs(escapeHtml(product.offerCaption), offerPage)}</em></p>` : '';
   return `${cardLabel(product, ph, options.label)}<h3>${name}</h3><p>${escapeHtml(product.tagline)}</p><ul>${highlights}</ul>
@@ -103,6 +104,7 @@ async function expandFilterRows(anchor, config) {
 }
 
 async function renderProductRows(block) {
+  const records = new Map();
   const config = readBlockConfig(block);
   const settings = [...block.children].filter((row) => row.children.length === 2
     && CONFIG_KEYS.includes(toClassName(row.firstElementChild.textContent)));
@@ -117,7 +119,7 @@ async function renderProductRows(block) {
     const alone = a?.parentElement.textContent.trim() === a?.textContent.trim();
     return a && alone && row.children.length <= 2;
   });
-  if (!rows.length) return;
+  if (!rows.length) return records;
   const ph = await fetchLocalPlaceholders();
   const variant = ['compact', 'picture', 'featured'].find((word) => block.classList.contains(word));
   const featured = variant === 'featured' && await import('./featured.js');
@@ -125,6 +127,7 @@ async function renderProductRows(block) {
     const link = row.querySelector('a');
     const product = await getProduct(link.getAttribute('href'));
     if (!product) { row.remove(); return; }
+    records.set(row, { product });
     if (featured) {
       const highlights = pickHighlights(product, keyList(row.children[1]))
         .map((h) => ({ icon: h.icon, html: claim(h.text, h.url, product.productPage) }));
@@ -145,6 +148,7 @@ async function renderProductRows(block) {
     }
     const body = document.createElement('div');
     body.innerHTML = productBody(product, ph, variant, keyList(row.children[1]), options);
+    records.set(row, { product, badge: body.querySelector('p.cards-product-badge') });
     if (variant !== 'compact') body.dataset.category = product.category;
     row.replaceChildren(body);
     if (variant === 'picture' && product.image) {
@@ -154,6 +158,7 @@ async function renderProductRows(block) {
     }
   }));
   await resolveRefLinks(block);
+  return records;
 }
 
 function decorateProduct(li) {
@@ -224,12 +229,14 @@ function decorateDetail(li, detail, ph) {
 
 export default async function decorate(block) {
   if (block.classList.contains('tinted-alternate')) block.classList.add('tinted');
-  if (block.classList.contains('product')) await renderProductRows(block);
+  const records = block.classList.contains('product') ? await renderProductRows(block) : new Map();
+  const products = new Map();
   const expandable = block.classList.contains('expandable');
   const ph = expandable ? await fetchLocalPlaceholders() : {};
   const ul = document.createElement('ul');
   [...block.children].forEach((row) => {
     const li = document.createElement('li');
+    if (records.has(row)) products.set(li, records.get(row));
     while (row.firstElementChild) li.append(row.firstElementChild);
     const detail = expandable && li.children.length > 2 ? li.lastElementChild : null;
     detail?.remove();
@@ -278,4 +285,14 @@ export default async function decorate(block) {
   if (block.classList.contains('product') && !block.classList.contains('featured')) {
     ul.querySelectorAll(':scope > li').forEach(decorateProduct);
   }
+  products.forEach(({ product, badge }, li) => {
+    trackProduct(li, product, { list: block, index: [...ul.children].indexOf(li) });
+    if (badge) {
+      trackPromotion(
+        badge,
+        { id: product.offerId, name: product.offerName },
+        badge.querySelector('a:not(.footnote, sup a)'),
+      );
+    }
+  });
 }
