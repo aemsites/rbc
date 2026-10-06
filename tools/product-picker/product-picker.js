@@ -97,7 +97,7 @@ function renderDetails() {
     if (!state.loading && !state.inserting) {
       selection.replaceChildren(
         `Ready to insert ${isOffer ? 'offer' : 'product'}: `,
-        createElement('code', {}, offer ? output : product.shortName || product.name || product.path),
+        createElement('code', {}, output),
       );
     }
   } catch (error) {

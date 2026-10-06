@@ -146,8 +146,8 @@ test('product insertion uses relative link text and stays open without requiring
   assert.equal(button.disabled, false);
   assert.equal(find('.picker-actionbar').hidden, false);
   assert.ok(button.closest('.picker-actionbar'));
-  assert.match(find('.picker-selection').textContent, /Ready to insert product: Signature/);
-  assert.equal(find('.picker-selection code').textContent, 'Signature');
+  assert.equal(find('.picker-selection').textContent, 'Ready to insert product: /products/signature');
+  assert.equal(find('.picker-selection code').textContent, '/products/signature');
   const result = find('.picker-list button[data-key="/products/signature:products:0"]');
   result.focus();
   const { KeyboardEvent } = result.ownerDocument.defaultView;
@@ -160,7 +160,7 @@ test('product insertion uses relative link text and stays open without requiring
   assert.equal(find('.picker-selection code'), null);
   await flush();
   assert.equal(button.disabled, false);
-  assert.match(find('.picker-selection').textContent, /Ready to insert product: Signature/);
+  assert.equal(find('.picker-selection').textContent, 'Ready to insert product: /products/signature');
   button.click();
   await flush();
   assert.deepEqual(calls, [
