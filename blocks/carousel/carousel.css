@@ -167,6 +167,8 @@
 }
 
 .carousel.single .carousel-slide .carousel-slide-image img {
+  position: absolute;
+  inset: 0;
   height: 100%;
   max-height: initial;
 }
