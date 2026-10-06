@@ -100,7 +100,6 @@ main > .section > .cards-wrapper + .default-content-wrapper {
   object-position: top;
 }
 
-/* logos: the whole mark sits on a tinted panel instead of cropping to fill */
 .cards.logos > ul > li > .cards-card-image {
   padding: var(--space-l);
   background-color: var(--rbc-grey-100);
@@ -138,8 +137,7 @@ main > .section > .cards-wrapper + .default-content-wrapper {
 
 .cards.icons .cards-card-body .cards-card-title,
 .cards.list .cards-card-body .cards-card-title {
-  font-size: var(--body-font-size-l);
-  font-family: var(--body-font-family);
+  font-family: var(--heading-font-family);
   font-weight: 500;
 }
 
@@ -163,10 +161,20 @@ main > .section > .cards-wrapper + .default-content-wrapper {
   }
 }
 
-.cards.icons:is(.medium, .large) > ul > li > .cards-card-image {
+.cards.icons:is(.medium, .large) > ul > li > .cards-card-image:not(:has(.icon)) {
   display: flex;
   align-items: flex-end;
   height: var(--icon-art-height);
+}
+
+.cards.icons:is(.large) > ul > li > .cards-card-image .icon svg {
+  width: 80px;
+  height: 80px;
+}
+
+.cards.icons:is(.medium) > ul > li > .cards-card-image .icon svg {
+  width: 60px;
+  height: 60px;
 }
 
 .cards.icons:is(.medium, .large) > ul > li > .cards-card-image img {
@@ -295,7 +303,7 @@ main > .section > .cards-wrapper + .default-content-wrapper {
 
 .cards.list.tinted > ul > li {
   border: 0;
-  background-color: var(--rbc-light-blue);
+  background-color: #E1EBEF;
   align-items: center;
 }
 
@@ -353,7 +361,7 @@ main > .section.dark-background .cards.tinted:not(.tile) > ul > li {
 
 .cards.tinted > ul > li {
   border: 0;
-  background-color: var(--rbc-light-blue);
+  background-color: #E1EBEF;
 }
 
 .cards.tinted-alternate > ul > li:nth-child(even) {
@@ -363,6 +371,10 @@ main > .section.dark-background .cards.tinted:not(.tile) > ul > li {
 .cards.tinted .cards-card-body,
 .cards.dark:not(.tile) .cards-card-body {
   padding: var(--space-l);
+}
+
+.cards.icons.tinted > ul > li > .cards-card-image .icon svg [fill]:not([fill="none"], [fill="white"]) {
+  fill: var(--rbc-grey-600);
 }
 
 .cards.icons.tinted > ul > li > .cards-card-image:not(:has(.icon)) {
