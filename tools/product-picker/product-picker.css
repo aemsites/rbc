@@ -258,6 +258,13 @@
   line-height: 1.5;
 }
 
+.rbc-picker .picker-instructions {
+  margin: 12px 0;
+  padding: 10px 12px;
+  border-left: 3px solid var(--picker-blue);
+  background: var(--picker-selected);
+}
+
 @media (width >= 768px) {
   .rbc-picker {
     height: 100dvh;

@@ -83,6 +83,17 @@ async function picker(actions = {}, pagePath = '/bank-accounts') {
   };
 }
 
+test('mode-specific instructions appear above the results before any selection', async () => {
+  const { find, changeMode } = await picker();
+  const instructions = find('.picker-instructions');
+  assert.ok(instructions.closest('.picker-toolbar'));
+  assert.equal(find('.picker-details .picker-instructions'), null);
+  assert.match(instructions.textContent, /structured product link/);
+  changeMode('offers');
+  assert.match(instructions.textContent, /value cell of a promo or offer Section Metadata row/);
+  assert.equal(find('.picker-actionbar').hidden, true);
+});
+
 test('Clear filters resets search/category/persona without changing language, mode, or selection', async () => {
   const {
     find, changeMode, requests,
