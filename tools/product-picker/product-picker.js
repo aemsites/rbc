@@ -95,7 +95,10 @@ function renderDetails() {
     if (!offer) addDetail(details, 'Link destination', productURL(product.path));
     content.append(createElement('h3', {}, 'Exact insertion output'), createElement('pre', {}, output));
     if (!state.loading && !state.inserting) {
-      selection.textContent = `Ready to insert ${isOffer ? 'offer' : 'product'}: ${offer ? output : product.shortName || product.name || product.path}`;
+      selection.replaceChildren(
+        `Ready to insert ${isOffer ? 'offer' : 'product'}: `,
+        createElement('code', {}, offer ? output : product.shortName || product.name || product.path),
+      );
     }
   } catch (error) {
     button.disabled = true;

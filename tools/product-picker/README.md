@@ -67,7 +67,8 @@ authors can switch explicitly. No cross-language fallback is performed. Search
 matches names, short names, paths, product codes, and offer identities. Category
 and persona filters include variants. Selecting a product or offer reveals a
 floating bottom action bar with the Insert button, alongside a ready-to-insert
-status or the reason insertion is unavailable. The bar stays visible while
+status or the reason insertion is unavailable. The selected value uses a code
+style to distinguish it from the status label. The bar stays visible while
 scrolling, and content space is reserved so it does not cover the list or details.
 Use Arrow Up/Down to select visible results, then Tab to reach Insert for a valid
 selection; Enter/Space activate native buttons.

@@ -53,6 +53,16 @@
   min-width: 0;
   margin: 0;
   overflow-wrap: anywhere;
+  line-height: 1.8;
+}
+
+.rbc-picker .picker-selection code {
+  padding: 2px 6px;
+  border: 1px solid var(--picker-border);
+  border-radius: 4px;
+  background: var(--picker-selected);
+  font-family: ui-monospace, SFMono-Regular, menlo, consolas, monospace;
+  font-size: 0.9em;
 }
 
 .rbc-picker h1 {
@@ -83,6 +93,12 @@
   padding: 0;
 }
 
+.rbc-picker .picker-filters {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.2fr) minmax(0, 1.1fr) auto;
+  gap: 8px;
+}
+
 .rbc-picker .picker-modes legend {
   margin-bottom: 6px;
   font-weight: bold;
@@ -93,6 +109,11 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+}
+
+.rbc-picker .picker-filters label {
+  min-width: 0;
+  font-size: 14px;
 }
 
 .rbc-picker .picker-search-label {
@@ -113,6 +134,19 @@
 .rbc-picker input[type="search"] {
   width: 100%;
   min-width: 0;
+}
+
+.rbc-picker .picker-filters select {
+  width: 100%;
+  min-width: 0;
+  padding: 8px 6px;
+  font-size: 14px;
+}
+
+.rbc-picker .picker-clear {
+  padding: 8px 6px;
+  font-size: 14px;
+  white-space: nowrap;
 }
 
 .rbc-picker button {

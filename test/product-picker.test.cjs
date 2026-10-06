@@ -147,6 +147,7 @@ test('product insertion uses relative link text and stays open without requiring
   assert.equal(find('.picker-actionbar').hidden, false);
   assert.ok(button.closest('.picker-actionbar'));
   assert.match(find('.picker-selection').textContent, /Ready to insert product: Signature/);
+  assert.equal(find('.picker-selection code').textContent, 'Signature');
   const result = find('.picker-list button[data-key="/products/signature:products:0"]');
   result.focus();
   const { KeyboardEvent } = result.ownerDocument.defaultView;
@@ -156,6 +157,7 @@ test('product insertion uses relative link text and stays open without requiring
   assert.deepEqual(calls, []);
   button.click();
   assert.equal(button.disabled, true);
+  assert.equal(find('.picker-selection code'), null);
   await flush();
   assert.equal(button.disabled, false);
   assert.match(find('.picker-selection').textContent, /Ready to insert product: Signature/);
@@ -179,6 +181,7 @@ test('valid offer insertion can be repeated; incomplete offers remain disabled',
   assert.equal(button.disabled, false);
   assert.equal(find('.picker-actionbar').hidden, false);
   assert.match(find('.picker-selection').textContent, /Ready to insert offer: Offer: summer:summer/);
+  assert.equal(find('.picker-selection code').textContent, 'Offer: summer:summer');
   button.click();
   await flush();
   assert.equal(button.disabled, false);
@@ -192,6 +195,7 @@ test('valid offer insertion can be repeated; incomplete offers remain disabled',
   assert.equal(button.disabled, true);
   assert.equal(find('.picker-actionbar').hidden, false);
   assert.match(find('.picker-selection').textContent, /Cannot insert: Offer name and ID are required/);
+  assert.equal(find('.picker-selection code'), null);
 });
 
 test('pending insertion prevents double sends and enables Insert after completion', async () => {
