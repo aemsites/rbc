@@ -38,6 +38,10 @@ export function fragment(html) {
   return template.content;
 }
 
+export function parseHtml(html) {
+  return new DOMParser().parseFromString(html, 'text/html').body.childNodes;
+}
+
 export function labelKind(p) {
   const text = p.textContent.trim();
   const covers = (selector) => [...p.querySelectorAll(selector)]
