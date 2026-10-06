@@ -236,7 +236,7 @@ main > .section > .cards-wrapper + .default-content-wrapper {
   margin: 0 0 var(--space-2xs);
   border-radius: var(--radius-s);
   padding: 2px var(--space-2xs);
-  background-color: var(--rbc-light-blue);
+  background-color: var(--rbc-tag-blue);
   color: #456b86;
   font-size: var(--body-font-size-xs);
   font-weight: 500;
@@ -369,7 +369,7 @@ main > .section.dark-background .cards.tinted:not(.tile) > ul > li {
   padding: var(--space-l) var(--space-l) 0;
 }
 
-.cards.icons.tinted > ul > li > .cards-card-image img {
+.cards.icons.tinted:not(.medium, .large) > ul > li > .cards-card-image img {
   max-height: 48px;
 }
 
@@ -1068,4 +1068,11 @@ main > .section.left .cards.product > ul {
 
 .cards.expandable .cards-card-close::before {
   content: "\00d7";
+}
+
+/* last, so two per row wins over each variant's own grid */
+.cards.split > ul {
+  @media (width >= 768px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }

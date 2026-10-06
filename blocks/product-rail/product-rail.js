@@ -89,8 +89,8 @@ export default async function decorate(block) {
     }
     // footnote links sit on fee values too, so they don't make a row an offer
     if (second.querySelector('picture, a:not(sup a)') || second.children.length > 1 || second.textContent.trim().length > 60) {
-      r.className = 'product-rail-offer';
-      first.className = 'product-rail-eyebrow';
+      r.className = 'product-rail-offer offer-box';
+      first.className = 'product-rail-eyebrow offer-label';
       return;
     }
     r.className = 'product-rail-fee';

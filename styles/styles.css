@@ -16,6 +16,7 @@
   --rbc-blue-dark: #0051a5;
   --rbc-navy: #003168;
   --rbc-light-blue: #edf7fc;
+  --rbc-tag-blue: #e4eeff;
   --rbc-yellow: #fedf01;
   --rbc-yellow-dark: #e8cf00;
   --rbc-yellow-light: #fae487;
@@ -568,6 +569,7 @@ main > .section.dark-background {
   --text-color: var(--rbc-white);
   --link-color: var(--rbc-white);
   --link-hover-color: var(--rbc-yellow);
+  --icon-color: var(--rbc-white);
 
   color: var(--text-color);
 }
@@ -586,6 +588,10 @@ main > .section.dark-background a.button.secondary:hover,
 main > .section.dark-background a.button.secondary:focus-visible {
   background-color: var(--rbc-white);
   color: var(--rbc-blue);
+}
+
+main > .section.dark-background .icon svg * {
+  fill: var(--icon-color);
 }
 
 body:not(.style-guide) main > .section > .default-content-wrapper :is(p, h2, h3, h4, h5, h6) {
@@ -858,20 +864,70 @@ body:not(.style-guide) main > .section.strip > .default-content-wrapper p {
   max-width: 100%;
 }
 
-body:not(.style-guide) main > .section > .default-content-wrapper > p:has(> strong:only-child):has(+ :is(h2, h3)) {
+body:not(.style-guide) main > .section > .default-content-wrapper > p.label {
+  display: block;
   width: fit-content;
   margin: 0 auto var(--space-xs);
-  border-radius: var(--radius-s);
-  padding: 2px var(--space-2xs);
-  background-color: var(--rbc-light-blue);
-  color: #456b86;
-  font-size: var(--body-font-size-xs);
-  letter-spacing: 0.06em;
+}
+
+body:not(.style-guide) main > .section.left > .default-content-wrapper > p.label {
+  margin-left: 0;
+}
+
+/* labels above headings: plain, light-blue tag (bold) or promotional tag (italic) */
+.label {
+  display: inline-block;
+  margin: 0 0 var(--space-2xs);
+  font-size: var(--body-font-size-s);
+  font-weight: 500;
+  letter-spacing: 0.3em;
   text-transform: uppercase;
 }
 
-body:not(.style-guide) main > .section.left > .default-content-wrapper > p:has(> strong:only-child):has(+ :is(h2, h3)) {
-  margin-left: 0;
+:is(.label, .offer-label) :is(u, strong, b, em, i) {
+  font-style: normal;
+  font-weight: inherit;
+  text-decoration: none;
+}
+
+.label-tag {
+  border-radius: var(--radius-s);
+  padding: 2px var(--space-2xs);
+  background-color: var(--rbc-tag-blue);
+  color: #456b86;
+  font-size: var(--body-font-size-xs);
+  letter-spacing: 0.06em;
+}
+
+.label-promo {
+  padding: 2px var(--space-2xs);
+  background-color: var(--rbc-orange);
+  color: var(--rbc-grey-900);
+  font-size: var(--body-font-size-xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+/* an offer: a cream box with its label notched into the top border */
+.offer-box {
+  position: relative;
+  border: 1px solid var(--rbc-orange);
+  border-radius: var(--radius-s);
+  padding: var(--space-l) var(--space-s) var(--space-s);
+  background-color: #fffbe6;
+}
+
+.offer-box > .offer-label {
+  position: absolute;
+  top: calc(var(--space-2xs) * -1);
+  left: var(--space-s);
+  margin: 0;
+  padding: 0 var(--space-2xs);
+  background-color: var(--rbc-orange);
+  font-size: var(--body-font-size-xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 body:not(.style-guide).library-page > main > .section > .default-content-wrapper :is(h1, h2, h3, h4, h5, h6, p, ul, ol, li) {

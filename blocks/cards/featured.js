@@ -70,7 +70,7 @@ export default function featuredBody(product, ph, highlights, {
     ];
   const body = createElement('div', { class: 'cards-card-body' }, [
     ...head,
-    offer ? createElement('div', { class: 'cards-featured-offer' }, fragment(offer.join(''))) : null,
+    offer ? createElement('div', { class: 'cards-featured-offer offer-box' }, fragment(offer.join(''))) : null,
     createElement('ul', {}, highlights.map(({ icon, html }) => createElement('li', {}, [
       icon ? createElement('span', { class: `icon icon-${icon}` }) : null,
       createElement('span', {}, fragment(html)),

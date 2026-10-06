@@ -6,6 +6,7 @@ import {
   getProduct, getProducts, monthlyFees, pickHighlights, keyList, offerLegalPage, isPrice, zeroPrice,
 } from '../../utils/products.js';
 import fetchLocalPlaceholders from '../../utils/placeholders.js';
+import { labelKind } from '../../utils/dom.js';
 import { rateSpan } from '../../utils/rates.js';
 import {
   footnoteSup, expandRefs, stripRefs, refIds, resolveRefLinks,
@@ -249,11 +250,17 @@ export default async function decorate(block) {
     (img.closest('picture') || img).replaceWith(optimized);
   });
   if (!block.classList.contains('product')) {
+    const yellow = block.classList.contains('yellow-eyebrow');
     ul.querySelectorAll(':scope > li').forEach((li) => {
       const eyebrow = li.querySelector('.cards-card-body > p:first-child:not(:has(a:not(.footnote), picture))');
       if (!eyebrow?.nextElementSibling?.matches('h2, h3, h4, h5, h6')) return;
-      eyebrow.className = 'cards-card-eyebrow';
-      if (block.classList.contains('yellow-eyebrow')) li.prepend(eyebrow);
+      if (yellow) {
+        eyebrow.className = 'cards-card-eyebrow';
+        li.prepend(eyebrow);
+        return;
+      }
+      const kind = labelKind(eyebrow);
+      if (kind) eyebrow.className = `label label-${kind}`;
     });
   }
   ul.querySelectorAll('h2, h3, h4, h5, h6').forEach((heading) => {

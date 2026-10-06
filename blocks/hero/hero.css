@@ -80,13 +80,6 @@ main > .section.hero-container:has(
   text-transform: uppercase;
 }
 
-.hero .columns .columns-tag {
-  border-radius: 0;
-  background-color: var(--rbc-orange);
-  color: inherit;
-  font-weight: 700;
-}
-
 .hero .hero-note {
   display: flex;
   align-items: center;

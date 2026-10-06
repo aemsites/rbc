@@ -1,4 +1,4 @@
-import { watchStuck } from '../utils/dom.js';
+import { labelKind, watchStuck } from '../utils/dom.js';
 import { decorateRateCode, decorateRates } from '../utils/rates.js';
 import linkFootnotes, { revealLegalHash } from '../utils/footnotes.js';
 import decorateTooltips from '../utils/tooltips.js';
@@ -270,6 +270,13 @@ function decorateStickyTitle(main) {
   watchStuck(section, (stuck) => section.classList.toggle('is-stuck', stuck));
 }
 
+function decorateLabels(main) {
+  main.querySelectorAll('.default-content-wrapper > p:has(+ :is(h2, h3))').forEach((p) => {
+    const kind = labelKind(p);
+    if (kind) p.classList.add('label', `label-${kind}`);
+  });
+}
+
 // eslint-disable-next-line import/prefer-default-export
 export function decorateMain(main) {
   decorateIcons(main);
@@ -279,6 +286,7 @@ export function decorateMain(main) {
   decorateStickyTitle(main);
   decorateSectionBackgrounds(main);
   decorateBlocks(main);
+  decorateLabels(main);
   decorateTooltips(main);
   decorateDisclosures(main);
   decorateButtons(main);

@@ -66,7 +66,7 @@ function cardSummary(product, ph, features, background) {
   const art = createElement('div', { class: 'product-summary-art' }, [
     background ? createElement('div', { class: 'product-summary-background' }, background) : null,
     product.cardImage ? createOptimizedPicture(product.cardImage, product.cardImageAlt, false, [{ width: '750' }]) : null,
-    offer ? createElement('div', { class: 'product-summary-offer' }, fragment(offer.join(''))) : null,
+    offer ? createElement('div', { class: 'product-summary-offer offer-box' }, fragment(offer.join(''))) : null,
   ]);
   decorateIcons(body);
   return [body, art];

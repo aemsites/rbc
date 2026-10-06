@@ -91,28 +91,11 @@
 }
 
 .cards.product.featured .cards-featured-offer {
-  position: relative;
   margin-bottom: var(--space-l);
-  border: 1px solid var(--rbc-orange);
-  border-radius: var(--radius-s);
-  padding: var(--space-l) var(--space-s) var(--space-s);
-  background-color: #fffbe6;
 }
 
 .cards.product.featured .cards-featured-offer > p {
   margin: 0;
-}
-
-.cards.product.featured .cards-featured-offer > p:first-child {
-  position: absolute;
-  top: calc(var(--space-2xs) * -1);
-  left: var(--space-s);
-  padding: 0 var(--space-2xs);
-  background-color: var(--rbc-orange);
-  font-size: var(--body-font-size-xs);
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
 }
 
 .cards.product.featured .cards-featured-offer > p + p:not(:nth-child(2)) {
