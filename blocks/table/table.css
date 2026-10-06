@@ -49,11 +49,35 @@
   border-top: 1px solid #dadada;
 }
 
+.table.bordered table th,
+.table.bordered table td {
+  border: 1px solid #dadada;
+}
+
+.table.white table {
+  background-color: #fff;
+}
+
+.table.white table th,
+.table.white table td,
+.table.white table tbody tr {
+  border: 0;
+}
+
 .table.striped tbody tr:nth-child(odd) {
   background-color: var(--rbc-light-blue);
 }
 
-.table.bordered table th,
-.table.bordered table td {
-  border: 1px solid #dadada;
+.table table td ul {
+  margin: 0;
+  padding-left: 0;
+  list-style: none;
+}
+
+.table table td li + li {
+  margin-top: 0.25em;
+}
+
+.table.striped tbody td:first-child {
+  font-weight: 500;
 }

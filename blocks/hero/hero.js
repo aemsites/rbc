@@ -12,9 +12,12 @@ function normalizeImage(block) {
   if (!img) return;
   if (img.closest('picture')) {
     img.loading = 'eager';
+    img.fetchPriority = 'high';
     return;
   }
-  img.replaceWith(createOptimizedPicture(img.src, img.alt, true));
+  const picture = createOptimizedPicture(img.src, img.alt, true);
+  picture.querySelector('img').style.objectPosition = img.style.objectPosition;
+  img.replaceWith(picture);
 }
 
 // plays once over the whole hero, then fades to reveal the image, copy and a replay button
@@ -85,6 +88,23 @@ function introVideo(block) {
   video.play().catch(() => show(false));
 }
 
+// a picture after the heading opens an offer box that runs to its first link line
+function offerBox(block) {
+  const heading = block.querySelector('.hero-copy > :is(h1, h2, h3, h4)');
+  const isPicture = (p) => p.matches('p:has(> :is(picture, img):only-child)');
+  let start = heading?.nextElementSibling;
+  while (start && !isPicture(start)) start = start.nextElementSibling;
+  if (!start) return;
+  const group = [start];
+  for (let p = start.nextElementSibling; p && !p.classList.contains('button-wrapper'); p = p.nextElementSibling) {
+    group.push(p);
+    if (p.querySelector('a')) break;
+  }
+  const box = createElement('div', { class: 'hero-offer' });
+  start.before(box);
+  box.append(...group);
+}
+
 function removeEmpty(node, stop) {
   let current = node;
   while (current && current !== stop && !current.childElementCount && !current.textContent.trim()) {
@@ -126,6 +146,7 @@ function arrange(block) {
 export default function decorate(block) {
   normalizeImage(block);
   arrange(block);
+  offerBox(block);
   introVideo(block);
 
   block.querySelectorAll('p > em:only-child').forEach((em) => {
@@ -138,7 +159,7 @@ export default function decorate(block) {
   });
 
   const eyebrow = block.querySelector('h1, h2, h3, h4, h5, h6')?.previousElementSibling;
-  if (eyebrow?.tagName === 'P' && !eyebrow.querySelector('a, picture')) {
+  if (eyebrow?.tagName === 'P' && !eyebrow.querySelector('a, picture, img')) {
     eyebrow.classList.add('hero-eyebrow');
   }
 }

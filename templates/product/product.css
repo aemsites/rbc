@@ -14,6 +14,7 @@
 .product main > .section.beside-rail > div {
   max-width: none;
   padding: 0;
+  margin: 0;
 }
 
 .product main > .section.beside-rail {

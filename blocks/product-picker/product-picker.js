@@ -4,6 +4,7 @@ import {
 import fetchLocalPlaceholders from '../../utils/placeholders.js';
 import { trackProduct, selectProduct } from '../../scripts/ecommerce-analytics.js';
 import { footnoteSup, expandRefs, resolveRefLinks } from '../../utils/footnotes.js';
+import { escapeHtml, safeUrl } from '../../utils/dom.js';
 
 let pickerCount = 0;
 
@@ -13,16 +14,16 @@ function detail(product, keys, ph) {
   } = monthlyFees(product);
   const sup = (value) => footnoteSup(value, product.productPage);
   const rebateLine = rebate
-    ? `<span>${ph.or || 'or'} ${rebate}${ph.perMonth || '/mo'} ${ph.withTheValueProgram || 'with the Value Program'}${sup(rebateFootnotes)}</span>` : '';
+    ? `<span>${escapeHtml(ph.or || 'or')} ${escapeHtml(rebate)}${escapeHtml(ph.perMonth || '/mo')} ${escapeHtml(ph.withTheValueProgram || 'with the Value Program')}${sup(rebateFootnotes)}</span>` : '';
   const includes = pickHighlights(product, keys)
-    .map((h) => `<li>${expandRefs(h.text, product.productPage)}</li>`).join('');
+    .map((h) => `<li>${expandRefs(escapeHtml(h.text), product.productPage)}</li>`).join('');
   return `
     <div class="product-picker-head">
-      <p class="product-picker-name">${product.name}</p>
-      <p class="product-picker-price"><span>${ph.monthlyFee || 'Monthly fee'}</span><strong>${regular}${sup(regularFootnotes)}</strong>${rebateLine}</p>
+      <p class="product-picker-name">${escapeHtml(product.name)}</p>
+      <p class="product-picker-price"><span>${escapeHtml(ph.monthlyFee || 'Monthly fee')}</span><strong>${escapeHtml(regular)}${sup(regularFootnotes)}</strong>${rebateLine}</p>
     </div>
-    ${includes ? `<p class="product-picker-includes">${ph.includes || 'Includes:'}</p><ul>${includes}</ul>` : ''}
-    <p class="button-wrapper"><a class="button" href="${product.applyUrl}">${ph.openAccount || 'Open Account'}</a></p>`;
+    ${includes ? `<p class="product-picker-includes">${escapeHtml(ph.includes || 'Includes:')}</p><ul>${includes}</ul>` : ''}
+    <p class="button-wrapper"><a class="button" href="${safeUrl(product.applyUrl)}">${escapeHtml(ph.openAccount || 'Open Account')}</a></p>`;
 }
 
 // optional intro row, then one row per /products/ link with optional claim keys;
@@ -61,10 +62,10 @@ export default async function decorate(block) {
     const per = isPrice(regular) ? ph.perMonth || '/mo' : '';
     const option = document.createElement('label');
     option.className = 'product-picker-option';
-    option.innerHTML = `<input type="radio" name="product-picker-${pickerCount}" value="${product.slug}"${i ? '' : ' checked'}>
-      <span class="product-picker-tagline">${product.tagline || ''}</span>
-      <span class="product-picker-option-name">${product.name}</span>
-      <span class="product-picker-option-price">${regular}${per}</span>`;
+    option.innerHTML = `<input type="radio" name="product-picker-${pickerCount}" value="${escapeHtml(product.slug)}"${i ? '' : ' checked'}>
+      <span class="product-picker-tagline">${escapeHtml(product.tagline || '')}</span>
+      <span class="product-picker-option-name">${escapeHtml(product.name)}</span>
+      <span class="product-picker-option-price">${escapeHtml(regular)}${escapeHtml(per)}</span>`;
     option.querySelector('input').addEventListener('change', () => {
       card.innerHTML = detail(product, keys.get(product), ph);
       trackProduct(card, product, { index: i });

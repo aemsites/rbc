@@ -61,6 +61,7 @@
 }
 
 .columns.shadow {
+  overflow: hidden;
   box-shadow: 0 3.591px 7.847px 0 rgb(37 37 37 / 8%);
   border-radius: var(--radius-s);
   background: var(--rbc-white);
@@ -70,13 +71,54 @@
   }
 }
 
+.columns.shadow > div > .columns-img-col:first-child picture,
+.columns.shadow > div > .columns-img-col:first-child img {
+  display: block;
+  height: 100%;
+}
+
+.columns.shadow > div > .columns-img-col:first-child img {
+  object-fit: cover;
+}
+
+.columns.shadow > div > .columns-img-col:last-child:not(:first-child) {
+  align-self: center;
+  padding: var(--space-xl);
+}
+
+.columns.no-img-padding > div > .columns-img-col:last-child:not(:first-child) {
+  padding: 0;
+}
+
+@media (width >= 768px) {
+  .columns.shadow > div {
+    column-gap: 0;
+    align-items: stretch;
+  }
+}
+
+.columns:is(.orange, .light-blue) > div > div:first-child {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.columns:is(.orange, .light-blue):not(.shadow) > div > div:first-child {
+  padding: var(--space-l) var(--space-xl);
+}
+
+.columns.orange > div > div:first-child { background-color: var(--rbc-orange); }
+.columns.light-blue > div > div:first-child { background-color: var(--rbc-light-blue); }
+
 .columns.rules > div > div + div {
   border-top: 1px solid var(--rbc-grey-200);
   padding-top: var(--space-l);
 }
 
 @media (width >= 768px) {
-  .columns:is(.rules, .align-top) > div {
+  .columns:is(.rules, .align-top, .checklist) > div {
     align-items: start;
   }
 
@@ -88,41 +130,93 @@
   }
 }
 
-.columns p > .icon:only-child {
+.columns p.columns-icon > .icon {
   width: 40px;
   height: 40px;
 }
 
-/* card: the copy sits in a bordered card that the image column overlaps */
-.columns.card > div > div:not(.columns-img-col) {
+.columns.logos p:has(> :is(picture, img) + :is(picture, img)) {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-l);
+  place-items: center;
+}
+
+.columns.logos p:has(> :is(picture, img) + :is(picture, img)) img {
+  width: auto;
+  max-width: 120px;
+  max-height: 56px;
+}
+
+.columns.logos > div > div:last-child p {
+  margin: 0;
+  border-bottom: 1px solid var(--rbc-grey-200);
+  padding-block: var(--space-l);
+}
+
+.columns.logos > div > div:last-child .icon {
+  width: 32px;
+  height: 32px;
+  margin-inline-end: var(--space-s);
+  vertical-align: middle;
+}
+
+/* overlap: the copy sits in a bordered panel that the image column overlaps */
+.columns.overlap > div > div:not(.columns-img-col) {
   border: 1px solid var(--rbc-grey-300);
   border-radius: var(--radius-s);
   padding: var(--space-xl);
   background-color: var(--rbc-white);
 }
 
-.columns.card > div > div:not(.columns-img-col) p > picture img {
+.columns.overlap > div > div:not(.columns-img-col) p > picture img {
   max-height: 56px;
   vertical-align: middle;
 }
 
-.columns.card hr {
+/* app rating: icon beside a gold star, the score, and a small label */
+.columns.overlap p:has(> :is(picture, img) + .icon-star) {
+  display: flow-root;
+  font-size: var(--body-font-size-xs);
+}
+
+.columns.overlap p:has(> :is(picture, img) + .icon-star) > :is(picture, img) {
+  float: left;
+  margin-right: var(--space-s);
+}
+
+.columns.overlap p:has(> :is(picture, img) + .icon-star) strong {
+  font-size: var(--heading-font-size-s);
+}
+
+.columns.overlap .icon-star {
+  width: 24px;
+  height: 24px;
+  vertical-align: text-bottom;
+}
+
+.columns.overlap .icon-star svg path {
+  fill: var(--rbc-orange);
+  stroke: none;
+}
+
+.columns.overlap hr {
   margin-block: var(--space-l);
   border: 0;
   border-top: 1px solid var(--rbc-grey-200);
 }
 
 @media (width >= 768px) {
-  .columns.card > div {
+  .columns.overlap > div {
     column-gap: 0;
   }
 
-  .columns.card > div > .columns-img-col {
+  .columns.overlap > div > .columns-img-col {
     position: relative;
     z-index: 1;
   }
 
-  .columns.card > div > .columns-img-col + div {
+  .columns.overlap > div > .columns-img-col + div {
     margin-left: -80px;
     padding: var(--space-3xl) var(--space-2xl) var(--space-3xl) calc(80px + var(--space-2xl));
   }
@@ -152,20 +246,23 @@
   }
 }
 
-.columns .columns-tag {
-  display: inline-block;
+.columns .label {
   margin: 0 0 var(--space-2xs);
-  border-radius: var(--radius-s);
-  padding: 2px var(--space-2xs);
-  background-color: var(--rbc-light-blue);
-  color: #456B86;
-  font-size: var(--body-font-size-xs);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  font-weight: 500;
 }
 
-.columns .columns-tag + :is(h3, h4) {
+.columns .offer-box {
+  margin: var(--space-l) 0 var(--space-m);
+}
+
+.columns .offer-box > p:not(.offer-label) {
+  margin: 0;
+}
+
+.columns .offer-box > p:not(.offer-label) + p {
+  margin-top: var(--space-2xs);
+}
+
+.columns .label-tag + :is(h3, h4) {
   margin-top: 0;
   font-family: var(--body-font-family);
   font-size: var(--body-font-size-l);
@@ -184,6 +281,10 @@
   margin-top: var(--space-2xl);
 }
 
+.columns.checklist > div + div {
+  margin-top: var(--space-s);
+}
+
 .columns.numbered {
   counter-reset: columns-row;
 }
@@ -192,12 +293,12 @@
   counter-increment: columns-row;
 }
 
-.columns.numbered > div > div:first-child > :is(h2, h3, h4):first-child {
+.columns.numbered > div > div:first-child > :is(h2, h3, h4, p):first-child {
   display: flex;
   gap: var(--space-xs);
 }
 
-.columns.numbered > div > div:first-child > :is(h2, h3, h4):first-child::before {
+.columns.numbered > div > div:first-child > :is(h2, h3, h4, p):first-child::before {
   content: counter(columns-row);
   display: grid;
   flex: none;
@@ -220,7 +321,7 @@
   background-color: var(--rbc-white);
 }
 
-.columns.list-row ul:has(> li > .icon:first-child, > li > p:first-child > .icon:first-child) {
+.columns.list-row ul:has(> li > .icon:first-child, > li > p:first-child > .icon:first-child, > li > a:first-child > .icon:first-child, > li > p:first-child > a:first-child > .icon:first-child) {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
   gap: var(--space-m);
@@ -229,7 +330,9 @@
 }
 
 .columns.list-row li > .icon:first-child,
-.columns.list-row li > p:first-child > .icon:first-child {
+.columns.list-row li > p:first-child > .icon:first-child,
+.columns.list-row li > a:first-child > .icon:first-child,
+.columns.list-row li > p:first-child > a:first-child > .icon:first-child {
   width: 20px;
   height: 20px;
   margin-inline-end: var(--space-2xs);

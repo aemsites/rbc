@@ -41,6 +41,20 @@ function showSlide(block, slideIndex = 0) {
   });
 }
 
+// several slides show at once, so the observer's active slide isn't where the track sits
+function stepSlide(block, step) {
+  const track = block.querySelector('.carousel-slides');
+  const slides = [...block.querySelectorAll('.carousel-slide')];
+  const atStart = track.scrollLeft <= 8;
+  const atEnd = track.scrollLeft + track.clientWidth >= track.scrollWidth - 8;
+  if (step < 0 && atStart) { showSlide(block, slides.length - 1); return; }
+  if (step > 0 && atEnd) { showSlide(block, 0); return; }
+  const start = track.getBoundingClientRect().left
+    + parseFloat(getComputedStyle(track).paddingLeft);
+  const offsets = slides.map((slide) => Math.abs(slide.getBoundingClientRect().left - start));
+  showSlide(block, offsets.indexOf(Math.min(...offsets)) + step);
+}
+
 function bindEvents(block) {
   block.querySelectorAll('.carousel-slide-indicator button').forEach((button) => {
     button.addEventListener('click', (e) => {
@@ -48,12 +62,8 @@ function bindEvents(block) {
     });
   });
 
-  block.querySelector('.slide-prev').addEventListener('click', () => {
-    showSlide(block, parseInt(block.dataset.activeSlide, 10) - 1);
-  });
-  block.querySelector('.slide-next').addEventListener('click', () => {
-    showSlide(block, parseInt(block.dataset.activeSlide, 10) + 1);
-  });
+  block.querySelector('.slide-prev').addEventListener('click', () => stepSlide(block, -1));
+  block.querySelector('.slide-next').addEventListener('click', () => stepSlide(block, 1));
 
   const track = block.querySelector('.carousel-slides');
   const progress = block.querySelector('.carousel-progress > div');
@@ -63,7 +73,9 @@ function bindEvents(block) {
       progress.style.width = `${((scrollLeft + clientWidth) / scrollWidth) * 100}%`;
     };
     track.addEventListener('scroll', update, { passive: true });
-    window.addEventListener('resize', update);
+    // slides only reach full width once their images load, which changes scrollWidth
+    const resize = new ResizeObserver(update);
+    [track, ...track.children].forEach((el) => resize.observe(el));
     update();
   }
 
@@ -85,7 +97,7 @@ function autoplay(block, ph) {
   let timer;
   const play = (playing) => {
     clearInterval(timer);
-    const next = () => showSlide(block, Number(block.dataset.activeSlide || 0) + 1);
+    const next = () => stepSlide(block, 1);
     if (playing) timer = setInterval(next, 6000);
     button.setAttribute('aria-label', playing ? ph.pause || 'Pause' : ph.play || 'Play');
     button.classList.toggle('paused', !playing);
