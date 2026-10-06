@@ -75,14 +75,18 @@ export default async function decorate(block) {
   block.textContent = '';
 
   const sectionMeta = getMetadata('footer');
-  if (sectionMeta) {
-    const fragment = await loadFragment(new URL(sectionMeta, window.location).pathname);
-    const columns = fragment && buildColumns(fragment);
-    if (columns) block.append(band('footer-columns-band', columns));
-  }
-
   const barPath = BAR_BY_LANG[getMetadata('lang') || document.documentElement.lang] || '/footer';
-  const barFragment = await loadFragment(barPath);
+
+  const [fragment, barFragment] = await Promise.all([
+    sectionMeta
+      ? loadFragment(new URL(sectionMeta, window.location).pathname)
+      : Promise.resolve(null),
+    loadFragment(barPath),
+  ]);
+
+  const columns = fragment && buildColumns(fragment);
+  if (columns) block.append(band('footer-columns-band', columns));
+
   const bar = barFragment && buildBar(barFragment);
   if (bar) block.append(band('footer-bar-band', bar));
 }
