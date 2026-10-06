@@ -91,14 +91,6 @@ The picker does not validate the cursor location or enforce offer dates.
 
 ## Development
 
-Run from the worktree root:
-
-```sh
-npm run test:product-picker
-npx eslint tools/product-picker/*.js test/product-picker.test.cjs
-npx stylelint tools/product-picker/product-picker.css
-```
-
 The index currently uses flat `offer*` fields. The normalizer adapts these to zero
 or one entries in `product.offers`; UI selection already handles multiple entries.
 A future external multi-offer schema needs an agreed adapter change, not an
