@@ -28,11 +28,12 @@ review the exact output, and click **Insert Product**. The picker sends a link a
 closes:
 
 ```html
-<a href="https://main--rbc--aemsites.aem.live/products/signature-no-limit">https://main--rbc--aemsites.aem.live/products/signature-no-limit</a>
+<a href="https://main--rbc--aemsites.aem.live/products/signature-no-limit">/products/signature-no-limit</a>
 ```
 
 This references the structured record, not its public `productPage` or application
-URL. Product variants remain separate records.
+URL. The visible text is the indexed relative path; the destination is the full
+EDS URL. Product variants remain separate records.
 
 ## Offers
 
@@ -71,6 +72,11 @@ Refresh clears the selection and reloads the index. Invalid product records are
 reported under **Skipped index records**. Loading failures show a retry message,
 not an empty catalog. SDK insertion is a message to the editor, not an acknowledged
 save; confirm the result in the document.
+
+Insert is disabled while loading or sending an insertion, without a selection,
+or when the selected offer identity is invalid. It is enabled again after the
+insertion/close attempt if the picker remains open and the selection is valid.
+The picker does not validate the cursor location or enforce offer dates.
 
 ## Development
 

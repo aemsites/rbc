@@ -2,8 +2,9 @@
 const assert = require('node:assert/strict');
 const { readFileSync } = require('node:fs');
 const { test } = require('node:test');
-const { SourceTextModule } = require('node:vm');
+const { SourceTextModule, SyntheticModule, createContext } = require('node:vm');
 const { resolve } = require('node:path');
+const { JSDOM } = require('jsdom');
 
 const model = new SourceTextModule(readFileSync(resolve(__dirname, '../tools/product-picker/products.js'), 'utf8'));
 const ready = model.link(() => {}).then(() => model.evaluate()).then(() => model.namespace);
@@ -18,6 +19,141 @@ const row = (fields = {}) => ({
 });
 const response = (data, metadata = {}) => ({
   ok: true, json: async () => ({ data, ...metadata }),
+});
+
+async function picker(actions = {}) {
+  const source = (path) => readFileSync(resolve(__dirname, '..', path), 'utf8');
+  const dom = new JSDOM(source('tools/product-picker/product-picker.html'));
+  const calls = [];
+  const context = createContext({
+    document: dom.window.document,
+    AbortController,
+    setTimeout,
+    clearTimeout,
+    console: { error: () => {} },
+    fetch: async () => response([
+      row({ offerName: 'Offer: summer', offerId: 'summer' }),
+      row({ path: '/products/incomplete', offerHeadline: 'Incomplete offer' }),
+    ]),
+  });
+  const sdk = new SyntheticModule(['default'], function initializeSDK() {
+    this.setExport('default', Promise.resolve({
+      context: { org: 'aemsites', repo: 'rbc', path: '/bank-accounts' },
+      actions: {
+        sendHTML: (value) => { calls.push({ action: 'html', value }); },
+        sendText: (value) => { calls.push({ action: 'text', value }); },
+        closeLibrary: () => { calls.push({ action: 'close' }); },
+        ...actions,
+      },
+    }));
+  }, { context });
+  await sdk.link(() => {});
+  await sdk.evaluate();
+  const modules = {
+    './products.js': new SourceTextModule(source('tools/product-picker/products.js'), { context }),
+    '../../utils/dom.js': new SourceTextModule(source('utils/dom.js'), { context }),
+  };
+  const ui = new SourceTextModule(source('tools/product-picker/product-picker.js'), {
+    context,
+    importModuleDynamically: async () => sdk,
+  });
+  await ui.link((specifier) => modules[specifier]);
+  await ui.evaluate();
+  const flush = () => new Promise((complete) => { setImmediate(complete); });
+  await flush();
+  assert.match(dom.window.document.querySelector('.picker-status').textContent, /shown/);
+  return {
+    calls,
+    flush,
+    find: (selector) => dom.window.document.querySelector(selector),
+    changeMode: (value) => {
+      const input = dom.window.document.querySelector(`[name="mode"][value="${value}"]`);
+      input.checked = true;
+      input.dispatchEvent(new dom.window.Event('change'));
+    },
+  };
+}
+
+test('product insertion uses relative link text and can be repeated while the picker stays open', async () => {
+  const { find, calls, flush } = await picker();
+  assert.equal(find('.picker-insert').disabled, true);
+  find('.picker-list button[data-key="/products/signature:products:0"]').click();
+  const button = find('.picker-insert');
+  assert.equal(button.disabled, false);
+  assert.equal(find('.picker-detail-content pre').textContent, '/products/signature');
+  button.click();
+  assert.equal(button.disabled, true);
+  await flush();
+  assert.equal(button.disabled, false);
+  button.click();
+  await flush();
+  assert.deepEqual(calls, [
+    { action: 'html', value: '<a href="https://main--rbc--aemsites.aem.live/products/signature">/products/signature</a>' },
+    { action: 'close' },
+    { action: 'html', value: '<a href="https://main--rbc--aemsites.aem.live/products/signature">/products/signature</a>' },
+    { action: 'close' },
+  ]);
+});
+
+test('valid offer insertion can be repeated; incomplete offers remain disabled', async () => {
+  const {
+    find, changeMode, calls, flush,
+  } = await picker();
+  changeMode('offers');
+  assert.equal(find('.picker-insert').disabled, true);
+  find('.picker-list button[data-key="/products/signature:offers:0"]').click();
+  const button = find('.picker-insert');
+  assert.equal(button.disabled, false);
+  button.click();
+  await flush();
+  assert.equal(button.disabled, false);
+  button.click();
+  await flush();
+  assert.deepEqual(calls, [
+    { action: 'text', value: 'Offer: summer:summer' }, { action: 'close' },
+    { action: 'text', value: 'Offer: summer:summer' }, { action: 'close' },
+  ]);
+  find('.picker-list button[data-key="/products/incomplete:offers:0"]').click();
+  assert.equal(button.disabled, true);
+});
+
+test('pending insertion prevents double sends and enables Insert after completion', async () => {
+  let finish;
+  let count = 0;
+  const { find, flush } = await picker({
+    sendHTML: () => {
+      count += 1;
+      return new Promise((complete) => { finish = complete; });
+    },
+  });
+  find('.picker-list button').click();
+  const button = find('.picker-insert');
+  button.click();
+  button.click();
+  await flush();
+  assert.equal(count, 1);
+  assert.equal(button.disabled, true);
+  finish();
+  await flush();
+  assert.equal(button.disabled, false);
+});
+
+test('failed insertion or library close never leaves a valid selection permanently disabled', async () => {
+  const failed = await picker({ sendHTML: () => { throw new Error('Insertion failed'); } });
+  failed.find('.picker-list button').click();
+  failed.find('.picker-insert').click();
+  await failed.flush();
+  assert.equal(failed.find('.picker-insert').disabled, false);
+  assert.match(failed.find('.picker-error').textContent, /Insertion failed/);
+  assert.equal(failed.calls.length, 0);
+
+  const open = await picker({ closeLibrary: () => { throw new Error('Close failed'); } });
+  open.find('.picker-list button').click();
+  open.find('.picker-insert').click();
+  await open.flush();
+  assert.equal(open.find('.picker-insert').disabled, false);
+  assert.match(open.find('.picker-error').textContent, /could not close/);
+  assert.equal(open.calls.length, 1);
 });
 
 test('product URL validation preserves full language paths and rejects unsafe paths', async () => {

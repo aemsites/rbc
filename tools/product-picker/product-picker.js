@@ -78,7 +78,8 @@ function renderDetails() {
   content.replaceChildren(details);
   try {
     if (offer?.error) throw new Error(offer.error);
-    const output = offer ? offerValue(offer) : productURL(product.path);
+    const output = offer ? offerValue(offer) : product.path;
+    if (!offer) addDetail(details, 'Link destination', productURL(product.path));
     content.append(createElement('h3', {}, 'Exact insertion output'), createElement('pre', {}, output));
   } catch (error) {
     button.disabled = true;
@@ -211,7 +212,7 @@ async function insert() {
       await state.actions.sendText(offerValue(offer));
     } else {
       const url = productURL(product.path);
-      await state.actions.sendHTML(createElement('a', { href: url }, url).outerHTML);
+      await state.actions.sendHTML(createElement('a', { href: url }, product.path).outerHTML);
     }
   } catch (error) {
     console.error('RBC picker: insertion failed', error);
@@ -227,6 +228,9 @@ async function insert() {
   } catch (error) {
     console.error('RBC picker: library close failed', error);
     showError('Insertion was sent, but the picker could not close. Check the document before inserting again.');
+  } finally {
+    state.inserting = false;
+    renderDetails();
   }
 }
 
