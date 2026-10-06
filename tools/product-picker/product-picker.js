@@ -17,9 +17,10 @@ const state = {
   request: null,
 };
 
-function showError(message = '') {
+function showError(message = '', retry = false) {
   find('error').textContent = message;
   find('error').hidden = !message;
+  find('retry').hidden = !retry;
 }
 
 function mode() {
@@ -44,6 +45,7 @@ function addDetail(list, label, value) {
 function renderDetails() {
   const content = find('detail-content');
   const button = find('insert');
+  find('actionbar').hidden = !state.selected;
   const selection = find('selection');
   const isOffer = mode() === 'offers';
   button.textContent = isOffer ? 'Insert Offer' : 'Insert Product';
@@ -54,7 +56,7 @@ function renderDetails() {
   } else if (state.loading) {
     selection.textContent = 'Connecting or loading records...';
   } else if (!state.loaded) {
-    selection.textContent = 'Load the catalog with Refresh before inserting.';
+    selection.textContent = 'Catalog unavailable. Use Retry loading before inserting.';
   } else if (!state.selected) {
     selection.textContent = `Select ${isOffer ? 'an offer' : 'a product'} to enable Insert.`;
   }
@@ -180,7 +182,8 @@ function setLoading(loading) {
   root.querySelectorAll('[name="mode"]').forEach((input) => {
     input.disabled = loading || !state.loaded;
   });
-  find('refresh').disabled = loading || !state.actions;
+  find('clear').disabled = loading || !state.loaded;
+  find('retry').disabled = loading || !state.actions;
   renderDetails();
 }
 
@@ -209,7 +212,7 @@ async function refresh() {
   } catch (error) {
     if (request !== state.request) return;
     console.error('RBC picker: index loading failed', error);
-    showError(`${error.message} Use Refresh to retry.`);
+    showError(error.message, true);
     find('status').textContent = 'Products could not be loaded.';
   } finally {
     clearTimeout(timeout);
@@ -290,8 +293,16 @@ root.querySelectorAll('[name="mode"]').forEach((input) => input.addEventListener
   state.selected = null;
   renderResults();
 }));
-find('refresh').addEventListener('click', refresh);
+find('clear').addEventListener('click', () => {
+  ['search', 'category', 'persona'].forEach((name) => { find(name).value = ''; });
+  renderResults();
+  find('search').focus();
+});
+find('retry').addEventListener('click', refresh);
 find('insert').addEventListener('click', insert);
+new ResizeObserver(() => {
+  root.style.setProperty('--picker-action-height', `${find('actionbar').offsetHeight}px`);
+}).observe(find('actionbar'));
 find('list').addEventListener('keydown', (event) => {
   if (event.key === 'Tab' && !event.shiftKey && !find('insert').disabled) {
     event.preventDefault();

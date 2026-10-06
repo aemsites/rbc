@@ -65,15 +65,19 @@ The separate promotion-analytics implementation must be deployed for hero tracki
 Content language defaults to French for `/fr/` documents and English otherwise;
 authors can switch explicitly. No cross-language fallback is performed. Search
 matches names, short names, paths, product codes, and offer identities. Category
-and persona filters include variants. The Insert button stays in the top action
-bar, alongside a ready-to-insert status or the reason insertion is unavailable.
+and persona filters include variants. Selecting a product or offer reveals a
+floating bottom action bar with the Insert button, alongside a ready-to-insert
+status or the reason insertion is unavailable. The bar stays visible while
+scrolling, and content space is reserved so it does not cover the list or details.
 Use Arrow Up/Down to select visible results, then Tab to reach Insert for a valid
 selection; Enter/Space activate native buttons.
 
-Refresh clears the selection and reloads the index. Invalid product records are
-reported under **Skipped index records**. Loading failures show a retry message,
-not an empty catalog. SDK insertion is a message to the editor, not an acknowledged
-save; confirm the result in the document.
+**Clear filters** resets search, category, and persona without reloading the
+catalog or changing the content language, Products/Offers mode, or selection.
+Invalid product records are reported under **Skipped index records**. Loading
+failures show **Retry loading**, not an empty catalog. Retrying reloads the index
+and clears the selection. SDK insertion is a message to the editor, not an
+acknowledged save; confirm the result in the document.
 
 Insert is disabled while loading or sending an insertion, without a selection,
 or when the selected offer identity is invalid. It is enabled again after the

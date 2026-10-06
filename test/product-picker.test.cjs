@@ -21,24 +21,32 @@ const response = (data, metadata = {}) => ({
   ok: true, json: async () => ({ data, ...metadata }),
 });
 
-async function picker(actions = {}) {
+async function picker(actions = {}, pagePath = '/bank-accounts') {
   const source = (path) => readFileSync(resolve(__dirname, '..', path), 'utf8');
   const dom = new JSDOM(source('tools/product-picker/product-picker.html'));
   const calls = [];
+  const requests = [];
   const context = createContext({
     document: dom.window.document,
     AbortController,
     setTimeout,
     clearTimeout,
+    ResizeObserver: class {
+      observe(element) { this.element = element; }
+    },
     console: { error: () => {} },
-    fetch: async () => response([
-      row({ offerName: 'Offer: summer', offerId: 'summer' }),
-      row({ path: '/products/incomplete', offerHeadline: 'Incomplete offer' }),
-    ]),
+    fetch: async (url) => {
+      requests.push(url);
+      return response([
+        row({ offerName: 'Offer: summer', offerId: 'summer' }),
+        row({ path: '/products/incomplete', offerHeadline: 'Incomplete offer' }),
+        row({ path: '/fr/products/signature', offerName: 'Offre: été', offerId: 'summer' }),
+      ]);
+    },
   });
   const sdk = new SyntheticModule(['default'], function initializeSDK() {
     this.setExport('default', Promise.resolve({
-      context: { org: 'aemsites', repo: 'rbc', path: '/bank-accounts' },
+      context: { org: 'aemsites', repo: 'rbc', path: pagePath },
       actions: {
         sendHTML: (value) => { calls.push({ action: 'html', value }); },
         sendText: (value) => { calls.push({ action: 'text', value }); },
@@ -64,6 +72,7 @@ async function picker(actions = {}) {
   assert.match(dom.window.document.querySelector('.picker-status').textContent, /shown/);
   return {
     calls,
+    requests,
     flush,
     find: (selector) => dom.window.document.querySelector(selector),
     changeMode: (value) => {
@@ -74,12 +83,42 @@ async function picker(actions = {}) {
   };
 }
 
+test('Clear filters resets search/category/persona without changing language, mode, or selection', async () => {
+  const {
+    find, changeMode, requests,
+  } = await picker({}, '/fr/bank-accounts');
+  changeMode('offers');
+  const change = (selector, value, event) => {
+    const control = find(selector);
+    control.value = value;
+    control.dispatchEvent(new control.ownerDocument.defaultView.Event(event));
+  };
+  change('.picker-search', 'ete', 'input');
+  change('.picker-category', 'chequing', 'change');
+  change('.picker-persona', 'everyone', 'change');
+  find('.picker-list button').click();
+  find('.picker-clear').click();
+  assert.equal(find('.picker-search').value, '');
+  assert.equal(find('.picker-category').value, '');
+  assert.equal(find('.picker-persona').value, '');
+  assert.equal(find('.picker-language').value, 'fr');
+  assert.equal(find('[name="mode"]:checked').value, 'offers');
+  assert.equal(find('.picker-insert').disabled, false);
+  assert.match(find('.picker-selection').textContent, /Ready to insert offer: Offre: été:summer/);
+  assert.equal(find('.picker-actionbar').hidden, false);
+  assert.equal(find('.picker-retry').hidden, true);
+  assert.equal(requests.length, 1);
+  assert.equal(find('.picker-search').ownerDocument.activeElement, find('.picker-search'));
+});
+
 test('product insertion uses relative link text and can be repeated while the picker stays open', async () => {
   const { find, calls, flush } = await picker();
   assert.equal(find('.picker-insert').disabled, true);
+  assert.equal(find('.picker-actionbar').hidden, true);
   find('.picker-list button[data-key="/products/signature:products:0"]').click();
   const button = find('.picker-insert');
   assert.equal(button.disabled, false);
+  assert.equal(find('.picker-actionbar').hidden, false);
   assert.ok(button.closest('.picker-actionbar'));
   assert.match(find('.picker-selection').textContent, /Ready to insert product: Signature/);
   const result = find('.picker-list button[data-key="/products/signature:products:0"]');
@@ -109,9 +148,11 @@ test('valid offer insertion can be repeated; incomplete offers remain disabled',
   } = await picker();
   changeMode('offers');
   assert.equal(find('.picker-insert').disabled, true);
+  assert.equal(find('.picker-actionbar').hidden, true);
   find('.picker-list button[data-key="/products/signature:offers:0"]').click();
   const button = find('.picker-insert');
   assert.equal(button.disabled, false);
+  assert.equal(find('.picker-actionbar').hidden, false);
   assert.match(find('.picker-selection').textContent, /Ready to insert offer: Offer: summer:summer/);
   button.click();
   await flush();
@@ -124,6 +165,7 @@ test('valid offer insertion can be repeated; incomplete offers remain disabled',
   ]);
   find('.picker-list button[data-key="/products/incomplete:offers:0"]').click();
   assert.equal(button.disabled, true);
+  assert.equal(find('.picker-actionbar').hidden, false);
   assert.match(find('.picker-selection').textContent, /Cannot insert: Offer name and ID are required/);
 });
 

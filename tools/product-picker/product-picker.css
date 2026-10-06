@@ -9,6 +9,7 @@
   --picker-blue: #2455d6;
 
   margin: 0;
+  padding-bottom: var(--picker-action-height, 0);
   background: var(--picker-background);
   color: var(--picker-text);
   font-family: adobe-clean, "Trebuchet MS", sans-serif;
@@ -30,30 +31,32 @@
 }
 
 .rbc-picker .picker-actionbar {
-  position: sticky;
-  top: 0;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
   z-index: 1;
-  padding: 16px 20px;
-  border-bottom: 1px solid var(--picker-border);
-  background: var(--picker-background);
-  flex-shrink: 0;
-}
-
-.rbc-picker .picker-action-heading {
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-between;
   align-items: center;
   gap: 12px;
+  padding: 16px 20px;
+  border-top: 1px solid var(--picker-border);
+  background: var(--picker-background);
+  box-shadow: 0 -4px 16px rgb(0 0 0 / 12%);
+  max-height: 40dvh;
+  overflow-y: auto;
 }
 
 .rbc-picker .picker-selection {
-  margin: 8px 0 0;
+  flex: 1 1 200px;
+  min-width: 0;
+  margin: 0;
   overflow-wrap: anywhere;
 }
 
 .rbc-picker h1 {
-  margin: 0;
+  margin: 0 0 12px;
   font-size: 22px;
 }
 
