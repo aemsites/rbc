@@ -9,7 +9,7 @@ import {
   getProduct, getProducts, monthlyFees, pickHighlights, keyList, offerLegalPage, isPrice, zeroPrice,
 } from '../../utils/products.js';
 import fetchLocalPlaceholders from '../../utils/placeholders.js';
-import { trackProduct } from '../../scripts/ecommerce-analytics.js';
+import { trackProduct, trackPromotion } from '../../scripts/ecommerce-analytics.js';
 import { rateSpan } from '../../utils/rates.js';
 import decorateTile, { tileWords } from './tiles.js';
 
@@ -77,7 +77,7 @@ function productBody(product, ph, variant, keys = [], options = {}) {
   }
   const offerPage = offerLegalPage(product);
   const badge = product.offerBadge
-    ? `<p><em>${offerLink(product, stripRefs(product.offerBadge))}${footnoteSup(refIds(product.offerBadge), offerPage)}</em></p>` : '';
+    ? `<p class="cards-product-badge"><em>${offerLink(product, stripRefs(product.offerBadge))}${footnoteSup(refIds(product.offerBadge), offerPage)}</em></p>` : '';
   const caption = product.offerBadge && product.offerCaption
     ? `<p class="cards-product-caption"><em>${expandRefs(escapeHtml(product.offerCaption), offerPage)}</em></p>` : '';
   return `${cardLabel(product, ph, options.label)}<h3>${name}</h3><p>${escapeHtml(product.tagline)}</p><ul>${highlights}</ul>
@@ -127,7 +127,7 @@ async function renderProductRows(block) {
     const link = row.querySelector('a');
     const product = await getProduct(link.getAttribute('href'));
     if (!product) { row.remove(); return; }
-    records.set(row, product);
+    records.set(row, { product });
     if (featured) {
       const highlights = pickHighlights(product, keyList(row.children[1]))
         .map((h) => ({ icon: h.icon, html: claim(h.text, h.url, product.productPage) }));
@@ -148,6 +148,7 @@ async function renderProductRows(block) {
     }
     const body = document.createElement('div');
     body.innerHTML = productBody(product, ph, variant, keyList(row.children[1]), options);
+    records.set(row, { product, badge: body.querySelector('p.cards-product-badge') });
     if (variant !== 'compact') body.dataset.category = product.category;
     row.replaceChildren(body);
     if (variant === 'picture' && product.image) {
@@ -284,7 +285,14 @@ export default async function decorate(block) {
   if (block.classList.contains('product') && !block.classList.contains('featured')) {
     ul.querySelectorAll(':scope > li').forEach(decorateProduct);
   }
-  products.forEach((product, li) => trackProduct(li, product, {
-    list: block, index: [...ul.children].indexOf(li),
-  }));
+  products.forEach(({ product, badge }, li) => {
+    trackProduct(li, product, { list: block, index: [...ul.children].indexOf(li) });
+    if (badge) {
+      trackPromotion(
+        badge,
+        { id: product.offerId, name: product.offerName },
+        badge.querySelector('a:not(.footnote, sup a)'),
+      );
+    }
+  });
 }

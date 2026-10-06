@@ -1,6 +1,8 @@
 import { getMetadata } from './aem.js';
 
 const registrations = new Map();
+const viewedPromotions = new WeakSet();
+const promotionLinks = new WeakSet();
 let started = false;
 let observer;
 let frame;
@@ -59,7 +61,7 @@ function listName(block, listTitle) {
 function push(event, key, value) {
   window.dataLayer = window.dataLayer || [];
   // GTM merges object values; clear the previous interaction before sending the next one.
-  window.dataLayer.push({ product: null, product_list: null });
+  window.dataLayer.push({ product: null, product_list: null, promotion: null });
   window.dataLayer.push({ event, [key]: value });
 }
 
@@ -121,10 +123,18 @@ function impression(registration) {
       );
     }
     push('product_list_viewed', 'product_list', { name: title.name, products });
+  } else if (registration.kind === 'promotion') {
+    push('promotion_viewed', 'promotion', registration.payload);
+    viewedPromotions.add(registration.target);
   } else {
     push('product_viewed', 'product', registration.payload);
   }
   return true;
+}
+
+function qualifies(element, registration) {
+  return visibleRatio(element) > 0.5
+    && (!registration.content || exposed(registration.content));
 }
 
 function update(element, registration) {
@@ -134,7 +144,7 @@ function update(element, registration) {
     return;
   }
   if (!registration.impressions) return;
-  if (visibleRatio(element) <= 0.5) {
+  if (!qualifies(element, registration)) {
     stopTimer(registration);
     return;
   }
@@ -142,7 +152,7 @@ function update(element, registration) {
   registration.since = performance.now();
   registration.timer = setTimeout(() => {
     registration.timer = undefined;
-    if (visibleRatio(element) > 0.5 && performance.now() - registration.since > 1000) {
+    if (qualifies(element, registration) && performance.now() - registration.since > 1000) {
       registration.viewed = impression(registration);
     }
     registration.since = undefined;
@@ -157,9 +167,13 @@ function register(element, registration) {
       && JSON.stringify(previous.urls) === JSON.stringify(registration.urls)
       && previous.list === registration.list
       && previous.detail === registration.detail
-      && previous.listTarget === registration.listTarget) return;
+      && previous.listTarget === registration.listTarget
+      && previous.link === registration.link
+      && previous.content === registration.content) return;
     stopTimer(previous);
-    registration.viewed = previous.payload.id === registration.payload.id && previous.viewed;
+    registration.viewed = registration.kind === 'promotion'
+      ? viewedPromotions.has(element)
+      : previous.payload.id === registration.payload.id && previous.viewed;
     existing.splice(existing.indexOf(previous), 1, registration);
   } else {
     existing.push(registration);
@@ -170,6 +184,74 @@ function register(element, registration) {
     if (registration.impressions) observer.observe(element);
     update(element, registration);
   }
+}
+
+function removePromotion(element) {
+  const existing = registrations.get(element) || [];
+  existing.filter((item) => item.kind === 'promotion').forEach(stopTimer);
+  const remaining = existing.filter((item) => item.kind !== 'promotion');
+  if (remaining.length) registrations.set(element, remaining);
+  else {
+    registrations.delete(element);
+    observer?.unobserve(element);
+  }
+}
+
+function promotionIdentity(identity) {
+  const id = identity?.id;
+  const name = identity?.name;
+  if (typeof id !== 'string' || !id.trim() || id.includes(':')
+    || typeof name !== 'string' || !name.trim()) return undefined;
+  return { id: id.trim(), name: name.trim() };
+}
+
+export function trackPromotion(element, identity, link, content = element) {
+  if (link) promotionLinks.add(link);
+  const offer = promotionIdentity(identity);
+  const slot = placement(element);
+  if (!offer || !slot) {
+    removePromotion(element);
+    warn(element, 'Promotion requires a nonblank string ID without colons, name and block placement.');
+    return;
+  }
+  register(element, {
+    kind: 'promotion',
+    target: element,
+    content,
+    link,
+    payload: { ...offer, context: { placement: slot } },
+    impressions: true,
+    viewed: viewedPromotions.has(element),
+  });
+}
+
+export function trackHeroPromotion(block) {
+  const section = block.closest('.section');
+  const values = [section?.dataset.promo, section?.dataset.offer]
+    .map((value) => value?.trim()).filter(Boolean);
+  if (!values.length) {
+    removePromotion(block);
+    return;
+  }
+  const offers = values.map((value) => {
+    const separator = value.lastIndexOf(':');
+    if (separator < 0 || /[\r\n]/.test(value)) return undefined;
+    return promotionIdentity({ name: value.slice(0, separator), id: value.slice(separator + 1) });
+  });
+  const link = block.querySelector('a.button.primary[href]:not(.footnote, sup a)');
+  if (link) promotionLinks.add(link);
+  if (offers.some((offer) => !offer)
+    || offers.some((offer) => offer.id !== offers[0].id || offer.name !== offers[0].name)) {
+    removePromotion(block);
+    warn(section, 'Hero promotion metadata is malformed or promo/offer aliases conflict.');
+    return;
+  }
+  trackPromotion(
+    block,
+    offers[0],
+    link,
+    block.querySelector('.hero-copy') || block,
+  );
 }
 
 function removeListProduct(element, product) {
@@ -281,7 +363,16 @@ function select(event) {
   if (event.type === 'auxclick' && event.button !== 1) return;
   if (event.type === 'click' && event.button !== 0) return;
   const link = event.target.closest?.('a[href], button[href]');
-  if (!link || !link.getAttribute('href') || link.closest('sup') || !exposed(link)) return;
+  if (!link || !link.getAttribute('href') || link.matches('.footnote')
+    || link.closest('sup') || !exposed(link)) return;
+  for (let element = link; element; element = element.parentElement) {
+    const promotion = registrations.get(element)?.find((item) => item.kind === 'promotion');
+    if (promotion?.link === link) {
+      push('promotion_selected', 'promotion', promotion.payload);
+      return;
+    }
+  }
+  if (promotionLinks.has(link)) return;
   for (let element = link; element; element = element.parentElement) {
     const registration = registrations.get(element)?.find((item) => item.kind === 'product');
     if (registration) {
@@ -324,8 +415,8 @@ export function initEcommerce() {
   document.addEventListener('auxclick', select, true);
   document.addEventListener('scroll', () => {
     registrations.forEach((registration, element) => {
-      if (registration.some((item) => item.impressions && !item.viewed)
-        && visibleRatio(element) <= 0.5) registration.forEach(stopTimer);
+      if (registration.some((item) => item.impressions && !item.viewed
+        && !qualifies(element, item))) registration.forEach(stopTimer);
     });
     scheduleRefresh();
   }, true);
