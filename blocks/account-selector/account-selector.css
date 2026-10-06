@@ -339,8 +339,7 @@
 }
 
 .account-selector.short .account-selector-options label:has(:checked) {
-  background-color: var(--rbc-navy);
-  color: var(--rbc-white);
+  background-color: var(--rbc-light-blue);
 }
 
 .account-selector.short .account-selector-options input {
