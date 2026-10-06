@@ -2,6 +2,7 @@ import applyConfig from '../../scripts/config.js';
 import { decorateIcons, getMetadata } from '../../scripts/aem.js';
 import { getProduct } from '../../utils/products.js';
 import { footnoteSup, expandRefs, resolveRefLinks } from '../../utils/footnotes.js';
+import { escapeHtml } from '../../utils/dom.js';
 
 const SHEET = '/fragments/value-calculator.json';
 const TABS = { 'fr-CA': 'fr', 'zh-Hans': 'sc', 'zh-Hant': 'tc' };
@@ -132,7 +133,7 @@ export default async function decorate(block) {
     const [product] = products;
     const fee = product.fees[0];
     block.querySelector('.value-calculator-name').textContent = product.name;
-    block.querySelector('.value-calculator-price').innerHTML = `${fee?.displayValue || ''}${text('per-month') ?? ''}${footnoteSup(fee?.footnotes, product.productPage)}`;
+    block.querySelector('.value-calculator-price').innerHTML = `${escapeHtml(fee?.displayValue)}${text('per-month') ?? ''}${footnoteSup(fee?.footnotes, product.productPage)}`;
   }
   block.querySelector('form').addEventListener('change', update);
   block.querySelector('form').addEventListener('submit', (e) => e.preventDefault());

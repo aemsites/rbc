@@ -1,12 +1,12 @@
 import { createOptimizedPicture, decorateIcons } from '../../scripts/aem.js';
-import { createElement, fragment } from '../../utils/dom.js';
+import { createElement, fragment, safeUrl } from '../../utils/dom.js';
 import {
   cardStats, getProduct, isCreditCard, monthlyFees, offerCells, pickHighlights,
 } from '../../utils/products.js';
 import fetchLocalPlaceholders from '../../utils/placeholders.js';
 import { expandRefs, footnoteSup, resolveRefLinks } from '../../utils/footnotes.js';
 
-const button = (text, href) => createElement('p', { class: 'button-wrapper' }, createElement('a', { class: 'button primary', href }, text));
+const button = (text, href) => createElement('p', { class: 'button-wrapper' }, createElement('a', { class: 'button primary', href: safeUrl(href) }, text));
 
 function featureList(rows) {
   return createElement('ul', { class: 'product-summary-features' }, rows.map((row) => createElement('li', {}, [...row.firstElementChild.childNodes])));
@@ -31,7 +31,7 @@ function accountSummary(product, ph, features) {
     ]),
     featureList(features),
     button(ph.openAccount || 'Open Account', product.applyUrl),
-    createElement('p', { class: 'product-summary-more link-wrapper' }, createElement('a', { href: product.productPage }, ph.viewMoreAccountBenefits || 'View More Account Benefits')),
+    createElement('p', { class: 'product-summary-more link-wrapper' }, createElement('a', { href: safeUrl(product.productPage) }, ph.viewMoreAccountBenefits || 'View More Account Benefits')),
   ];
 }
 
@@ -61,7 +61,7 @@ function cardSummary(product, ph, features, background) {
     product.note ? createElement('p', { class: 'product-summary-note' }, fragment(expandRefs(product.note, product.productPage))) : null,
     highlights,
     product.applyUrl ? button(ph.applyNow || 'Apply Now', product.applyUrl) : null,
-    createElement('p', { class: 'product-summary-more link-wrapper' }, createElement('a', { href: product.productPage, ...external }, ph.seeAllCardDetails || 'See All Card Details')),
+    createElement('p', { class: 'product-summary-more link-wrapper' }, createElement('a', { href: safeUrl(product.productPage), ...external }, ph.seeAllCardDetails || 'See All Card Details')),
   ]);
   const art = createElement('div', { class: 'product-summary-art' }, [
     background ? createElement('div', { class: 'product-summary-background' }, background) : null,

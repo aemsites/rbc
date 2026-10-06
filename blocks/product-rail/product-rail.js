@@ -5,6 +5,7 @@ import { rateSpan } from '../../utils/rates.js';
 import {
   footnoteSup, expandRefs, resolveRefLinks, normalizeLabel,
 } from '../../utils/footnotes.js';
+import { escapeHtml, safeUrl } from '../../utils/dom.js';
 
 const picture = (src, alt) => createOptimizedPicture(src, alt, false, [{ width: '750' }]).outerHTML;
 const cell = (html) => `<div>${html}</div>`;
@@ -21,27 +22,28 @@ function noteMarker() {
 function railRows(product, ph) {
   const rows = [];
   if (product.cardImage) {
-    rows.push(row(picture(product.cardImage, product.cardImageAlt), `<p>${product.categoryLabel}</p>`));
+    rows.push(row(picture(product.cardImage, product.cardImageAlt), `<p>${escapeHtml(product.categoryLabel)}</p>`));
   }
   const offer = offerCells(product, ph, { disclose: true });
   if (offer) rows.push(row(...offer));
   if (product.rateFallbackValue) {
     const value = product.rateRateCode
-      ? rateSpan(product.rateRateCode, product.rateFallbackValue) : product.rateFallbackValue;
-    rows.push(row(`<p>${expandRefs(product.rateLabel, product.productPage)}</p>`, `<p>${value}</p>`));
+      ? rateSpan(product.rateRateCode, product.rateFallbackValue)
+      : escapeHtml(product.rateFallbackValue);
+    rows.push(row(`<p>${expandRefs(escapeHtml(product.rateLabel), product.productPage)}</p>`, `<p>${value}</p>`));
   }
   // the regular fee's marker points at the fee note below, not the legal list
   const note = product.feeDisclaimer ? `<sup>${noteMarker()}</sup>` : '';
   product.fees.forEach((fee, i) => {
-    const label = fee.detailUrl ? `<a href="${fee.detailUrl}">${fee.label}</a>` : fee.label;
-    rows.push(row(`<p>${label}${i ? '' : note}</p>`, `<p>${fee.displayValue}${footnoteSup(fee.footnotes, product.productPage)}</p>`));
+    const label = fee.detailUrl ? `<a href="${safeUrl(fee.detailUrl)}">${escapeHtml(fee.label)}</a>` : escapeHtml(fee.label);
+    rows.push(row(`<p>${label}${i ? '' : note}</p>`, `<p>${escapeHtml(fee.displayValue)}${footnoteSup(fee.footnotes, product.productPage)}</p>`));
   });
   if (product.feeDisclaimer) {
-    const details = product.feeDetailsUrl ? ` <a href="${product.feeDetailsUrl}">${ph.viewFeeDetails || 'View the fee details'}</a>.` : '';
-    rows.push(row(`<p>${note} ${product.feeDisclaimer}${details}</p>`));
+    const details = product.feeDetailsUrl ? ` <a href="${safeUrl(product.feeDetailsUrl)}">${escapeHtml(ph.viewFeeDetails || 'View the fee details')}</a>.` : '';
+    rows.push(row(`<p>${note} ${escapeHtml(product.feeDisclaimer)}${details}</p>`));
   }
-  const apply = product.applyUrl ? `<p class="button-wrapper"><a class="button primary" href="${product.applyUrl}">${ph.openAccountOnline || 'Open Account Online'}</a></p>` : '';
-  rows.push(row(`${apply}<p class="link-wrapper"><a href="#legal-disclaimers">${ph.viewLegalDisclaimers || 'View legal disclaimers'}</a></p>`));
+  const apply = product.applyUrl ? `<p class="button-wrapper"><a class="button primary" href="${safeUrl(product.applyUrl)}">${escapeHtml(ph.openAccountOnline || 'Open Account Online')}</a></p>` : '';
+  rows.push(row(`${apply}<p class="link-wrapper"><a href="#legal-disclaimers">${escapeHtml(ph.viewLegalDisclaimers || 'View legal disclaimers')}</a></p>`));
   return rows.join('');
 }
 
@@ -53,8 +55,8 @@ function stickyBar(block, ph) {
   if (!apply || !title) return;
   const bar = document.createElement('div');
   bar.className = 'product-rail-bar';
-  bar.innerHTML = `<p class="product-rail-bar-title" aria-hidden="true">${title.textContent}</p>
-    <p class="button-wrapper"><a class="button primary" href="${apply.href}">${ph.openAccount || 'Open Account'}</a></p>`;
+  bar.innerHTML = `<p class="product-rail-bar-title" aria-hidden="true">${escapeHtml(title.textContent)}</p>
+    <p class="button-wrapper"><a class="button primary" href="${safeUrl(apply.href)}">${escapeHtml(ph.openAccount || 'Open Account')}</a></p>`;
   document.body.append(bar);
   const section = block.closest('.section');
   new IntersectionObserver(([entry]) => {

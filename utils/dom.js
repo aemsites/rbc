@@ -47,6 +47,17 @@ export function labelKind(p) {
   return covers('strong, b') ? 'tag' : 'plain';
 }
 
+export const escapeHtml = (str) => String(str ?? '').replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
+
+export const safeUrl = (url) => {
+  try {
+    const u = new URL(url, window.location.href);
+    return (u.protocol === 'https:' || u.protocol === 'http:') ? u.href : '#';
+  } catch {
+    return '#';
+  }
+};
+
 // calls back with true when the element reaches the top of the viewport, false once it is below
 export function watchStuck(element, callback) {
   let stuck = null;

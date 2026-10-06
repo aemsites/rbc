@@ -1,5 +1,5 @@
 import { createOptimizedPicture, decorateIcons, loadCSS } from '../../scripts/aem.js';
-import { createElement, fragment } from '../../utils/dom.js';
+import { createElement, fragment, safeUrl } from '../../utils/dom.js';
 import {
   cardStats, isCreditCard, monthlyFees, offerCells,
 } from '../../utils/products.js';
@@ -50,7 +50,7 @@ function applyButton(product, ph, cta, ctaText) {
   if (!href) return null;
   const fallback = isCreditCard(product) ? ph.applyNow || 'Apply Now' : ph.openAccount || 'Open Account';
   const text = cta?.textContent.trim() || ctaText || fallback;
-  return createElement('p', { class: 'button-wrapper' }, createElement('a', { class: 'button primary', href }, text));
+  return createElement('p', { class: 'button-wrapper' }, createElement('a', { class: 'button primary', href: safeUrl(href) }, text));
 }
 
 export default function featuredBody(product, ph, highlights, {
@@ -75,7 +75,7 @@ export default function featuredBody(product, ph, highlights, {
       icon ? createElement('span', { class: `icon icon-${icon}` }) : null,
       createElement('span', {}, fragment(html)),
     ]))),
-    createElement('p', { class: 'link-wrapper' }, createElement('a', { href: product.productPage, ...external }, more)),
+    createElement('p', { class: 'link-wrapper' }, createElement('a', { href: safeUrl(product.productPage), ...external }, more)),
     cardStats(product, 'cards-featured-stats'),
     button ? applyButton(product, ph, cta, ctaText) : null,
   ]);
