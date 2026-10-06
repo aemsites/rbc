@@ -1,7 +1,7 @@
 import { createOptimizedPicture } from '../../scripts/aem.js';
 import { getProduct, offerLegalPage } from '../../utils/products.js';
 import fetchLocalPlaceholders from '../../utils/placeholders.js';
-import { trackProduct, isProductDetail } from '../../scripts/ecommerce-analytics.js';
+import { trackProduct, trackPromotion, isProductDetail } from '../../scripts/ecommerce-analytics.js';
 import { rateSpan } from '../../utils/rates.js';
 import {
   footnoteSup, expandRefs, resolveRefLinks, normalizeLabel,
@@ -26,6 +26,7 @@ function noteMarker() {
 // the rail an author would otherwise write row by row, built from the product record
 function railRows(product, ph) {
   const rows = [];
+  let offerIndex;
   if (product.cardImage) {
     rows.push(row(picture(product.cardImage, product.cardImageAlt), `<p>${product.categoryLabel}</p>`));
   }
@@ -35,6 +36,7 @@ function railRows(product, ph) {
     const offerPage = offerLegalPage(product);
     // rbcroyalbank.com rails don't link off-site offers (e.g. the investments HISA page)
     const details = offerPage === product.offerDetailsUrl ? `<p class="link-wrapper"><a href="${product.offerDetailsUrl}" target="_blank" rel="noopener">${ph.viewOfferDetails || 'View Offer Details'}</a></p>` : '';
+    offerIndex = rows.length;
     rows.push(row(`<p>${product.offerEyebrow || ph.offer || 'Offer'}</p>`, `${image}<p>${expandRefs(product.offerHeadline, offerPage)}</p><p>${ends}${product.offerConditions || ''}</p>${details}`));
   }
   if (product.rateFallbackValue) {
@@ -54,7 +56,7 @@ function railRows(product, ph) {
   }
   const apply = product.applyUrl ? `<p class="button-wrapper"><a class="button primary" href="${product.applyUrl}">${ph.openAccountOnline || 'Open Account Online'}</a></p>` : '';
   rows.push(row(`${apply}<p class="link-wrapper"><a href="#legal-disclaimers">${ph.viewLegalDisclaimers || 'View legal disclaimers'}</a></p>`));
-  return rows.join('');
+  return { html: rows.join(''), offerIndex };
 }
 
 // once the rail scrolls away, a bar with the page title keeps its apply button in reach;
@@ -78,12 +80,15 @@ function stickyBar(block, ph) {
 export default async function decorate(block) {
   const ph = await fetchLocalPlaceholders();
   let record;
+  let offerRow;
   const link = block.querySelector('a[href*="/products/"]');
   if (link && block.textContent.trim() === link.textContent.trim()) {
     const product = await getProduct(link.getAttribute('href'));
     if (product) {
       record = product;
-      block.innerHTML = railRows(product, ph);
+      const { html, offerIndex } = railRows(product, ph);
+      block.innerHTML = html;
+      offerRow = block.children[offerIndex];
     }
     await resolveRefLinks(block);
   }
@@ -109,6 +114,13 @@ export default async function decorate(block) {
   const bar = stickyBar(block, ph);
   if (record) {
     trackProduct(block, record, { detail: isProductDetail() });
+    if (offerRow) {
+      trackPromotion(
+        offerRow,
+        { id: record.offerId, name: record.offerName },
+        offerRow.querySelector(':scope > div:last-child > p.link-wrapper > a'),
+      );
+    }
     if (bar) {
       bar.dataset.blockName = 'product-rail';
       trackProduct(bar, record);

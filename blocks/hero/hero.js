@@ -1,6 +1,7 @@
 import { createOptimizedPicture } from '../../scripts/aem.js';
 import { createElement } from '../../utils/dom.js';
 import fetchLocalPlaceholders from '../../utils/placeholders.js';
+import { trackHeroPromotion } from '../../scripts/ecommerce-analytics.js';
 
 const contentImages = (block, sel) => [...block.querySelectorAll(sel)]
   .filter((el) => !el.closest('span.icon'));
@@ -141,4 +142,5 @@ export default function decorate(block) {
   if (eyebrow?.tagName === 'P' && !eyebrow.querySelector('a, picture')) {
     eyebrow.classList.add('hero-eyebrow');
   }
+  trackHeroPromotion(block);
 }
