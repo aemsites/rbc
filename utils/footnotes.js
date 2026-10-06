@@ -1,3 +1,5 @@
+import { escapeHtml } from './dom.js';
+
 const NAMES = {
   '*': 'asterisk',
   '**': 'double-asterisk',
@@ -22,7 +24,6 @@ export function legalId(label, tab = 'default') {
   return tab === 'default' ? `legal-${name}` : `legal-${tab}-${name}`;
 }
 
-const escape = (text) => text.replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
 const samePath = (a, b) => a.replace(/(\.html|\/)$/, '') === b.replace(/(\.html|\/)$/, '');
 const REF = /\[\[([^\]]+)\]\]/g;
 const splitIds = (value) => String(value || '').split(',').map((id) => id.trim()).filter(Boolean);
@@ -31,7 +32,7 @@ const splitIds = (value) => String(value || '').split(',').map((id) => id.trim()
 // resolveRefLinks numbers it from the list the marker's own tab shows
 export function footnoteSup(value, page) {
   const links = splitIds(value)
-    .map((id) => `<a data-ref="${escape(id)}"${page ? ` data-page="${escape(page)}"` : ''}></a>`);
+    .map((id) => `<a data-ref="${escapeHtml(id)}"${page ? ` data-page="${escapeHtml(page)}"` : ''}></a>`);
   return links.length ? `<sup>${links.join(',')}</sup>` : '';
 }
 
@@ -181,7 +182,7 @@ function expandAuthoredRefs(root) {
   }
   nodes.forEach((node) => {
     const template = document.createElement('template');
-    template.innerHTML = expandRefs(escape(node.textContent));
+    template.innerHTML = expandRefs(escapeHtml(node.textContent));
     node.replaceWith(template.content);
   });
   if (nodes.length) resolveRefLinks(root);
