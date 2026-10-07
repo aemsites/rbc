@@ -22,6 +22,10 @@ Edge Delivery Services. Read a block first. Omissions are in the repo or known.
 - A PR without a `{branch}--{repo}--{owner}.aem.page/{path}` link is rejected.
 - All committed files are served. Use `.hlxignore`.
 - Skills: `/plugin marketplace add adobe/skills`, then `aem-edge-delivery-services` (24 skills, incl. `docs-search`).
+- When adding a block that accepts structured product references, or changing its
+  reference placement, update the product picker's usage instructions in
+  `tools/product-picker/product-picker.html` and `tools/product-picker/product-picker.js`,
+  plus the supported-block placement guide in `tools/product-picker/README.md`.
 
 ## DataLayer (`scripts/gtm.js`, `scripts/consent-check.js`)
 - Maintain `LAST_UPDATED` in `scripts/gtm.js` as the DataLayer's change date,
