@@ -6,7 +6,7 @@ import {
 
 const INDEX = '/products/query-index.json';
 // one index holds every language; records live under the language root, e.g. /fr/products/
-const ROOTS = { 'fr-CA': '/fr/' };
+const ROOTS = { 'fr-CA': '/fr/', 'zh-Hans': '/sc/' };
 let cache;
 
 // item cells come back as the structured doc's html: rows of key heading + value
