@@ -62,7 +62,7 @@ function renderDetails() {
   }
   find('instructions').textContent = isOffer
     ? 'Place the cursor in the value cell of a promo or offer Section Metadata row. Only Name:ID is inserted; no row, copy, or CTA is created. Existing values do not update automatically.'
-    : 'Products insert a structured product link, not a product page link.';
+    : 'Use product references in product-summary, cards (product), product-rail, product-picker, account-selector, and account-comparison. Place the cursor in the intended product-reference cell before inserting. For cards (product) and product-picker, use one product per row. This inserts a structured product link, not a product page link.';
   if (!state.selected) {
     content.replaceChildren(createElement('p', {}, `Select ${isOffer ? 'an offer' : 'a product'} to review its details.`));
     return;

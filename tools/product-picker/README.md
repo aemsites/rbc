@@ -32,6 +32,22 @@ This references the structured record, not its public `productPage` or applicati
 URL. The visible text is the indexed relative path; the destination is the full
 EDS URL. Product variants remain separate records.
 
+Product references are supported by `product-summary`, `cards (product)`,
+`product-rail`, the visitor-facing `product-picker` block, `account-selector`,
+and `account-comparison`. Insert into the intended product-reference cell:
+
+| Block | Product-reference placement |
+| --- | --- |
+| `product-summary` | First row |
+| `cards (product)` | First cell of each product row; one product per row |
+| `product-rail` | A block containing only the product reference |
+| `product-picker` | First cell of each product row; one product per row |
+| `account-selector` | Explicit product-reference links in the block |
+| `account-comparison` | One product per header cell after the first label cell |
+
+The plugin inserts one reference at the cursor; it does not create surrounding
+rows or columns. Create the required cells before inserting.
+
 ## Offers
 
 Create a Section Metadata row named `promo` or `offer` and put the cursor in its
