@@ -76,8 +76,10 @@ The separate promotion-analytics implementation must be deployed for hero tracki
 ## Finding records
 
 Content language defaults to French for `/fr/` documents and English otherwise;
-authors can switch explicitly. Mode-specific authoring instructions appear above
-the results, before selection. No cross-language fallback is performed. Search
+authors can switch explicitly. Mode-specific authoring instructions appear in a
+collapsed-by-default **Usage instructions: supported blocks and where to insert**
+accordion above the results. Expand it to read the guidance before selection.
+No cross-language fallback is performed. Search
 matches names, short names, paths, product codes, and offer identities. Category
 and persona filters include variants. Selecting a product or offer reveals a
 floating bottom action bar with the Insert button, alongside a ready-to-insert
