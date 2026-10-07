@@ -1,3 +1,7 @@
+import { loadScript } from './aem.js';
+
+const OT_DOMAIN_SCRIPT = '051ec25d-8edf-4043-a57e-af9e3a458709';
+
 // OneTrust cookie category IDs
 // 1 Essential, 2 Performance, 3 Personalization, 4 Advertising.
 export const CONSENT_GROUPS = {
@@ -64,3 +68,11 @@ if (override !== null) {
   const groups = resolveGroups();
   if (groups) onConsentUpdate(hasConsentGroup(groups));
 }
+
+// OneTrust reaches the EDS site through GTM today, which never fires its tag here and would
+// land after the martech delay anyway; loading the stub ourselves is what resolves consent
+// for a first-time visitor. Returning visitors resolve from the cookie above, without it.
+loadScript('https://cdn.cookielaw.org/scripttemplates/otSDKStub.js', {
+  async: '',
+  'data-domain-script': OT_DOMAIN_SCRIPT,
+});

@@ -406,12 +406,14 @@ async function loadLazy(doc) {
   loadFonts();
 }
 
+// GTM is the last thing the page needs; it stays out of the way of consent and personalization
+const MARTECH_DELAY_MS = 3000;
+
 /**
  * Loads everything that happens a lot later,
  * without impacting the user experience.
  */
 function loadDelayed() {
-  import('./consent-check.js');
   // ?martech=off keeps GTM out of the page entirely, for performance testing
   if (new URLSearchParams(window.location.search).get('martech') !== 'off') import('./gtm.js');
   // load anything that can be postponed to the latest here
@@ -420,7 +422,9 @@ function loadDelayed() {
 async function loadPage() {
   await loadEager(document);
   await loadLazy(document);
-  loadDelayed();
+  // consent gates personalization, so it resolves ahead of the martech delay rather than inside it
+  import('./consent-check.js');
+  setTimeout(loadDelayed, MARTECH_DELAY_MS);
 }
 
 loadPage();
