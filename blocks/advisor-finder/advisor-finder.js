@@ -73,7 +73,7 @@ export default async function decorate(block) {
   cards.hidden = true;
   const empty = document.createElement('p');
   empty.className = 'advisor-finder-empty';
-  empty.textContent = ph.noAdvisors || (getMetadata('lang') === 'zh-Hans' ? '' : 'No advisors listed for this province yet. Email us and we will connect you.');
+  empty.textContent = ph.noAdvisors || (getMetadata('lang')?.startsWith('zh') ? '' : 'No advisors listed for this province yet. Email us and we will connect you.');
   empty.hidden = true;
 
   form.addEventListener('submit', (e) => {
