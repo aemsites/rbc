@@ -10,7 +10,7 @@ const PROD_HOSTS = ['main--rbc--aemsites.aem.live', 'www.rbcroyalbank.com'];
 const SITE_SECTION = 'public';
 const CMS_TYPE = 'aem';
 // Manually maintained DataLayer change date (MMDDYYYY); see AGENTS.md.
-const LAST_UPDATED = '10062026';
+const LAST_UPDATED = '10072026';
 
 const defined = (obj) => Object.fromEntries(
   Object.entries(obj).filter(([, value]) => value !== undefined && value !== null && value !== ''),
