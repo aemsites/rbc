@@ -377,7 +377,7 @@ main > .section.dark-background .cards.tinted:not(.tile) > ul > li {
   fill: var(--rbc-grey-600);
 }
 
-.cards.icons.tinted > ul > li > .cards-card-image:not(:has(.icon)) {
+.cards.icons.tinted:not(.horizontal) > ul > li > .cards-card-image:not(:has(.icon)) {
   padding: var(--space-l) var(--space-l) 0;
 }
 
