@@ -523,8 +523,11 @@ main > .section.dark-background .cards.tinted:not(.tile) > ul > li {
 .cards.product > ul > li {
   border-color: var(--rbc-grey-300);
   border-radius: var(--radius-m);
-  max-width: 400px;
   margin: 0 auto;
+}
+
+.cards.product:not(.picture) > ul > li {
+  max-width: 400px;
 }
 
 .cards.product .cards-card-body {
