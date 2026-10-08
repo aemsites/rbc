@@ -125,6 +125,8 @@ function buildAutoBlocks(main) {
   }
 }
 
+const imageLink = (a) => [...a.querySelectorAll('img')].some((img) => !img.closest('span.icon'));
+
 /**
  * Decorates formatted links to style them as buttons.
  * @param {HTMLElement} main The main container element
@@ -143,7 +145,7 @@ function decorateButtons(main) {
     if (probe.textContent.trim()) return;
 
     const buttons = links.filter((a) => {
-      if (a.querySelector('img')) return false;
+      if (imageLink(a)) return false;
       const text = a.textContent.trim();
       try {
         if (new URL(a.href).href === new URL(text, window.location).href) return false;
@@ -155,7 +157,7 @@ function decorateButtons(main) {
       inner.querySelectorAll('a[href]').forEach((link) => link.remove());
       return !inner.textContent.trim();
     });
-    if (!buttons.length && links.every((a) => !a.querySelector('img'))) p.classList.add('link-wrapper');
+    if (!buttons.length && !links.some(imageLink)) p.classList.add('link-wrapper');
     if (buttons.length !== links.length) return;
 
     const variants = new Map(buttons.map((a) => {

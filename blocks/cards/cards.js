@@ -47,6 +47,23 @@ function priceLine(product, ph) {
     <span class="cards-product-rebate-label">${escapeHtml(ph.withTheValueProgram || 'with the Value Program')}</span></span></p>`;
 }
 
+function waiverLines(product, ph, all) {
+  if (product.variantOf) return '';
+  const variants = all.filter((p) => p.variantOf === product.productCode
+    && p.productPage !== product.productPage && p.fees.length);
+  if (!variants.length) return '';
+  const per = (value) => (isPrice(value) ? escapeHtml(ph.perMonth || '/mo') : '');
+  return `<ul class="cards-product-waivers">${variants.map((variant) => {
+    const { fees: [fee], productPage, persona } = variant;
+    const label = ph[toCamelCase(`waiver-${persona}`)] || fee.label;
+    const badge = variant.offerBadge
+      ? `<p class="cards-product-waiver-offer">${offerLink(variant, stripRefs(variant.offerBadge))}${footnoteSup(refIds(variant.offerBadge), offerLegalPage(variant))}</p>` : '';
+    return `<li>
+      <p class="cards-product-waiver-name"><a href="${safeUrl(productPage)}">${escapeHtml(label)}</a>${footnoteSup(fee.footnotes, productPage)}</p>
+      ${badge}<p class="cards-product-amount"><strong>${escapeHtml(fee.displayValue)}</strong>${per(fee.displayValue)}</p></li>`;
+  }).join('')}</ul>`;
+}
+
 function cardLabel(product, ph, label) {
   if (label === 'none') return '';
   return `<p>${escapeHtml(ph[toCamelCase(`category-${product.category}`)] || product.categoryLabel)}</p>`;
@@ -61,7 +78,7 @@ function productBody(product, ph, variant, keys = [], options = {}) {
     ? `<li>${expandRefs(escapeHtml(product.rateLabel), page)}: ${product.rateRateCode ? rateSpan(product.rateRateCode, product.rateFallbackValue) : escapeHtml(product.rateFallbackValue)}</li>` : '';
   const highlights = pickHighlights(product, keys.filter((k) => k !== 'rate'))
     .map((h) => `<li>${claim(h.text, h.url, page)}</li>`).join('') + rate;
-  const note = product.note ? `<p>${expandRefs(escapeHtml(product.note), page)}</p>` : '';
+  const note = product.note ? `<p class="cards-product-note">${expandRefs(escapeHtml(product.note), page)}</p>` : '';
   const [fee] = product.fees;
   const feeSup = sup(fee?.footnotes);
   const name = escapeHtml(product.name);
@@ -81,7 +98,7 @@ function productBody(product, ph, variant, keys = [], options = {}) {
   const caption = product.offerBadge && product.offerCaption
     ? `<p class="cards-product-caption"><em>${expandRefs(escapeHtml(product.offerCaption), offerPage)}</em></p>` : '';
   return `${cardLabel(product, ph, options.label)}<h3>${name}</h3><p>${escapeHtml(product.tagline)}</p><ul>${highlights}</ul>
-    ${note}${badge}${caption}${priceLine(product, ph)}
+    ${waiverLines(product, ph, options.all || [])}${badge}${caption}${priceLine(product, ph)}${note}
     ${product.applyUrl ? button(cta, product.applyUrl, 'primary') : ''}
     <p class="link-wrapper"><a href="${productLink}">${escapeHtml(ph.viewMoreAccountBenefits || 'View More Account Benefits')}</a></p>`;
 }
@@ -113,6 +130,7 @@ async function renderProductRows(block) {
   const options = {
     cta: config.cta,
     label: block.classList.contains('no-label') ? 'none' : undefined,
+    all: await getProducts(),
   };
   const rows = [...block.children].filter((row) => {
     const a = row.firstElementChild?.querySelector('a[href*="/products/"]');
