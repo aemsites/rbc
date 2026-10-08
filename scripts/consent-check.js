@@ -69,19 +69,24 @@ window.OptanonWrapper = () => {
   onConsentUpdate(active.split(',').includes(CONSENT_GROUPS.personalization));
 };
 
-const override = consentOverride();
-if (override !== null) {
-  onConsentUpdate(override);
-} else {
-  const groups = resolveGroups();
-  if (groups) onConsentUpdate(hasConsentGroup(groups));
+// OneTrust reaches the EDS site through GTM today, which never fires its tag here; loading the
+// stub ourselves is what shows the banner and resolves consent for a first-time visitor.
+export function loadOneTrust() {
+  return loadScript('https://cdn.cookielaw.org/scripttemplates/otSDKStub.js', {
+    async: '',
+    'data-domain-script': OT_DOMAIN_SCRIPT,
+  });
 }
 
-// OneTrust reaches the EDS site through GTM today, which never fires its tag here and would
-// land after the martech delay anyway; loading the stub ourselves is what resolves consent
-// for a first-time visitor. Returning visitors resolve from the cookie above, ahead of it; the
-// stub still loads for them, since OneTrust also serves the preference center.
-loadScript('https://cdn.cookielaw.org/scripttemplates/otSDKStub.js', {
-  async: '',
-  'data-domain-script': OT_DOMAIN_SCRIPT,
-});
+const override = consentOverride();
+const groups = override === null ? resolveGroups() : null;
+if (override !== null) {
+  onConsentUpdate(override);
+} else if (groups) {
+  onConsentUpdate(hasConsentGroup(groups));
+}
+
+// A visitor who has already decided resolves from the cookie above, and the stub loads now for
+// the preference center. A first-time visitor has nothing to personalize until they choose, so
+// their banner waits for the martech delay, where loadDelayed() loads it ahead of GTM.
+if (override !== null || groups) loadOneTrust();
