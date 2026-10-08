@@ -298,11 +298,11 @@ body.article main > .section > .default-content-wrapper p.article-image {
   mask: var(--share-icon) center / contain no-repeat;
 }
 
-.article .article-share-x { --share-icon: url("/icons/share-x.svg"); }
-.article .article-share-facebook { --share-icon: url("/icons/share-facebook.svg"); }
-.article .article-share-linkedin { --share-icon: url("/icons/share-linkedin.svg"); }
-.article .article-share-email { --share-icon: url("/icons/share-email.svg"); }
-.article .article-share-copy { --share-icon: url("/icons/share-copy.svg"); }
+.article .article-share-x { --share-icon: url("/icons/twitter.svg"); }
+.article .article-share-facebook { --share-icon: url("/icons/facebook.svg"); }
+.article .article-share-linkedin { --share-icon: url("/icons/linkedin.svg"); }
+.article .article-share-email { --share-icon: url("/icons/email.svg"); }
+.article .article-share-copy { --share-icon: url("/icons/copy-url.svg"); }
 
 .article .article-share-status {
   position: absolute;
