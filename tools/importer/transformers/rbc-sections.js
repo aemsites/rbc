@@ -69,7 +69,7 @@ function heading(el) {
 }
 
 function isTldr(el) {
-  return el.matches(SEL.topLine) && /^tldr$/i.test(text(heading(el)));
+  return el.matches(SEL.topLine) && /^(tldr|tlpl)$/i.test(text(heading(el)));
 }
 
 function classify(el) {
@@ -89,7 +89,7 @@ function isNoise(node) {
   if (node.tagName === 'P') {
     const t = node.textContent.replace(/[ \s]/g, '');
     if (!t && !node.querySelector('img, picture, a')) return true;
-    if (/^share this article$/i.test(text(node))) return true;
+    if (/^(share this article|partager cet article)$/i.test(text(node))) return true;
   }
   if (node.tagName === 'DIV' && !node.textContent.trim() && !node.querySelector('img, picture, table, iframe')) return true;
   return false;
@@ -161,11 +161,14 @@ function rewritePromo(doc, unit) {
   return nodes;
 }
 
-/** what-is page: plain h2 FAQ + h3/p pairs -> .inner-section-cool-white > .accordion. */
+/**
+ * what-is page: plain h2 FAQ + h3/p pairs -> .inner-section-cool-white > .accordion.
+ * The French page's heading is "FAQ sur les comptes d’épargne".
+ */
 function wrapPlainFaq(doc, entry) {
   if (entry.querySelector(SEL.faq)) return;
   const start = [...entry.children].find((el) => /^H[23]$/.test(el.tagName)
-    && /frequently asked questions/i.test(text(el)));
+    && /frequently asked questions|^faq(\s|$)|questions (fréquemment posées|fréquentes)/i.test(text(el)));
   if (!start) return;
 
   const range = [];

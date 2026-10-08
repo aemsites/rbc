@@ -25,6 +25,38 @@ const LEGACY_METADATA = {
     "hreflang-zh-hans": "https://www.rbcroyalbank.com/sc/new-to-canada/international-students/article/how-to-find-the-best-bank-account-for-international-students.html",
     "hreflang-zh-hant": "https://www.rbcroyalbank.com/tc/new-to-canada/international-students/article/how-to-find-the-best-bank-account-for-international-students.html",
     "json-ld": "{\"@context\":\"https://schema.org\",\"@type\":\"BreadcrumbList\",\"itemListElement\":[{\"@type\":\"ListItem\",\"position\":1,\"name\":\"Personal\",\"item\":\"https://www.rbcroyalbank.com/personal.html\"},{\"@type\":\"ListItem\",\"position\":2,\"name\":\"Newcomers to Canada\",\"item\":\"https://www.rbcroyalbank.com/new-to-canada\"},{\"@type\":\"ListItem\",\"position\":3,\"name\":\"Studying in Canada\",\"item\":\"https://www.rbcroyalbank.com/new-to-canada/international-students\"},{\"@type\":\"ListItem\",\"position\":4,\"name\":\"How to Find the Best Bank Account for International Students?\",\"item\":\"https://www.rbcroyalbank.com/new-to-canada/international-students/article/how-to-find-the-best-bank-account-for-international-students\"}]}"
+  },
+  "/fr/comptes-bancaires/comptes-depargne/fonctionnement-des-interets-sur-un-compte-depargne": {
+    "lang": "fr-CA",
+    "hreflang-en-ca": "/bank-accounts/savings-accounts/how-does-interest-work-on-a-savings-account",
+    "page-type": "article",
+    "json-ld": "{\"@context\":\"https://schema.org\",\"@type\":\"BreadcrumbList\",\"itemListElement\":[{\"@type\":\"ListItem\",\"position\":1,\"name\":\"Services bancaires personnels\",\"item\":\"https://www.rbcbanqueroyale.com\"},{\"@type\":\"ListItem\",\"position\":2,\"name\":\"Comptes bancaires\",\"item\":\"https://www.rbcroyalbank.com/fr/comptes-bancaires\"},{\"@type\":\"ListItem\",\"position\":3,\"name\":\"Comptes d’épargne\",\"item\":\"https://www.rbcroyalbank.com/fr/comptes-bancaires/comptes-depargne\"},{\"@type\":\"ListItem\",\"position\":4,\"name\":\"Fonctionnement des intérêts sur un compte d’épargne\",\"item\":\"https://www.rbcroyalbank.com/fr/comptes-bancaires/comptes-depargne/fonctionnement-des-interets-sur-un-compte-depargne\"}]}"
+  },
+  "/fr/comptes-bancaires/comptes-depargne/choisir-le-meilleur-compte-depargne-pour-moi": {
+    "lang": "fr-CA",
+    "hreflang-en-ca": "/bank-accounts/savings-accounts/how-to-choose-the-best-savings-account-for-me",
+    "page-type": "article",
+    "json-ld": "{\"@context\":\"https://schema.org\",\"@type\":\"BreadcrumbList\",\"itemListElement\":[{\"@type\":\"ListItem\",\"position\":1,\"name\":\"Services bancaires personnels\",\"item\":\"https://www.rbcbanqueroyale.com\"},{\"@type\":\"ListItem\",\"position\":2,\"name\":\"Comptes bancaires\",\"item\":\"https://www.rbcroyalbank.com/fr/comptes-bancaires\"},{\"@type\":\"ListItem\",\"position\":3,\"name\":\"Comptes d’épargne\",\"item\":\"https://www.rbcroyalbank.com/fr/comptes-bancaires/comptes-depargne\"},{\"@type\":\"ListItem\",\"position\":4,\"name\":\"Choisir le meilleur compte d’épargne pour moi\",\"item\":\"https://www.rbcroyalbank.com/fr/comptes-bancaires/comptes-depargne/choisir-le-meilleur-compte-depargne-pour-moi\"}]}"
+  },
+  "/fr/comptes-bancaires/comptes-depargne/quels-sont-les-differents-types-de-compte-depargne-au-canada": {
+    "lang": "fr-CA",
+    "hreflang-en-ca": "/bank-accounts/savings-accounts/what-are-the-different-types-of-savings-accounts-in-canada",
+    "page-type": "article",
+    "json-ld": "{\"@context\":\"https://schema.org\",\"@type\":\"BreadcrumbList\",\"itemListElement\":[{\"@type\":\"ListItem\",\"position\":1,\"name\":\"Services bancaires personnels\",\"item\":\"https://www.rbcbanqueroyale.com\"},{\"@type\":\"ListItem\",\"position\":2,\"name\":\"Comptes bancaires\",\"item\":\"https://www.rbcroyalbank.com/fr/comptes-bancaires\"},{\"@type\":\"ListItem\",\"position\":3,\"name\":\"Comptes d’épargne\",\"item\":\"https://www.rbcroyalbank.com/fr/comptes-bancaires/comptes-depargne\"},{\"@type\":\"ListItem\",\"position\":4,\"name\":\"Quels sont les différents types de compte d’épargne au Canada ?\",\"item\":\"https://www.rbcroyalbank.com/fr/comptes-bancaires/comptes-depargne/quels-sont-les-differents-types-de-compte-depargne-au-canada\"}]}"
+  },
+  "/fr/comptes-bancaires/comptes-depargne/quest-ce-quun-compte-depargne-et-comment-lutiliser": {
+    "lang": "fr-CA",
+    "hreflang-en-ca": "/bank-accounts/savings-accounts/what-is-a-savings-account-and-how-do-i-use-it",
+    "page-type": "article",
+    "json-ld": "{\"@context\":\"https://schema.org\",\"@type\":\"BreadcrumbList\",\"itemListElement\":[{\"@type\":\"ListItem\",\"position\":1,\"name\":\"Services bancaires personnels\",\"item\":\"https://www.rbcbanqueroyale.com\"},{\"@type\":\"ListItem\",\"position\":2,\"name\":\"Comptes bancaires\",\"item\":\"https://www.rbcroyalbank.com/fr/comptes-bancaires\"},{\"@type\":\"ListItem\",\"position\":3,\"name\":\"Comptes d’épargne\",\"item\":\"https://www.rbcroyalbank.com/fr/comptes-bancaires/comptes-depargne\"},{\"@type\":\"ListItem\",\"position\":4,\"name\":\"Qu’est-ce qu’un compte d’épargne et comment l’utiliser ?\",\"item\":\"https://www.rbcroyalbank.com/fr/comptes-bancaires/comptes-depargne/quest-ce-quun-compte-depargne-et-comment-lutiliser\"}]}"
+  },
+  "/nouveaux-arrivants/etudiants-etrangers/article/trouver-le-meilleur-compte-bancaire-pour-etudiant-etranger": {
+    "lang": "fr-CA",
+    "hreflang-en-ca": "/new-to-canada/international-students/article/how-to-find-the-best-bank-account-for-international-students",
+    "hreflang-zh-hans": "https://www.rbcroyalbank.com/sc/new-to-canada/international-students/article/how-to-find-the-best-bank-account-for-international-students.html",
+    "hreflang-zh-hant": "https://www.rbcroyalbank.com/tc/new-to-canada/international-students/article/how-to-find-the-best-bank-account-for-international-students.html",
+    "page-type": "article",
+    "json-ld": "{\"@context\":\"https://schema.org\",\"@type\":\"BreadcrumbList\",\"itemListElement\":[{\"@type\":\"ListItem\",\"position\":1,\"name\":\"Particuliers\",\"item\":\"https://www.rbcroyalbank.com/fr/personal.html\"},{\"@type\":\"ListItem\",\"position\":2,\"name\":\"Nouveaux arrivants au Canada\",\"item\":\"https://www.rbcroyalbank.com/nouveaux-arrivants\"},{\"@type\":\"ListItem\",\"position\":3,\"name\":\"Étudier au Canada\",\"item\":\"https://www.rbcroyalbank.com/nouveaux-arrivants/etudiants-etrangers\"},{\"@type\":\"ListItem\",\"position\":4,\"name\":\"Trouver le meilleur compte bancaire pour étudiant étranger\",\"item\":\"https://www.rbcroyalbank.com/nouveaux-arrivants/etudiants-etrangers/article/trouver-le-meilleur-compte-bancaire-pour-etudiant-etranger\"}]}"
   }
 };
 
@@ -59,6 +91,8 @@ const H = { before: 'beforeTransform', after: 'afterTransform' };
 const ORIGIN = 'https://www.rbcroyalbank.com';
 const MONTHS = ['january', 'february', 'march', 'april', 'may', 'june', 'july',
   'august', 'september', 'october', 'november', 'december'];
+const MONTHS_FR = ['janvier', 'fevrier', 'mars', 'avril', 'mai', 'juin', 'juillet',
+  'aout', 'septembre', 'octobre', 'novembre', 'decembre'];
 
 function getDoc(element, payload) {
   return (payload && payload.document) || element.ownerDocument || document;
@@ -108,18 +142,34 @@ function cleanTitle(raw) {
   return t;
 }
 
-/** Minutes from "… • 10 Min Read", kept so the page shows the source's stated read time. */
+/**
+ * Minutes from "… • 10 Min Read" (French pages: "… • 13 min de lecture"), kept so the page
+ * shows the source's stated read time.
+ */
 function parseReadTime(str) {
-  const m = /(\d+)\s*min(ute)?s?\s+read/i.exec(str || '');
+  const m = /(\d+)\s*min(ute)?s?\s+(read|de\s+lecture)/i.exec(str || '');
   return m ? m[1] : '';
 }
 
+function isoDate(year, monthIdx, day) {
+  return `${year}-${String(monthIdx + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+}
+
+/** "Published June 9, 2025", or on French pages "Published 9 juin 2025" / "1er mai 2025". */
 function parsePublished(str) {
-  const m = /Published\s+([A-Za-z]+)\.?\s+(\d{1,2}),?\s+(\d{4})/i.exec(str || '');
-  if (!m) return '';
-  const idx = MONTHS.findIndex((mo) => mo.startsWith(m[1].toLowerCase().slice(0, 3)));
-  if (idx < 0) return '';
-  return `${m[3]}-${String(idx + 1).padStart(2, '0')}-${m[2].padStart(2, '0')}`;
+  const s = str || '';
+  const en = /Published\s+([A-Za-z]+)\.?\s+(\d{1,2}),?\s+(\d{4})/i.exec(s);
+  if (en) {
+    const idx = MONTHS.findIndex((mo) => mo.startsWith(en[1].toLowerCase().slice(0, 3)));
+    return idx < 0 ? '' : isoDate(en[3], idx, en[2]);
+  }
+  const fr = /(?:Published|Publié(?:\s+le)?)\s+(\d{1,2})(?:er)?\s+([A-Za-zÀ-ÿ]+)\.?\s+(\d{4})/i.exec(s);
+  if (fr) {
+    const name = fr[2].toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const idx = MONTHS_FR.indexOf(name);
+    return idx < 0 ? '' : isoDate(fr[3], idx, fr[1]);
+  }
+  return '';
 }
 
 function findBreadcrumbList(doc) {
@@ -185,7 +235,7 @@ function buildMetadata(element, doc, payload) {
     if (pill && text(pill)) cells.category = text(pill);
 
     const byline = header.querySelector('p.author-text');
-    if (byline && text(byline)) cells.author = text(byline).replace(/^By\s+/i, '');
+    if (byline && text(byline)) cells.author = text(byline).replace(/^(By|Par)\s+/i, '');
 
     const pub = header.querySelector('p.cover-pub-line');
     const date = parsePublished(text(pub));
@@ -261,10 +311,13 @@ function bannerImageUrl(element) {
   return src ? absUrl(src) : '';
 }
 
+/** "Published …" date line; French pages may say "Publié …". */
+const PUBLISHED_RE = /^(published|publié)(\s|$)/i;
+
 /** div.grid-wpr.eh-wpr rows that hold the "Published …" line (+ share links). */
 function publishedRows(element) {
   return [...element.querySelectorAll('div.grid-wpr.eh-wpr')]
-    .filter((row) => [...row.querySelectorAll('p.disclaimer')].some((p) => /^published\b/i.test(text(p))));
+    .filter((row) => [...row.querySelectorAll('p.disclaimer')].some((p) => PUBLISHED_RE.test(text(p))));
 }
 
 function buildNewcomerMetadata(element, doc, payload) {
@@ -288,7 +341,7 @@ function buildNewcomerMetadata(element, doc, payload) {
   cells.template = templateName(payload) || NEWCOMER;
 
   const pubRow = publishedRows(element)[0];
-  const pub = pubRow && [...pubRow.querySelectorAll('p.disclaimer')].find((p) => /^published\b/i.test(text(p)));
+  const pub = pubRow && [...pubRow.querySelectorAll('p.disclaimer')].find((p) => PUBLISHED_RE.test(text(p)));
   const date = parsePublished(text(pub));
   if (date) cells['publication-date'] = date;
   const minutes = parseReadTime(text(pub));
@@ -332,6 +385,15 @@ export default function transform(hookName, element, payload) {
     // 1b. Source markup closes .entry-content early on some pages (what-is: right after the
     // TLDR; types: before the legal collapsible), so parser selectors scoped to
     // .entry-content would miss content. Pull the following siblings back in.
+    // The centered template (French what-is page) has no .entry-content at all: its body is
+    // the section.narrow-centered-section after the article header. Tag that instead.
+    if (!element.querySelector('.entry-content')) {
+      const articleHeader = element.querySelector('.wp-block-rbc-single-article-header');
+      let sib = articleHeader && articleHeader.nextElementSibling;
+      while (sib && !sib.matches('section.narrow-centered-section')) sib = sib.nextElementSibling;
+      const body = sib && sib.querySelector(':scope > .section-inner');
+      if (body) body.classList.add('entry-content');
+    }
     const entry = element.querySelector('.entry-content');
     if (entry) while (entry.nextSibling) entry.append(entry.nextSibling);
 
@@ -350,6 +412,9 @@ export default function transform(hookName, element, payload) {
     // 3b. The live page's stacktable script clones row-stack tables into a mobile-only copy
     // (table.stacktable.small-only); keep only the real table, which the table block stacks.
     element.querySelectorAll('table.stacktable.small-only').forEach((t) => t.remove());
+    // Swipe tables get Tablesaw's column navigation (buttons + minimap dots) injected
+    // before them at runtime; the table block provides its own.
+    WebImporter.DOMUtils.remove(element, ['.tablesaw-bar']);
 
     // 4. ul.numbered-list -> ol (before parsers so block cells get the fix too).
     element.querySelectorAll('ul.numbered-list').forEach((ul) => {
@@ -430,9 +495,9 @@ export default function transform(hookName, element, payload) {
       '.wp-block-rbc-single-article-header hr.mobile-only',
     ]);
 
-    // "Share This Article" heading paragraph.
+    // "Share This Article" ("Partager cet article") heading paragraph.
     element.querySelectorAll('p').forEach((p) => {
-      if (/^share this article$/i.test(text(p))) p.remove();
+      if (/^(share this article|partager cet article)$/i.test(text(p))) p.remove();
     });
 
     // Site-relative links point at pages on the new site, which have no .html extension.

@@ -18,7 +18,8 @@ const PAGE_TEMPLATE = {
   "name": "newcomer-article",
   "description": "Newcomer article: bordered title box with image, date + share row, TLDR callout, on-this-page rail, legal disclaimers",
   "urls": [
-    "https://www.rbcroyalbank.com/new-to-canada/international-students/article/how-to-find-the-best-bank-account-for-international-students.html"
+    "https://www.rbcroyalbank.com/new-to-canada/international-students/article/how-to-find-the-best-bank-account-for-international-students.html",
+    "https://www.rbcroyalbank.com/nouveaux-arrivants/etudiants-etrangers/article/trouver-le-meilleur-compte-bancaire-pour-etudiant-etranger.html"
   ],
   "blocks": [
     {

@@ -6,7 +6,11 @@
         "https://www.rbcroyalbank.com/bank-accounts/savings-accounts/how-does-interest-work-on-a-savings-account.html",
         "https://www.rbcroyalbank.com/bank-accounts/savings-accounts/how-to-choose-the-best-savings-account-for-me.html",
         "https://www.rbcroyalbank.com/bank-accounts/savings-accounts/what-are-the-different-types-of-savings-accounts-in-canada.html",
-        "https://www.rbcroyalbank.com/bank-accounts/savings-accounts/what-is-a-savings-account-and-how-do-i-use-it.html"
+        "https://www.rbcroyalbank.com/bank-accounts/savings-accounts/what-is-a-savings-account-and-how-do-i-use-it.html",
+        "https://www.rbcroyalbank.com/fr/comptes-bancaires/comptes-depargne/fonctionnement-des-interets-sur-un-compte-depargne.html",
+        "https://www.rbcroyalbank.com/fr/comptes-bancaires/comptes-depargne/choisir-le-meilleur-compte-depargne-pour-moi.html",
+        "https://www.rbcroyalbank.com/fr/comptes-bancaires/comptes-depargne/quels-sont-les-differents-types-de-compte-depargne-au-canada.html",
+        "https://www.rbcroyalbank.com/fr/comptes-bancaires/comptes-depargne/quest-ce-quun-compte-depargne-et-comment-lutiliser.html"
       ],
       "representativeUrl": "https://www.rbcroyalbank.com/bank-accounts/savings-accounts/how-does-interest-work-on-a-savings-account.html",
       "description": "My Money Matters article (savings accounts): grey title band, TLDR callout, optional on-this-page rail, FAQ accordion, legal disclaimers, topics",
@@ -154,7 +158,8 @@
     {
       "name": "newcomer-article",
       "urls": [
-        "https://www.rbcroyalbank.com/new-to-canada/international-students/article/how-to-find-the-best-bank-account-for-international-students.html"
+        "https://www.rbcroyalbank.com/new-to-canada/international-students/article/how-to-find-the-best-bank-account-for-international-students.html",
+        "https://www.rbcroyalbank.com/nouveaux-arrivants/etudiants-etrangers/article/trouver-le-meilleur-compte-bancaire-pour-etudiant-etranger.html"
       ],
       "representativeUrl": "https://www.rbcroyalbank.com/new-to-canada/international-students/article/how-to-find-the-best-bank-account-for-international-students.html",
       "description": "Newcomer article: bordered title box with image, date + share row, TLDR callout, on-this-page rail, legal disclaimers",
