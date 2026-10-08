@@ -7,7 +7,6 @@ import {
   getMetadata,
   loadHeader,
   loadFooter,
-  decorateIcons,
   decorateSections,
   decorateBlocks,
   decorateTemplateAndTheme,
@@ -225,22 +224,18 @@ function decorateFocalPoints(main) {
  */
 const iconCache = new Map();
 
-/**
- * Replaces the <img> the boilerplate inserts with an inline <svg>, so icons can take their
- * colour from CSS. aem.js is vendored, so this runs as a second pass over the same spans.
- * @param {Element} span The span.icon holding the image
- */
-async function inlineIcon(span) {
-  const img = span.querySelector(':scope > img');
-  if (!img) return;
-  const { src } = img;
+async function decorateIcon(span) {
+  if (span.childElementCount) return;
+  const iconName = [...span.classList].find((c) => c.startsWith('icon-'))?.slice(5);
+  if (!iconName) return;
+  const src = `${window.hlx.codeBasePath}/icons/${iconName}.svg`;
   if (!iconCache.has(src)) {
     iconCache.set(src, fetch(src)
       .then((resp) => (resp.ok ? resp.text() : ''))
       .catch(() => ''));
   }
   const markup = await iconCache.get(src);
-  if (!markup || !span.contains(img)) return;
+  if (!markup || span.childElementCount) return;
   const svg = new DOMParser().parseFromString(markup, 'image/svg+xml').querySelector('svg');
   if (!svg || svg.querySelector('parsererror')) return;
   const [width, height] = ['width', 'height'].map((attr) => parseFloat(svg.getAttribute(attr)));
@@ -251,7 +246,7 @@ async function inlineIcon(span) {
       .filter((attr) => attr.name.toLowerCase().startsWith('on'))
       .forEach((attr) => node.removeAttribute(attr.name));
   });
-  const prefix = img.dataset.iconName;
+  const prefix = iconName;
   svg.querySelectorAll('style').forEach((style) => {
     style.textContent = style.textContent.replace(/\.(-?[_a-zA-Z][\w-]*)/g, `.${prefix}-$1`);
   });
@@ -267,15 +262,11 @@ async function inlineIcon(span) {
   });
   svg.setAttribute('aria-hidden', 'true');
   svg.setAttribute('focusable', 'false');
-  img.replaceWith(svg);
+  span.append(svg);
 }
 
-/**
- * Inlines every authored icon in the element.
- * @param {Element} element The container element
- */
-function inlineIcons(element) {
-  element.querySelectorAll('span.icon').forEach(inlineIcon);
+export function decorateIcons(element) {
+  element.querySelectorAll('span.icon').forEach(decorateIcon);
 }
 
 function decorateStickyTitle(main) {
@@ -292,10 +283,8 @@ function decorateLabels(main) {
   });
 }
 
-// eslint-disable-next-line import/prefer-default-export
 export function decorateMain(main) {
   decorateIcons(main);
-  inlineIcons(main);
   buildAutoBlocks(main);
   decorateSections(main);
   decorateStickyTitle(main);

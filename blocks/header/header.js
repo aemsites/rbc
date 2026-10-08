@@ -1,4 +1,5 @@
 import { getMetadata } from '../../scripts/aem.js';
+import { decorateIcons } from '../../scripts/scripts.js';
 import { loadFragment } from '../fragment/fragment.js';
 import { createElement as el } from '../../utils/dom.js';
 import fetchLocalPlaceholders from '../../utils/placeholders.js';
@@ -575,6 +576,8 @@ export default async function decorate(block) {
   tools.prepend(buildSearch());
   const shield = brand?.querySelector('.icon');
   if (shield) tools.querySelector('.nav-search-brand')?.append(shield.cloneNode(true));
+  // a cloned span carries no inlined svg, so the copy needs decorating in its own right
+  decorateIcons(tools);
   main.append(tools);
 
   const hamburger = el('button', { class: 'nav-hamburger', type: 'button' });
