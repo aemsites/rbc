@@ -85,10 +85,10 @@ export default async function decorate(block) {
     });
   }
 
-  // swipe: tables in answers page through their columns when they don't all fit the panel
+  // tables in answers page through their columns when they don't all fit the panel
   const tables = [...block.querySelectorAll('.accordion-item-body table')];
   tables.forEach(promoteHeader);
-  if (tables.length && block.classList.contains('swipe')) {
+  if (tables.length) {
     const ph = await fetchLocalPlaceholders();
     const labels = { previous: ph.previousColumn, next: ph.nextColumn };
     tables.forEach((table) => swipeTable(table, labels));

@@ -1,10 +1,9 @@
 import { createElement } from './dom.js';
 
 /**
- * Pages a table's columns like a carousel, with arrows and dots. As on the source site, at
- * least one column always waits on the next slide, and on narrow screens fewer columns show
- * when they don't fit at their natural width. Columns are re-fitted whenever the table's
- * width changes, including when a collapsed panel holding it opens.
+ * Pages a table's columns like a carousel, with arrows and dots, once they don't all fit at
+ * their natural width; a table that fits shows whole, without controls. Columns are re-fitted
+ * whenever the table's width changes, including when a collapsed panel holding it opens.
  * @param {HTMLTableElement} table the table to enhance
  * @param {object} [labels] accessible names for the arrows
  */
@@ -36,13 +35,20 @@ export default function swipeTable(table, labels = {}) {
     controls.hidden = visible >= count;
   };
 
-  // natural column widths: every column shown, text only wrapping where the author broke it
+  // column widths: short values stay on one line, prose wraps down to a readable width
   const measure = () => {
     rows.forEach((row) => [...row.cells].forEach((cell) => { cell.hidden = false; }));
-    wrapper.classList.add('table-swipe-measure');
-    const columnWidth = (i) => Math.max(0, ...rows.map((row) => row.cells[i]?.offsetWidth || 0));
-    widths = Array.from({ length: count }, (_, i) => columnWidth(i));
-    wrapper.classList.remove('table-swipe-measure');
+    const columnWidths = (mode) => {
+      wrapper.classList.add(mode);
+      const width = (i) => Math.max(0, ...rows.map((row) => row.cells[i]?.offsetWidth || 0));
+      const result = Array.from({ length: count }, (_, i) => width(i));
+      wrapper.classList.remove(mode);
+      return result;
+    };
+    const natural = columnWidths('table-swipe-measure');
+    const narrowest = columnWidths('table-swipe-measure-min');
+    const readable = 12 * parseFloat(getComputedStyle(table).fontSize);
+    widths = natural.map((w, i) => Math.min(w, Math.max(narrowest[i], readable)));
   };
 
   const fit = () => {
@@ -52,13 +58,33 @@ export default function swipeTable(table, labels = {}) {
     // the widest run of neighbouring columns that fits decides how many show at once
     const runFits = (span) => widths.some((_, i) => i + span <= count
       && widths.slice(i, i + span).reduce((sum, w) => sum + w, 0) <= available);
-    visible = count - 1;
+    visible = count;
     while (visible > 1 && !runFits(visible)) visible -= 1;
     start = Math.min(start, count - visible);
     show();
   };
 
-  prev.addEventListener('click', () => { start = Math.max(0, start - 1); show(); });
-  next.addEventListener('click', () => { start = Math.min(count - visible, start + 1); show(); });
+  const go = (step) => { start = Math.max(0, Math.min(count - visible, start + step)); show(); };
+  prev.addEventListener('click', () => go(-1));
+  next.addEventListener('click', () => go(1));
+
+  // a horizontal swipe or drag across the table pages one column; vertical drags still scroll
+  let drag = null;
+  const begin = (x, y) => { drag = controls.hidden ? null : { x, y }; };
+  const end = (x, y) => {
+    if (!drag) return;
+    const dx = x - drag.x;
+    const dy = y - drag.y;
+    drag = null;
+    if (Math.abs(dx) >= 30 && Math.abs(dx) > Math.abs(dy)) go(dx < 0 ? 1 : -1);
+  };
+  table.addEventListener('touchstart', (e) => {
+    if (e.touches.length === 1) begin(e.touches[0].clientX, e.touches[0].clientY);
+    else drag = null;
+  }, { passive: true });
+  table.addEventListener('touchend', (e) => end(e.changedTouches[0].clientX, e.changedTouches[0].clientY));
+  table.addEventListener('touchcancel', () => { drag = null; });
+  table.addEventListener('pointerdown', (e) => { if (e.pointerType !== 'touch' && e.isPrimary) begin(e.clientX, e.clientY); });
+  table.addEventListener('pointerup', (e) => { if (e.pointerType !== 'touch') end(e.clientX, e.clientY); });
   new ResizeObserver(fit).observe(wrapper);
 }
