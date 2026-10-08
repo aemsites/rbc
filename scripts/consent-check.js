@@ -1,15 +1,3 @@
-import { loadScript } from './aem.js';
-
-const OT_DOMAIN_ID = '051ec25d-8edf-4043-a57e-af9e3a458709';
-
-// The production domain script is bound to rbcroyalbank.com and writes its consent cookies with
-// domain=.rbcroyalbank.com, which browsers reject on any other host (aem.page, aem.live,
-// localhost). There consent never persists and the banner returns on every page. OneTrust's
-// -test variant writes host-only cookies, so it is used everywhere except the production domain.
-const OT_DOMAIN_SCRIPT = /(^|\.)rbcroyalbank\.com$/.test(window.location.hostname)
-  ? OT_DOMAIN_ID
-  : `${OT_DOMAIN_ID}-test`;
-
 // OneTrust cookie category IDs
 // 1 Essential, 2 Performance, 3 Personalization, 4 Advertising.
 export const CONSENT_GROUPS = {
@@ -76,12 +64,3 @@ if (override !== null) {
   const groups = resolveGroups();
   if (groups) onConsentUpdate(hasConsentGroup(groups));
 }
-
-// OneTrust reaches the EDS site through GTM today, which never fires its tag here and would
-// land after the martech delay anyway; loading the stub ourselves is what resolves consent
-// for a first-time visitor. Returning visitors resolve from the cookie above, ahead of it; the
-// stub still loads for them, since OneTrust also serves the preference center.
-loadScript('https://cdn.cookielaw.org/scripttemplates/otSDKStub.js', {
-  async: '',
-  'data-domain-script': OT_DOMAIN_SCRIPT,
-});
