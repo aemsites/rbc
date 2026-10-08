@@ -1,7 +1,7 @@
 import { getProduct, offerLegalPage } from '../../utils/products.js';
 import fetchLocalPlaceholders from '../../utils/placeholders.js';
 import { trackProduct } from '../../scripts/ecommerce-analytics.js';
-import { escapeHtml, safeUrl } from '../../utils/dom.js';
+import { createElement, escapeHtml, safeUrl } from '../../utils/dom.js';
 import {
   footnoteSup, stripRefs, refIds, resolveRefLinks,
 } from '../../utils/footnotes.js';
@@ -35,6 +35,57 @@ async function renderProductHeader(block) {
   return products;
 }
 
+const MOBILE_COLUMNS = 2;
+
+function columnName(table, col) {
+  const cell = table.querySelector(`.account-comparison-products [data-col="${col}"]`)
+    || table.querySelector(`.account-comparison-head [data-col="${col}"]`);
+  return (cell?.querySelector('h3, h4, a')?.textContent || cell?.textContent || '').trim() || `${col}`;
+}
+
+// narrow screens show the row label above the values, so only two accounts fit side by side
+function buildPicker(block, table, productCols, ph) {
+  const chosen = [1, Math.min(2, productCols)];
+
+  const apply = () => {
+    const shown = chosen.slice(0, MOBILE_COLUMNS);
+    block.style.setProperty('--account-comparison-columns', shown.length);
+    table.querySelectorAll('[data-col]').forEach((cell) => {
+      const index = shown.indexOf(Number(cell.dataset.col));
+      cell.classList.toggle('account-comparison-hidden', index < 0);
+      if (index < 0) delete cell.dataset.pos;
+      else cell.dataset.pos = index;
+    });
+  };
+
+  if (productCols > MOBILE_COLUMNS) {
+    const names = Array.from({ length: productCols }, (_, i) => columnName(table, i + 1));
+    const label = ph.chooseAnAccount || 'Choose an account';
+    const picker = createElement('fieldset', { class: 'account-comparison-picker' });
+    picker.append(createElement('legend', {}, label));
+    const selects = chosen.map((value, slot) => {
+      const select = createElement('select', { 'aria-label': `${label} ${slot + 1}` });
+      names.forEach((name, i) => select.append(createElement('option', { value: i + 1 }, name)));
+      select.value = String(value);
+      picker.append(select);
+      return select;
+    });
+    selects.forEach((select, slot) => {
+      select.addEventListener('change', () => {
+        const next = Number(select.value);
+        const other = 1 - slot;
+        // picking the account already in the other slot swaps them rather than showing it twice
+        if (chosen[other] === next) chosen[other] = chosen[slot];
+        chosen[slot] = next;
+        selects.forEach((s, i) => { s.value = String(chosen[i]); });
+        apply();
+      });
+    });
+    block.prepend(picker);
+  }
+  apply();
+}
+
 export default async function decorate(block) {
   const products = await renderProductHeader(block);
   const rows = [...block.children];
@@ -42,6 +93,9 @@ export default async function decorate(block) {
   const table = document.createElement('table');
   const thead = document.createElement('thead');
   const tbody = document.createElement('tbody');
+  table.role = 'table';
+  thead.role = 'rowgroup';
+  tbody.role = 'rowgroup';
   table.append(thead, tbody);
 
   const toggleGroup = (tr, open) => {
@@ -56,6 +110,7 @@ export default async function decorate(block) {
   rows.forEach((row, i) => {
     const cells = [...row.children];
     const tr = document.createElement('tr');
+    tr.role = 'row';
 
     if (cells.length === 1) {
       groups += 1;
@@ -63,6 +118,7 @@ export default async function decorate(block) {
       const th = document.createElement('th');
       th.colSpan = cols;
       th.scope = 'colgroup';
+      th.role = 'columnheader';
       const button = document.createElement('button');
       button.type = 'button';
       button.setAttribute('aria-expanded', String(groups <= 2));
@@ -84,6 +140,14 @@ export default async function decorate(block) {
       el.scope = header ? 'col' : 'row';
       el.append(...cell.childNodes);
       if (!header && c > 0 && cells.length < cols) el.colSpan = cols - cells.length + 1;
+      // the mobile layout changes display, which drops native table semantics
+      if (header) el.role = 'columnheader';
+      else el.role = c === 0 ? 'rowheader' : 'cell';
+      if (c === 0 && !el.textContent.trim()) el.dataset.empty = '';
+      if (c > 0) {
+        if (el.colSpan > 1) el.dataset.span = '';
+        else el.dataset.col = c;
+      }
       tr.append(el);
     });
     if (header) {
@@ -100,6 +164,7 @@ export default async function decorate(block) {
   });
 
   block.replaceChildren(table);
+  if (cols > 2) buildPicker(block, table, cols - 1, await fetchLocalPlaceholders());
   if (products) {
     // The structured header renders taglines in thead, then products in the first body row.
     const productRow = tbody.firstElementChild;

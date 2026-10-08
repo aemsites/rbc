@@ -574,6 +574,12 @@ main > .section[data-pzn-slot]:empty {
   display: none;
 }
 
+@media (width < 768px) {
+  main .hide-mobile {
+    display: none;
+  }
+}
+
 main > .section.colored-background {
   margin-block: 0;
   padding-block: var(--space-2xl);
