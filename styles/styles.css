@@ -575,7 +575,8 @@ main > .section[data-pzn-slot]:empty {
 }
 
 @media (width < 768px) {
-  main .hide-mobile {
+  main .hide-mobile,
+  main .default-content-wrapper:has(+ * > .hide-mobile):not(:has(p, ul, ol, table)) {
     display: none;
   }
 }
