@@ -1,5 +1,6 @@
 import { getMetadata } from '../scripts/aem.js';
 import getPublicConfig from './config.js';
+import { escapeHtml } from './dom.js';
 
 const TTL = 60 * 60 * 1000;
 const RATE = /^rate\s+(\d+)\s*(.*)$/;
@@ -26,7 +27,7 @@ async function fetchRate(code) {
 }
 
 export function rateSpan(code, fallback = '') {
-  return `<span data-rate-code="${code}">${fallback}</span>`;
+  return `<span data-rate-code="${escapeHtml(code)}">${escapeHtml(fallback)}</span>`;
 }
 
 // inline code `rate 0026840006 0.550%` in authored copy becomes a live rate with its fallback

@@ -9,8 +9,6 @@ export default async function decorate(block) {
   const summary = document.createElement('summary');
   summary.textContent = ph.legalDisclaimers || 'Legal Disclaimers';
 
-  // labels aren't sequential (they skip numbers and include symbols like * and †), so each row
-  // carries its own label rather than one derived from position
   const list = document.createElement('ul');
   [...block.children].forEach((row) => {
     const [labelCell, textCell, idCell] = [...row.children];

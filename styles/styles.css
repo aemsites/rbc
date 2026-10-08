@@ -16,6 +16,7 @@
   --rbc-blue-dark: #0051a5;
   --rbc-navy: #003168;
   --rbc-light-blue: #edf7fc;
+  --rbc-tag-blue: #e4eeff;
   --rbc-yellow: #fedf01;
   --rbc-yellow-dark: #e8cf00;
   --rbc-yellow-light: #fae487;
@@ -255,7 +256,7 @@ a:any-link {
   color: var(--link-color);
   text-decoration: none;
   overflow-wrap: break-word;
-  font-weight: 400;
+  font-weight: 300;
 }
 
 a:hover {
@@ -267,6 +268,115 @@ sup {
   font-size: 0.6em;
   line-height: 0;
   vertical-align: super;
+}
+
+sub {
+  font-size: 0.75em;
+  line-height: 0;
+  vertical-align: sub;
+}
+
+/* fine print: a line that is only <sub> reads as small grey copy under what it qualifies */
+p > sub:only-child {
+  display: block;
+  line-height: var(--body-line-height);
+  color: var(--rbc-grey-600);
+  font-size: var(--body-font-size-xs);
+}
+
+main > .section.dark-background p > sub:only-child {
+  color: var(--rbc-grey-200);
+}
+
+.tooltip-trigger {
+  border: 0;
+  padding: 0;
+  background: none;
+  color: var(--link-color);
+  font: inherit;
+  cursor: pointer;
+}
+
+.tooltip-trigger:is(:hover, :focus-visible) {
+  text-decoration: underline;
+}
+
+.tooltip-trigger::after {
+  content: "i";
+  display: inline-grid;
+  place-items: center;
+  width: 1.1em;
+  height: 1.1em;
+  margin-inline-start: 0.25em;
+  border: 1px solid currentcolor;
+  border-radius: 50%;
+  font-family: var(--body-font-family);
+  font-size: 0.8em;
+  font-style: normal;
+  line-height: 1;
+  text-decoration: none;
+  vertical-align: 0.05em;
+}
+
+.tooltip {
+  position-area: bottom span-right;
+  position-try-fallbacks: flip-block, flip-inline;
+  max-width: min(320px, calc(100vw - 32px));
+  margin: var(--space-2xs) 0;
+  border: 1px solid var(--rbc-grey-200);
+  border-radius: var(--radius-s);
+  padding: var(--space-s);
+  box-shadow: 0 4px 12px rgb(37 37 37 / 15%);
+  background-color: var(--rbc-white);
+  color: var(--rbc-grey-900);
+  font-size: var(--body-font-size-s);
+  font-weight: 400;
+  line-height: 1.5;
+  text-align: start;
+}
+
+.tooltip strong {
+  display: block;
+}
+
+/* disclosures: a "+ label" toggle that opens the copy under it (#44) */
+details.disclosure {
+  margin-block: var(--space-xs);
+}
+
+details.disclosure > summary {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  color: var(--link-color);
+  cursor: pointer;
+  list-style: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+details.disclosure > summary::-webkit-details-marker {
+  display: none;
+}
+
+details.disclosure > summary::before {
+  content: "";
+  flex: none;
+  width: 12px;
+  height: 12px;
+  background:
+    linear-gradient(currentcolor, currentcolor) center / 100% 2px no-repeat,
+    linear-gradient(currentcolor, currentcolor) center / 2px 100% no-repeat;
+}
+
+details.disclosure[open] > summary::before {
+  background-size: 100% 2px, 0 0;
+}
+
+details.disclosure > :not(summary) {
+  margin-inline-start: calc(12px + var(--space-xs));
 }
 
 sup a:any-link,
@@ -303,7 +413,7 @@ button.button {
   cursor: pointer;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: wrap;
   font-weight: 400;
 }
 
@@ -388,6 +498,26 @@ main img {
   width: 100%;
 }
 
+:is(h1, h2, h3, h4, h5, h6) > .icon:first-child {
+  margin-inline-end: var(--space-2xs);
+  vertical-align: -0.15em;
+}
+
+main .default-content-wrapper :is(a, button) > .icon {
+  width: 20px;
+  height: 20px;
+  margin-inline: var(--space-2xs);
+  vertical-align: -0.3em;
+}
+
+main .default-content-wrapper :is(a, button) > .icon svg [fill]:not([fill="none"], [fill="white"]) {
+  fill: currentcolor;
+}
+
+main .default-content-wrapper :is(a, button) > .icon svg [stroke]:not([stroke="none"]) {
+  stroke: currentcolor;
+}
+
 /* sections */
 main > .section {
   margin: var(--space-2xl) 0;
@@ -395,15 +525,20 @@ main > .section {
 
 main > .section > div {
   max-width: var(--content-width);
-  margin: auto;
+  margin: var(--space-2xl) auto;
   padding: 0 var(--space-l);
+}
+
+main > .section:first-of-type > div {
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
 main > .section:first-of-type {
   margin-top: 0;
 }
 
-main > .section:first-of-type h1 {
+main > .section:first-of-type > :where(.default-content-wrapper) h1 {
   color: var(--rbc-blue);
   margin-top: var(--space-s);
 }
@@ -411,6 +546,14 @@ main > .section:first-of-type h1 {
 @media (width >= 768px) {
   main > .section > div {
     padding: 0 var(--space-xl);
+  }
+}
+
+main > .section p.link-wrapper a {
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
   }
 }
 
@@ -427,6 +570,10 @@ main > .section p.link-wrapper a::after {
 }
 
 /* section metadata */
+main > .section[data-pzn-slot]:empty {
+  display: none;
+}
+
 main > .section.colored-background {
   margin-block: 0;
   padding-block: var(--space-2xl);
@@ -436,10 +583,12 @@ main > .section.colored-background :is(h1, h2, h3, h4, h5, h6):first-child {
   margin-top: 0;
 }
 
+
 main > .section.dark-background {
   --text-color: var(--rbc-white);
   --link-color: var(--rbc-white);
   --link-hover-color: var(--rbc-yellow);
+  --icon-color: var(--rbc-white);
 
   color: var(--text-color);
 }
@@ -460,13 +609,21 @@ main > .section.dark-background a.button.secondary:focus-visible {
   color: var(--rbc-blue);
 }
 
+main > .section.dark-background .icon svg * {
+  fill: var(--icon-color);
+}
+
 body:not(.style-guide) main > .section > .default-content-wrapper :is(p, h2, h3, h4, h5, h6) {
   text-align: center;
-  margin-bottom: var(--space-2xl);
 }
 
 body:not(.style-guide) main > .section > .default-content-wrapper p.button-wrapper {
   justify-content: center;
+}
+
+body:not(.style-guide) main > .section:not(.left) > .default-content-wrapper > p {
+  max-width: 800px;
+  margin-inline: auto;
 }
 
 body:not(.style-guide) main > .section.left > .default-content-wrapper :is(p, h2, h3, h4, h5, h6) {
@@ -515,6 +672,15 @@ main > .section[data-layout] > .default-content-wrapper:nth-last-child(2) :is(p,
   main > .section[data-layout="50-50"] { grid-template-columns: 1fr 1fr; }
   main > .section[data-layout="66-33"] { grid-template-columns: 2fr 1fr; }
   main > .section[data-layout="33-66"] { grid-template-columns: 1fr 2fr; }
+
+  /* heading | block, then a closing line: the line stays under the block */
+  main > .section[data-layout] > div:first-child:has(+ div + .default-content-wrapper:last-child) {
+    grid-column: auto;
+  }
+
+  main > .section[data-layout] > .default-content-wrapper:nth-child(3):last-child {
+    grid-column: 2;
+  }
 }
 
 main > .section[data-width="s"] > div {
@@ -527,6 +693,12 @@ main > .section[data-width="m"] > div {
 
 main > .section[data-width="l"] > div {
   max-width: var(--width-l);
+}
+
+main > .section.divider > div:first-child > :first-child {
+  margin-top: 0;
+  border-top: 1px solid var(--rbc-grey-200);
+  padding-top: var(--space-xl);
 }
 
 main > .section.shadow {
@@ -582,6 +754,15 @@ main > .section.contained-l {
     }
 }
 
+/* a contained box takes the section's width when one is set */
+main > .section.contained:is([data-width="s"], [data-width="m"], [data-width="l"]) {
+  max-width: var(--section-width);
+}
+
+main > .section.contained[data-width="s"] { --section-width: var(--width-s); }
+main > .section.contained[data-width="m"] { --section-width: var(--width-m); }
+main > .section.contained[data-width="l"] { --section-width: var(--width-l); }
+
 main > .section.contained.colored-background,
 main > .section.contained-l.colored-background {
   border-radius: var(--radius-m);
@@ -593,7 +774,7 @@ main > .section.overlap {
   position: relative;
 
   @media (width >= 768px) {
-    margin-top: calc(var(--space-2xl) * -1);
+    margin-top: calc(var(--space-3xl) * -1);
   }
 }
 
@@ -641,6 +822,11 @@ main > .section.padding-xl { padding-block: var(--space-4xl); }
 main > .section.padding-2xl { padding-block: var(--space-5xl); }
 main > .section.padding-3xl { padding-block: var(--space-6xl); }
 main > .section.padding-4xl { padding-block: var(--space-7xl); }
+
+main > .section.strip > .default-content-wrapper {
+  padding-block: 0;
+  margin: var(--space-2xs) auto;
+}
 
 .checklist ul:not(.block > ul) {
   padding-left: 0;
@@ -716,6 +902,83 @@ main .default-content-wrapper p:has(> :is(picture, img):only-child):has(+ :is(h1
 body:not(.style-guide) main > .section.strip > .default-content-wrapper p {
   margin: 0;
   font-size: var(--body-font-size-xs);
+  max-width: 100%;
+}
+
+body:not(.style-guide) main > .section > .default-content-wrapper > p.label {
+  display: block;
+  width: fit-content;
+  margin: 0 auto var(--space-xs);
+}
+
+body:not(.style-guide) main > .section.left > .default-content-wrapper > p.label {
+  margin-left: 0;
+}
+
+/* labels above headings: plain, light-blue tag (bold) or promotional tag (italic) */
+.label {
+  display: inline-block;
+  margin: 0 0 var(--space-2xs);
+  font-size: var(--body-font-size-s);
+  font-weight: 500;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+
+:is(.label, .offer-label) :is(u, strong, b, em, i) {
+  font-style: normal;
+  font-weight: inherit;
+  text-decoration: none;
+}
+
+.label-tag {
+  border-radius: var(--radius-s);
+  padding: 2px var(--space-2xs);
+  background-color: var(--rbc-tag-blue);
+  color: #456b86;
+  font-size: var(--body-font-size-xs);
+  letter-spacing: 0.06em;
+}
+
+.label-promo {
+  padding: 2px var(--space-2xs);
+  background-color: var(--rbc-orange);
+  color: var(--rbc-grey-900);
+  font-size: var(--body-font-size-xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+/* an offer: a cream box with its label notched into the top border */
+.offer-box {
+  position: relative;
+  border: 1px solid var(--rbc-orange);
+  border-radius: var(--radius-s);
+  padding: var(--space-l) var(--space-s) var(--space-s);
+  background-color: #fffbe6;
+}
+
+.offer-box > .offer-label {
+  position: absolute;
+  top: calc(var(--space-2xs) * -1);
+  left: var(--space-s);
+  margin: 0;
+  padding: 0 var(--space-2xs);
+  background-color: var(--rbc-orange);
+  font-size: var(--body-font-size-xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+body:not(.style-guide).library-page > main > .section > .default-content-wrapper :is(h1, h2, h3, h4, h5, h6, p, ul, ol, li) {
+  text-align: left;
+  max-width: initial;
+}
+
+body:not(.style-guide).library-page > main > .section > .default-content-wrapper :is(h2, h3) {
+  background: var(--rbc-cool-white);
+  padding: var(--space-m);
 }
 
 /* swipe tables (utils/table-swipe.js): as many columns as fit, arrows and dots for the rest */

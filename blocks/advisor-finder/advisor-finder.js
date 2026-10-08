@@ -1,6 +1,7 @@
 import fetchLocalPlaceholders from '../../utils/placeholders.js';
-import { createOptimizedPicture } from '../../scripts/aem.js';
+import { createOptimizedPicture, getMetadata } from '../../scripts/aem.js';
 import { createModal } from '../modal/modal.js';
+import { escapeHtml } from '../../utils/dom.js';
 
 function paragraphs(text) {
   return text.split(/\n\s*\n/).map((chunk) => {
@@ -17,15 +18,15 @@ function card(person, ph) {
   const first = person.Nickname || person.Name.split(' ')[0];
   li.append(createOptimizedPicture(person.Image, person.Name, false, [{ width: '320' }]));
   const body = document.createElement('div');
-  body.innerHTML = `<h3>${person.Name}<span>${person.Location}</span></h3>
-    <p><strong>${ph.arrived || 'Arrived in Canada'}:</strong> ${person.Arrived}</p>
-    <p><strong>${ph.speaks || 'Speaks'}:</strong> ${person.Speaks}</p>
-    <p class="advisor-finder-quote">${person.Quote}</p>`;
+  body.innerHTML = `<h3>${escapeHtml(person.Name)}<span>${escapeHtml(person.Location)}</span></h3>
+    <p><strong>${ph.arrived || 'Arrived in Canada'}:</strong> ${escapeHtml(person.Arrived)}</p>
+    <p><strong>${ph.speaks || 'Speaks'}:</strong> ${escapeHtml(person.Speaks)}</p>
+    <p class="advisor-finder-quote">${escapeHtml(person.Quote)}</p>`;
   if (person.Bio) {
     const more = document.createElement('button');
     more.type = 'button';
     more.className = 'advisor-finder-more';
-    more.textContent = `${ph.readMoreAbout || 'Read more about'} ${first}`;
+    more.textContent = `${ph.readMoreAbout || 'Read more about'} ${first}${ph.advisorStorySuffix ? ` ${ph.advisorStorySuffix}` : ''}`;
     more.addEventListener('click', async () => {
       const title = Object.assign(document.createElement('h3'), { textContent: person.Name });
       const { showModal } = await createModal([title, ...paragraphs(person.Bio)]);
@@ -60,7 +61,7 @@ export default async function decorate(block) {
   const button = document.createElement('button');
   button.type = 'submit';
   button.className = 'button primary';
-  button.textContent = ph.search || 'Search';
+  button.textContent = ph.advisorSearch || ph.search || 'Search';
   form.append(label, select, button);
 
   const results = document.createElement('div');
@@ -72,7 +73,7 @@ export default async function decorate(block) {
   cards.hidden = true;
   const empty = document.createElement('p');
   empty.className = 'advisor-finder-empty';
-  empty.textContent = ph.noAdvisors || 'No advisors listed for this province yet. Email us and we will connect you.';
+  empty.textContent = ph.noAdvisors || (getMetadata('lang')?.startsWith('zh') ? '' : 'No advisors listed for this province yet. Email us and we will connect you.');
   empty.hidden = true;
 
   form.addEventListener('submit', (e) => {
@@ -97,7 +98,7 @@ export default async function decorate(block) {
       li.hidden = !li.dataset.province.split(', ').includes(province);
       if (!li.hidden) shown += 1;
     });
-    empty.hidden = shown > 0;
+    empty.hidden = shown > 0 || !empty.textContent;
     results.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   });
 

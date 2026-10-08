@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RBC Products &amp; Offers</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="https://da.live/nx2/styles/styles.css">
+  <link rel="stylesheet" href="./product-picker.css">
+  <script type="module" src="./product-picker.js"></script>
+</head>
+<body class="rbc-picker">
+  <div class="picker-toolbar">
+    <h1>Products &amp; Offers</h1>
+    <fieldset class="picker-modes">
+      <legend>Insert type</legend>
+      <label><input type="radio" name="mode" value="products" checked> Products</label>
+      <label><input type="radio" name="mode" value="offers"> Offers</label>
+    </fieldset>
+    <label class="picker-search-label">Search
+      <input class="picker-search" type="search" placeholder="Name, path, product code, or offer ID">
+    </label>
+    <div class="picker-filters">
+      <label>Language
+        <select class="picker-language" aria-label="Content language"><option value="en">English</option><option value="fr">French</option></select>
+      </label>
+      <label>Category<select class="picker-category"><option value="">All categories</option></select></label>
+      <label>Persona<select class="picker-persona"><option value="">All personas</option></select></label>
+      <button class="picker-clear" type="button" disabled>Clear filters</button>
+    </div>
+    <details class="picker-help">
+      <summary>Usage instructions: supported blocks and where to insert</summary>
+      <p class="picker-instructions">Use product references in product-summary, cards (product), product-rail, product-picker, account-selector, and account-comparison. Place the cursor in the intended product-reference cell before inserting. For cards (product) and product-picker, use one product per row. This inserts a structured product link, not a product page link.</p>
+    </details>
+    <p class="picker-status" role="status" aria-live="polite">Connecting to DA...</p>
+    <div class="picker-error" role="alert" hidden></div>
+    <button class="picker-retry" type="button" hidden>Retry loading</button>
+    <details class="picker-warnings" hidden><summary>Skipped index records</summary><ul></ul></details>
+  </div>
+  <main class="picker-panels">
+    <section class="picker-results" aria-label="Search results" aria-busy="true">
+      <ul class="picker-list" aria-label="Products and offers"></ul>
+    </section>
+    <section class="picker-details" aria-label="Selected item">
+      <h2>Selection details</h2>
+      <div class="picker-detail-content"><p>Select a product to review its details.</p></div>
+    </section>
+  </main>
+  <footer class="picker-actionbar" aria-label="Insert selection" hidden>
+    <p class="picker-selection" id="picker-selection" role="status" aria-live="polite">Select a product to enable Insert.</p>
+    <button class="picker-insert" type="button" aria-describedby="picker-selection" disabled>Insert Product</button>
+  </footer>
+</body>
+</html>

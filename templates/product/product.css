@@ -14,6 +14,7 @@
 .product main > .section.beside-rail > div {
   max-width: none;
   padding: 0;
+  margin: 0;
 }
 
 .product main > .section.beside-rail {
@@ -58,6 +59,7 @@
     position: sticky;
     top: calc(var(--nav-height) + var(--space-l));
     padding: 0;
+    margin-top: 0;
   }
 
   .product main.rail-left {

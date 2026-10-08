@@ -1,5 +1,7 @@
 import applyConfig from '../../scripts/config.js';
 import { getMetadata } from '../../scripts/aem.js';
+import { trackProduct } from '../../scripts/ecommerce-analytics.js';
+import { escapeHtml, safeUrl } from '../../utils/dom.js';
 import {
   getProduct, getProducts, pickHighlights, isPrice,
 } from '../../utils/products.js';
@@ -163,12 +165,12 @@ function productCard(product, text) {
   li.dataset.name = product.name;
   li.dataset.slug = product.slug;
   li.innerHTML = `<p class="account-selector-badge">${text('badge')}</p>
-    <div class="account-selector-head"><h3>${product.name}</h3><p>${product.tagline}</p></div>
+    <div class="account-selector-head"><h3>${escapeHtml(product.name)}</h3><p>${escapeHtml(product.tagline)}</p></div>
     <div class="account-selector-body">
-      <p>${product.fees[0]?.displayValue || ''}${isPrice(product.fees[0]?.displayValue) ? text('per-month') : ''}${sup(product.fees[0]?.footnotes)}</p>
-      <ul>${pickHighlights(product).slice(0, 3).map((h) => `<li>${expandRefs(h.text, product.productPage)}</li>`).join('')}</ul>
-      ${product.applyUrl ? `<p class="button-wrapper"><a class="button primary" href="${product.applyUrl}">${text('open-this-account')}</a></p>` : ''}
-      <p><a href="${product.productPage}">${text('view-account-details')}</a></p>
+      <p>${escapeHtml(product.fees[0]?.displayValue || '')}${isPrice(product.fees[0]?.displayValue) ? text('per-month') : ''}${sup(product.fees[0]?.footnotes)}</p>
+      <ul>${pickHighlights(product).slice(0, 3).map((h) => `<li>${expandRefs(escapeHtml(h.text), product.productPage)}</li>`).join('')}</ul>
+      ${product.applyUrl ? `<p class="button-wrapper"><a class="button primary" href="${safeUrl(product.applyUrl)}">${text('open-this-account')}</a></p>` : ''}
+      <p><a href="${safeUrl(product.productPage)}">${text('view-account-details')}</a></p>
     </div>`;
   return li;
 }
@@ -194,6 +196,9 @@ export default async function decorate(block) {
   const config = applyConfig(block, TEMPLATE);
   // block rows win over the sheet
   block.querySelectorAll('[data-key]').forEach((el) => {
+    // copy[el.dataset.key] is authored HTML from the AEM sheet — same trust as page copy.
+    // If the sheet authoring pipeline changes to accept untrusted input,
+    // sanitize here with DOMPurify.
     if (!(el.dataset.key in config) && copy[el.dataset.key]) el.innerHTML = copy[el.dataset.key];
   });
   const short = block.classList.contains('short');
@@ -221,7 +226,17 @@ export default async function decorate(block) {
   const text = (key) => results.querySelector(`[data-key="${key}"]`).textContent;
   let products = [];
   if (!handoff) products = refs.length ? await Promise.all(refs.map(getProduct)) : await getProducts({ category: 'chequing', persona: 'everyone' });
-  cards.append(...products.filter(Boolean).map((product) => productCard(product, text)));
+  const tracking = new Map();
+  cards.append(...products.filter(Boolean).map((product) => {
+    const card = productCard(product, text);
+    tracking.set(card, product);
+    return card;
+  }));
+  const listTitle = heading.firstElementChild.textContent.trim();
+  const trackCards = () => [...cards.children].forEach((card, index) => {
+    trackProduct(card, tracking.get(card), { list: cards, listTitle, index });
+  });
+  trackCards();
   resolveRefLinks(cards);
 
   const prefill = new URLSearchParams(window.location.search);
@@ -279,7 +294,9 @@ export default async function decorate(block) {
       return;
     }
     if (handoff) {
-      const url = new URL(config.handoff || '/', window.location.href);
+      const resolved = new URL(config.handoff || '/', window.location.href);
+      // Reject off-origin handoff URLs to prevent open redirect via external sheet data.
+      const url = resolved.origin === window.location.origin ? resolved : new URL('/', window.location.href);
       new URLSearchParams(new FormData(form)).forEach((v, k) => url.searchParams.set(k, v));
       window.location.assign(url);
       return;
@@ -293,6 +310,7 @@ export default async function decorate(block) {
       if (hit) cards.prepend(li);
     });
     heading.lastElementChild.textContent = cards.querySelector('.recommended')?.dataset.name || '';
+    trackCards();
     form.hidden = true;
     results.hidden = false;
     results.scrollIntoView({ behavior: 'smooth' });

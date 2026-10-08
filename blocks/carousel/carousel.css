@@ -54,15 +54,18 @@
 }
 
 .carousel .carousel-slide .carousel-slide-image {
-  margin-top: auto;
   line-height: 0;
+
+  > p {
+    margin: 0;
+  }
 }
 
 .carousel .carousel-slide .carousel-slide-image img {
   width: 100%;
-  height: 200px;
-  object-fit: contain;
-  object-position: bottom;
+  object-fit: cover;
+  max-height: 200px;
+  object-position: top;
 }
 
 .carousel nav {
@@ -164,7 +167,10 @@
 }
 
 .carousel.single .carousel-slide .carousel-slide-image img {
+  position: absolute;
+  inset: 0;
   height: 100%;
+  max-height: initial;
 }
 
 .carousel.single .carousel-slide .carousel-slide-content {
@@ -244,6 +250,13 @@
     --slide-content-width: 50%;
 
     margin: var(--space-3xl) var(--space-4xl);
+  }
+
+  /* full bleed, so line the copy up with the content edge of the sections around it */
+  .carousel.single:not(.dark) .carousel-slide .carousel-slide-content {
+    --slide-content-width: min(50%, var(--content-width) / 2);
+
+    margin-inline: max(var(--space-xl), (100% - var(--content-width)) / 2);
   }
 
   .carousel.single .carousel-navigation-buttons {

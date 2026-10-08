@@ -1,0 +1,317 @@
+.rbc-picker {
+  color-scheme: light dark;
+
+  --picker-background: #fff;
+  --picker-text: #292929;
+  --picker-border: #ccc;
+  --picker-selected: #edf4ff;
+  --picker-error: #b32020;
+  --picker-blue: #2455d6;
+
+  margin: 0;
+  padding-bottom: var(--picker-action-height, 0);
+  background: var(--picker-background);
+  color: var(--picker-text);
+  font-family: adobe-clean, "Trebuchet MS", sans-serif;
+  font-size: 15px;
+}
+
+.rbc-picker * {
+  box-sizing: border-box;
+}
+
+.rbc-picker [hidden] {
+  display: none !important;
+}
+
+.rbc-picker .picker-toolbar {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--picker-border);
+  flex-shrink: 0;
+}
+
+.rbc-picker .picker-actionbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  border-top: 1px solid var(--picker-border);
+  background: var(--picker-background);
+  box-shadow: 0 -4px 16px rgb(0 0 0 / 12%);
+  max-height: 40dvh;
+  overflow-y: auto;
+}
+
+.rbc-picker .picker-selection {
+  flex: 1 1 200px;
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.8;
+}
+
+.rbc-picker .picker-selection code {
+  padding: 2px 6px;
+  border: 1px solid var(--picker-border);
+  border-radius: 4px;
+  background: var(--picker-selected);
+  font-family: ui-monospace, SFMono-Regular, menlo, consolas, monospace;
+  font-size: 0.9em;
+}
+
+.rbc-picker h1 {
+  margin: 0 0 12px;
+  font-size: 22px;
+}
+
+.rbc-picker h2 {
+  margin-top: 0;
+  font-size: 18px;
+}
+
+.rbc-picker h3 {
+  font-size: 16px;
+}
+
+.rbc-picker .picker-modes,
+.rbc-picker .picker-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: end;
+  margin: 0 0 12px;
+}
+
+.rbc-picker .picker-modes {
+  border: 0;
+  padding: 0;
+}
+
+.rbc-picker .picker-filters {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.2fr) minmax(0, 1.1fr) auto;
+  gap: 8px;
+}
+
+.rbc-picker .picker-modes legend {
+  margin-bottom: 6px;
+  font-weight: bold;
+}
+
+.rbc-picker .picker-filters label,
+.rbc-picker .picker-search-label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.rbc-picker .picker-filters label {
+  min-width: 0;
+  font-size: 14px;
+}
+
+.rbc-picker .picker-search-label {
+  margin-bottom: 12px;
+}
+
+.rbc-picker input[type="search"],
+.rbc-picker select,
+.rbc-picker button {
+  padding: 8px 12px;
+  border: 1px solid var(--picker-border);
+  border-radius: 4px;
+  background: var(--picker-background);
+  color: var(--picker-text);
+  font: inherit;
+}
+
+.rbc-picker input[type="search"] {
+  width: 100%;
+  min-width: 0;
+}
+
+.rbc-picker .picker-filters select {
+  width: 100%;
+  min-width: 0;
+  padding: 8px 6px;
+  font-size: 14px;
+}
+
+.rbc-picker .picker-clear {
+  padding: 8px 6px;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.rbc-picker button {
+  cursor: pointer;
+}
+
+.rbc-picker button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.rbc-picker :focus-visible {
+  outline: 2px solid var(--picker-blue);
+  outline-offset: 3px;
+}
+
+.rbc-picker .picker-status {
+  margin: 8px 0 0;
+}
+
+.rbc-picker .picker-error,
+.rbc-picker .picker-invalid {
+  color: var(--picker-error);
+}
+
+.rbc-picker .picker-error,
+.rbc-picker .picker-warnings {
+  margin-top: 12px;
+}
+
+.rbc-picker .picker-panels {
+  display: grid;
+  grid-template-columns: minmax(250px, 2fr) minmax(0, 3fr);
+}
+
+.rbc-picker .picker-results,
+.rbc-picker .picker-details {
+  padding: 20px;
+  min-width: 0;
+}
+
+.rbc-picker .picker-results {
+  border-right: 1px solid var(--picker-border);
+}
+
+.rbc-picker .picker-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.rbc-picker .picker-list li + li {
+  margin-top: 8px;
+}
+
+.rbc-picker .picker-list button {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+
+.rbc-picker .picker-list button:hover,
+.rbc-picker .picker-list button[aria-pressed="true"] {
+  background: var(--picker-selected);
+}
+
+.rbc-picker .picker-list small {
+  font-size: 13px;
+}
+
+.rbc-picker mark {
+  background: #ffed4e;
+  color: #292929;
+}
+
+.rbc-picker dl {
+  margin: 0;
+}
+
+.rbc-picker dt {
+  margin-top: 12px;
+  font-weight: bold;
+}
+
+.rbc-picker dd {
+  margin: 4px 0 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.rbc-picker pre {
+  padding: 12px;
+  border: 1px solid var(--picker-border);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.rbc-picker .picker-insert {
+  background: var(--picker-blue);
+  border-color: var(--picker-blue);
+  color: #fff;
+}
+
+.rbc-picker .picker-instructions,
+.rbc-picker .picker-empty {
+  line-height: 1.5;
+}
+
+.rbc-picker .picker-help {
+  margin: 12px 0;
+  padding: 10px 12px;
+  border-left: 3px solid var(--picker-blue);
+  background: var(--picker-selected);
+}
+
+.rbc-picker .picker-help summary {
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.rbc-picker .picker-instructions {
+  margin: 10px 0 0;
+}
+
+@media (width >= 768px) {
+  .rbc-picker {
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .rbc-picker .picker-panels {
+    min-height: 0;
+    flex: 1;
+  }
+
+  .rbc-picker .picker-results,
+  .rbc-picker .picker-details {
+    overflow-y: auto;
+  }
+}
+
+@media (width < 768px) {
+  .rbc-picker .picker-panels {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .rbc-picker .picker-results {
+    border-right: 0;
+    border-bottom: 1px solid var(--picker-border);
+    max-height: 40dvh;
+    overflow-y: auto;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .rbc-picker {
+    --picker-background: #1d1d1d;
+    --picker-text: #f5f5f5;
+    --picker-border: #777;
+    --picker-selected: #253a5b;
+    --picker-error: #ff9c9c;
+    --picker-blue: #3966e4;
+  }
+}

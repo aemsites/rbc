@@ -1,6 +1,6 @@
 import { getMetadata, toCamelCase } from '../scripts/aem.js';
 
-const SHEETS = {
+export const SHEETS = {
   'fr-CA': 'fr',
   'zh-Hans': 'sc',
   'zh-Hant': 'tc',

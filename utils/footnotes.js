@@ -1,3 +1,5 @@
+import { escapeHtml } from './dom.js';
+
 const NAMES = {
   '*': 'asterisk',
   '**': 'double-asterisk',
@@ -22,7 +24,6 @@ export function legalId(label, tab = 'default') {
   return tab === 'default' ? `legal-${name}` : `legal-${tab}-${name}`;
 }
 
-const escape = (text) => text.replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
 const samePath = (a, b) => a.replace(/(\.html|\/)$/, '') === b.replace(/(\.html|\/)$/, '');
 const REF = /\[\[([^\]]+)\]\]/g;
 const splitIds = (value) => String(value || '').split(',').map((id) => id.trim()).filter(Boolean);
@@ -31,7 +32,7 @@ const splitIds = (value) => String(value || '').split(',').map((id) => id.trim()
 // resolveRefLinks numbers it from the list the marker's own tab shows
 export function footnoteSup(value, page) {
   const links = splitIds(value)
-    .map((id) => `<a data-ref="${escape(id)}"${page ? ` data-page="${escape(page)}"` : ''}></a>`);
+    .map((id) => `<a data-ref="${escapeHtml(id)}"${page ? ` data-page="${escapeHtml(page)}"` : ''}></a>`);
   return links.length ? `<sup>${links.join(',')}</sup>` : '';
 }
 
@@ -74,7 +75,7 @@ function remoteLabels(page) {
 }
 
 // numbers each placeholder from its tab's list; ids this page doesn't list link to the row
-// on the record's own page, in a new tab, with that page's number
+// on the record's own page (when it is on this site), in a new tab, with that page's number
 export async function resolveRefLinks(root) {
   const pending = [...root.querySelectorAll('a[data-ref]')];
   const sups = new Set(pending.map((a) => a.closest('sup')).filter(Boolean));
@@ -87,7 +88,7 @@ export async function resolveRefLinks(root) {
       a.href = `#${legalId(local)}`;
       a.textContent = local;
     } else {
-      const remoteLabel = page && !samePath(page, window.location.pathname)
+      const remoteLabel = page?.startsWith('/') && !samePath(page, window.location.pathname)
         ? (await remoteLabels(page)).get(id) : '';
       if (!remoteLabel) {
         // eslint-disable-next-line no-console
@@ -105,6 +106,8 @@ export async function resolveRefLinks(root) {
   }));
   sups.forEach((sup) => {
     const links = [...sup.querySelectorAll('a')];
+    // labels are numbered per page, so a record's ref order can come out as "3,2"
+    if (links.every((a) => /^\d+$/.test(a.textContent))) links.sort((a, b) => a.textContent - b.textContent);
     if (!links.length) sup.remove();
     else sup.replaceChildren(...links.flatMap((a, i) => (i ? [',', a] : [a])));
   });
@@ -172,7 +175,23 @@ function isOtherPageLegal(a) {
   return legal && url.pathname !== window.location.pathname;
 }
 
+function expandAuthoredRefs(root) {
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  while (walker.nextNode()) {
+    const node = walker.currentNode;
+    if (node.textContent.includes('[[') && !node.parentElement.closest('.disclaimers')) nodes.push(node);
+  }
+  nodes.forEach((node) => {
+    const template = document.createElement('template');
+    template.innerHTML = expandRefs(escapeHtml(node.textContent));
+    node.replaceWith(template.content);
+  });
+  if (nodes.length) resolveRefLinks(root);
+}
+
 export default function linkFootnotes(root) {
+  expandAuthoredRefs(root);
   root.querySelectorAll('sup a[href], a[href]:has(> sup)').forEach((a) => {
     if (!isOtherPageLegal(a)) return;
     a.target = '_blank';

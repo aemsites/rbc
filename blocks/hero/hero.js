@@ -1,6 +1,7 @@
 import { createOptimizedPicture } from '../../scripts/aem.js';
 import { createElement } from '../../utils/dom.js';
 import fetchLocalPlaceholders from '../../utils/placeholders.js';
+import { trackHeroPromotion } from '../../scripts/ecommerce-analytics.js';
 
 const contentImages = (block, sel) => [...block.querySelectorAll(sel)]
   .filter((el) => !el.closest('span.icon'));
@@ -12,9 +13,12 @@ function normalizeImage(block) {
   if (!img) return;
   if (img.closest('picture')) {
     img.loading = 'eager';
+    img.fetchPriority = 'high';
     return;
   }
-  img.replaceWith(createOptimizedPicture(img.src, img.alt, true));
+  const picture = createOptimizedPicture(img.src, img.alt, true);
+  picture.querySelector('img').style.objectPosition = img.style.objectPosition;
+  img.replaceWith(picture);
 }
 
 // plays once over the whole hero, then fades to reveal the image, copy and a replay button
@@ -85,24 +89,65 @@ function introVideo(block) {
   video.play().catch(() => show(false));
 }
 
-export default function decorate(block) {
-  normalizeImage(block);
+// a picture after the heading opens an offer box that runs to its first link line
+function offerBox(block) {
+  const heading = block.querySelector('.hero-copy > :is(h1, h2, h3, h4)');
+  const isPicture = (p) => p.matches('p:has(> :is(picture, img):only-child)');
+  let start = heading?.nextElementSibling;
+  while (start && !isPicture(start)) start = start.nextElementSibling;
+  if (!start) return;
+  const group = [start];
+  for (let p = start.nextElementSibling; p && !p.classList.contains('button-wrapper'); p = p.nextElementSibling) {
+    group.push(p);
+    if (p.querySelector('a')) break;
+  }
+  const box = createElement('div', { class: 'hero-offer' });
+  start.before(box);
+  box.append(...group);
+}
 
-  const backdrop = block.classList.contains('background');
-  if (backdrop && !block.classList.contains('light')) block.closest('.section')?.classList.add('dark-background');
+function removeEmpty(node, stop) {
+  let current = node;
+  while (current && current !== stop && !current.childElementCount && !current.textContent.trim()) {
+    const parent = current.parentElement;
+    current.remove();
+    current = parent;
+  }
+}
 
+function arrange(block) {
   const row = block.firstElementChild;
-  if (row && row.children.length > 1 && !backdrop) {
-    block.classList.add('hero-split');
-  } else {
-    const [picture] = contentImages(block, 'picture');
-    if (picture) {
-      const wrapper = picture.parentElement;
-      block.prepend(picture);
-      if (!wrapper.childElementCount && !wrapper.textContent.trim()) wrapper.remove();
-    }
+  if (!row) return;
+  const columns = row.children.length > 1;
+  const [picture] = contentImages(block, 'picture');
+  if (picture) {
+    const parent = picture.parentElement;
+    picture.remove();
+    removeEmpty(parent, row);
   }
 
+  const [copy = createElement('div'), ...extra] = [...row.children];
+  extra.forEach((cell) => {
+    copy.append(...cell.childNodes);
+    cell.remove();
+  });
+  copy.classList.add('hero-copy');
+  row.append(copy);
+  if (!picture) return;
+
+  if (block.classList.contains('split') || columns) {
+    row.append(createElement('div', { class: 'hero-media' }, picture));
+    if (!block.classList.contains('split')) block.classList.add('hero-columns');
+    return;
+  }
+  block.prepend(picture);
+  block.classList.add('hero-backdrop');
+}
+
+export default function decorate(block) {
+  normalizeImage(block);
+  arrange(block);
+  offerBox(block);
   introVideo(block);
 
   block.querySelectorAll('p > em:only-child').forEach((em) => {
@@ -115,7 +160,8 @@ export default function decorate(block) {
   });
 
   const eyebrow = block.querySelector('h1, h2, h3, h4, h5, h6')?.previousElementSibling;
-  if (eyebrow?.tagName === 'P' && !eyebrow.querySelector('a, picture')) {
+  if (eyebrow?.tagName === 'P' && !eyebrow.querySelector('a, picture, img')) {
     eyebrow.classList.add('hero-eyebrow');
   }
+  trackHeroPromotion(block);
 }

@@ -1,5 +1,7 @@
 import { getProduct, offerLegalPage } from '../../utils/products.js';
 import fetchLocalPlaceholders from '../../utils/placeholders.js';
+import { trackProduct } from '../../scripts/ecommerce-analytics.js';
+import { escapeHtml, safeUrl } from '../../utils/dom.js';
 import {
   footnoteSup, stripRefs, refIds, resolveRefLinks,
 } from '../../utils/footnotes.js';
@@ -10,29 +12,31 @@ const line = (...cells) => `<div>${cells.map(wrap).join('')}</div>`;
 // a header row of product links becomes the tagline, product and offer rows
 async function renderProductHeader(block) {
   const first = block.firstElementChild;
+  if (!first) return undefined;
   const links = [...first.children].slice(1).map((c) => c.querySelector('a[href*="/products/"]'));
-  if (!links.length || links.some((a) => !a || a.closest('div').textContent.trim() !== a.textContent.trim())) return;
+  if (!links.length || links.some((a) => !a || a.closest('div').textContent.trim() !== a.textContent.trim())) return undefined;
   const [products, ph] = await Promise.all([Promise.all(links.map((a) => getProduct(a.getAttribute('href')))), fetchLocalPlaceholders()]);
-  if (products.some((p) => !p)) return;
+  if (products.some((p) => !p)) return undefined;
   const monthlyFee = (ph.monthlyFee || 'Monthly Fee').toLowerCase();
-  const taglines = line('', ...products.map((p) => `<p>${p.tagline}</p>`));
+  const taglines = line('', ...products.map((p) => `<p>${escapeHtml(p.tagline)}</p>`));
   const cards = line('', ...products.map((p) => {
-    const apply = p.applyUrl ? `<p class="button-wrapper"><a class="button primary" href="${p.applyUrl}">${ph.openNow || 'Open Now'}</a></p>` : '';
-    return `<h3><a href="${p.productPage}">${p.name}</a></h3><p><strong>${p.fees[0]?.displayValue || ''}</strong> ${monthlyFee}${footnoteSup(p.fees[0]?.footnotes, p.productPage)}</p>${apply}`;
+    const apply = p.applyUrl ? `<p class="button-wrapper"><a class="button primary" href="${safeUrl(p.applyUrl)}">${escapeHtml(ph.openNow || 'Open Now')}</a></p>` : '';
+    return `<h3><a href="${safeUrl(p.productPage)}">${escapeHtml(p.name)}</a></h3><p><strong>${escapeHtml(p.fees[0]?.displayValue)}</strong> ${escapeHtml(monthlyFee)}${footnoteSup(p.fees[0]?.footnotes, p.productPage)}</p>${apply}`;
   }));
   const offers = line('', ...products.map((p) => {
     if (!p.offerBadge) return '';
     const href = p.offerDetailsUrl || p.productPage;
     // the badge is already a link, so the marker sits beside it rather than inside
-    return `<p><a href="${href}" target="_blank" rel="noopener">${stripRefs(p.offerBadge).replace(/^\+\s*/, '')}</a>${footnoteSup(refIds(p.offerBadge), offerLegalPage(p))}</p>`;
+    return `<p><a href="${safeUrl(href)}" target="_blank" rel="noopener">${escapeHtml(stripRefs(p.offerBadge).replace(/^\+\s*/, ''))}</a>${footnoteSup(refIds(p.offerBadge), offerLegalPage(p))}</p>`;
   }));
   first.insertAdjacentHTML('beforebegin', taglines + cards + offers);
   first.remove();
   await resolveRefLinks(block);
+  return products;
 }
 
 export default async function decorate(block) {
-  await renderProductHeader(block);
+  const products = await renderProductHeader(block);
   const rows = [...block.children];
   const cols = Math.max(...rows.map((row) => row.children.length));
   const table = document.createElement('table');
@@ -96,4 +100,15 @@ export default async function decorate(block) {
   });
 
   block.replaceChildren(table);
+  if (products) {
+    // The structured header renders taglines in thead, then products in the first body row.
+    const productRow = tbody.firstElementChild;
+    productRow.querySelectorAll(':scope > td').forEach((cell, index) => {
+      if (products[index]) {
+        trackProduct(cell, products[index], {
+          list: block, listTarget: productRow, index,
+        });
+      }
+    });
+  }
 }

@@ -32,6 +32,32 @@ export function createElement(tag, props, children) {
 
 export default createElement;
 
+export function fragment(html) {
+  const template = document.createElement('template');
+  template.innerHTML = html;
+  return template.content;
+}
+
+export function labelKind(p) {
+  const text = p.textContent.trim();
+  const covers = (selector) => [...p.querySelectorAll(selector)]
+    .some((el) => el.textContent.trim() === text);
+  if (!text || p.querySelector('a:not(.footnote), picture') || !covers('u')) return null;
+  if (covers('em, i')) return 'promo';
+  return covers('strong, b') ? 'tag' : 'plain';
+}
+
+export const escapeHtml = (str) => String(str ?? '').replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
+
+export const safeUrl = (url) => {
+  try {
+    const u = new URL(url, window.location.href);
+    return (u.protocol === 'https:' || u.protocol === 'http:') ? u.href : '#';
+  } catch {
+    return '#';
+  }
+};
+
 // calls back with true when the element reaches the top of the viewport, false once it is below
 export function watchStuck(element, callback) {
   let stuck = null;
