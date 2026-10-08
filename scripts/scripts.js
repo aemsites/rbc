@@ -400,13 +400,17 @@ async function loadLazy(doc) {
 // GTM is the last thing the page needs; it stays out of the way of consent and personalization
 const MARTECH_DELAY_MS = 3000;
 
+// ?martech=off keeps OneTrust, Conductrics and GTM off the page, for performance testing.
+// Skipping consent-check.js is what removes the first two: it loads the OneTrust stub, and
+// Conductrics only ever loads from its consent callback.
+const MARTECH_OFF = new URLSearchParams(window.location.search).get('martech') === 'off';
+
 /**
  * Loads everything that happens a lot later,
  * without impacting the user experience.
  */
 function loadDelayed() {
-  // ?martech=off keeps GTM out of the page entirely, for performance testing
-  if (new URLSearchParams(window.location.search).get('martech') !== 'off') import('./gtm.js');
+  if (!MARTECH_OFF) import('./gtm.js');
   // load anything that can be postponed to the latest here
 }
 
@@ -414,7 +418,7 @@ async function loadPage() {
   await loadEager(document);
   await loadLazy(document);
   // consent gates personalization, so it resolves ahead of the martech delay rather than inside it
-  import('./consent-check.js');
+  if (!MARTECH_OFF) import('./consent-check.js');
   setTimeout(loadDelayed, MARTECH_DELAY_MS);
 }
 
