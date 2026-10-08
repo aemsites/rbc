@@ -1,4 +1,5 @@
-import { createOptimizedPicture, decorateIcons } from '../../scripts/aem.js';
+import { createOptimizedPicture } from '../../scripts/aem.js';
+import { decorateIcons } from '../../scripts/scripts.js';
 import { createElement, fragment, safeUrl } from '../../utils/dom.js';
 import {
   cardStats, getProduct, isCreditCard, monthlyFees, offerCells, pickHighlights,
