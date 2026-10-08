@@ -78,6 +78,17 @@ main > .section.hero-container:has(
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
+
+  &:has(.icon) {
+    display: inline-flex;
+    width: auto;
+    gap: var(--space-3xs);
+  }
+
+  > .icon {
+    width: 14px;
+    height: 14px;
+  }
 }
 
 .hero .hero-note {
