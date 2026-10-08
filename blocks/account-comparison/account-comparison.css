@@ -110,6 +110,87 @@
   color: var(--rbc-grey-900);
 }
 
+.account-comparison-picker {
+  display: none;
+}
+
+@media (width < 768px) {
+  .account-comparison {
+    overflow-x: visible;
+  }
+
+  .account-comparison table {
+    min-width: 0;
+  }
+
+  .account-comparison .account-comparison-hidden,
+  .account-comparison [data-empty] {
+    display: none;
+  }
+
+  .account-comparison-picker {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+    min-inline-size: 0;
+    margin: 0 0 var(--space-m);
+    border: 0;
+    padding: 0;
+  }
+
+  .account-comparison-picker legend {
+    width: 100%;
+    margin-bottom: var(--space-2xs);
+    padding: 0;
+    font-size: var(--body-font-size-xs);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .account-comparison-picker select {
+    flex: 1 1 120px;
+    min-width: 0;
+    border: 1px solid var(--rbc-grey-300);
+    border-radius: var(--radius-s);
+    padding: var(--space-xs) var(--space-s);
+    background-color: var(--rbc-white);
+    font-size: var(--body-font-size-s);
+  }
+
+  .account-comparison table,
+  .account-comparison thead,
+  .account-comparison tbody,
+  .account-comparison .account-comparison-group,
+  .account-comparison .account-comparison-group > th {
+    display: block;
+  }
+
+  .account-comparison tr:not(.account-comparison-group, [hidden]) {
+    display: grid;
+    grid-template-columns: repeat(var(--account-comparison-columns, 2), minmax(0, 1fr));
+  }
+
+  .account-comparison tbody tr:not(.account-comparison-group) > th[scope="row"] {
+    grid-column: 1 / -1;
+    padding-bottom: var(--space-2xs);
+    text-align: center;
+    font-weight: 700;
+  }
+
+  .account-comparison tbody tr > [data-span] {
+    grid-column: 1 / -1;
+  }
+
+  .account-comparison tbody tr > [data-pos="1"] {
+    border-left: 1px solid var(--rbc-grey-200);
+  }
+
+  .account-comparison thead th:first-child {
+    width: auto;
+  }
+}
+
 @media (width >= 768px) {
   .account-comparison table {
     font-size: var(--body-font-size-m);

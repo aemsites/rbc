@@ -28,7 +28,8 @@ export default function decorate(block) {
 
   // the comparison block builds its table after this one decorates, so resolve it on each change
   form.addEventListener('change', () => {
-    const table = block.closest('.section')?.querySelector('.account-comparison table');
+    const table = block.closest('.section')?.querySelector('.account-comparison table')
+      || document.querySelector('.account-comparison table');
     if (!table) return;
     const products = [...table.querySelectorAll('.account-comparison-products td')]
       .map((td) => norm(td.querySelector('a:not(.button), h3, h4')?.textContent || td.textContent));
