@@ -210,8 +210,8 @@ body.article main > .section > .default-content-wrapper p.article-formula,
   text-transform: uppercase;
 }
 
-.article .article-category:hover,
-.article .article-topic:hover {
+.article a.article-category:hover,
+.article a.article-topic:hover {
   background-color: var(--rbc-blue);
   color: var(--rbc-white);
   text-decoration: none;
