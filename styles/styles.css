@@ -413,7 +413,7 @@ button.button {
   cursor: pointer;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: wrap;
   font-weight: 400;
 }
 
@@ -492,15 +492,30 @@ main img {
   width: 24px;
 }
 
+.icon img,
+.icon svg {
+  height: 100%;
+  width: 100%;
+}
+
 :is(h1, h2, h3, h4, h5, h6) > .icon:first-child {
   margin-inline-end: var(--space-2xs);
   vertical-align: -0.15em;
 }
 
-.icon img,
-.icon svg {
-  height: 100%;
-  width: 100%;
+main .default-content-wrapper :is(a, button) > .icon {
+  width: 20px;
+  height: 20px;
+  margin-inline: var(--space-2xs);
+  vertical-align: -0.3em;
+}
+
+main .default-content-wrapper :is(a, button) > .icon svg [fill]:not([fill="none"], [fill="white"]) {
+  fill: currentcolor;
+}
+
+main .default-content-wrapper :is(a, button) > .icon svg [stroke]:not([stroke="none"]) {
+  stroke: currentcolor;
 }
 
 /* sections */

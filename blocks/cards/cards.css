@@ -523,6 +523,8 @@ main > .section.dark-background .cards.tinted:not(.tile) > ul > li {
 .cards.product > ul > li {
   border-color: var(--rbc-grey-300);
   border-radius: var(--radius-m);
+  max-width: 400px;
+  margin: 0 auto;
 }
 
 .cards.product .cards-card-body {
@@ -595,10 +597,72 @@ main > .section.dark-background .cards.tinted:not(.tile) > ul > li {
   mask: url("../../icons/check.svg") center / contain no-repeat;
 }
 
+.cards.product .cards-card-body ul.cards-product-waivers {
+  margin-bottom: var(--space-s);
+}
+
+.cards.product .cards-product-waivers li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 0 var(--space-xs);
+  margin-bottom: var(--space-2xs);
+  padding: var(--space-xs);
+  border-radius: 8px;
+  background-color: #f5f8f9;
+}
+
+.cards.product .cards-card-body ul.cards-product-waivers li::before {
+  content: none;
+}
+
+.cards.product .cards-product-waivers p {
+  margin: 0;
+}
+
+.cards.product .cards-product-waiver-offer {
+  grid-column: 1;
+}
+
+.cards.product .cards-product-waiver-offer > a:any-link {
+  display: inline-block;
+  margin-top: var(--space-3xs);
+  padding: 2px var(--space-2xs);
+  border-radius: 4px;
+  background-color: var(--rbc-yellow);
+  color: var(--text-color);
+  font-size: var(--body-font-size-xs);
+  font-weight: 700;
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.cards.product .cards-product-waivers .cards-product-amount {
+  grid-area: 1 / 2 / span 2 / 3;
+  align-self: center;
+}
+
+.cards.product .cards-product-waivers .cards-product-amount strong {
+  font-size: var(--heading-font-size-s);
+  font-weight: 500;
+}
+
 .cards.product .cards-product-price {
   margin: auto 0 var(--space-s);
   text-align: center;
   font-size: var(--body-font-size-s);
+}
+
+.cards.product .cards-card-body:has(> .cards-product-badge) .cards-product-price {
+  margin-top: 0;
+}
+
+.cards.product .cards-product-note {
+  margin: calc(var(--space-s) * -0.5) 0 var(--space-s);
+  color: var(--rbc-grey-600);
+  font-size: var(--body-font-size-xs);
+  text-align: center;
 }
 
 .cards.product .cards-product-price strong {
@@ -614,7 +678,6 @@ main > .section.dark-background .cards.tinted:not(.tile) > ul > li {
   margin-right: var(--space-3xs);
 }
 
-/* regular | or | rebate, as rbcroyalbank.com lays out the Value Program price */
 .cards.product .cards-product-price-split {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
@@ -658,8 +721,9 @@ main > .section.dark-background .cards.tinted:not(.tile) > ul > li {
 }
 
 .cards.product .cards-product-badge {
+  position: relative;
   align-self: center;
-  margin: 0 0 var(--space-s);
+  margin: auto 0 var(--space-s);
   border-radius: var(--radius-s);
   padding: var(--space-3xs) var(--space-s);
   background-color: var(--rbc-yellow);
@@ -671,6 +735,16 @@ main > .section.dark-background .cards.tinted:not(.tile) > ul > li {
 
 .cards.product .cards-product-badge em {
   font-style: normal;
+}
+
+.cards.product .cards-product-badge > em > a:any-link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.cards.product .cards-product-badge sup {
+  position: relative;
 }
 
 .cards.product > ul > li .cards-product-badge a:any-link {
