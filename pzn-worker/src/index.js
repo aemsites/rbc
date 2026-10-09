@@ -302,12 +302,18 @@ async function decideSegment(request, url, env, trace, jar, page, ssr, visitorUu
     ? (gaClientId(jar) || visitorUuid)
     : visitorUuid;
 
-  const { arm, agent, reason } = await experimentArm((page.agents || {})[lob], identity, {
-    qa: url.searchParams.has('qa'),
-    loc,
-    traits,
-    env,
-  });
+  // the same preview override the arms-based pages honour, against this lob's agent
+  const lobAgent = (page.agents || {})[lob];
+  const forcedArm = prod ? null : previewArm(url, jar, lobAgent);
+  const { arm, agent, reason } = forcedArm
+    ? { arm: forcedArm, agent: lobAgent, reason: null }
+    : await experimentArm(lobAgent, identity, {
+      qa: url.searchParams.has('qa'),
+      loc,
+      traits,
+      env,
+    });
+  if (forcedArm) trace.source = 'preview';
   if (reason) trace.reason = `${reason}-for-${lob}`;
   trace.lob = lob;
   trace.agent = agent;
