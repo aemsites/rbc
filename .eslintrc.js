@@ -15,4 +15,16 @@ module.exports = {
     'linebreak-style': ['error', 'unix'], // enforce unix linebreaks
     'no-param-reassign': [2, { props: false }], // allow modifying properties of param
   },
+  overrides: [
+    {
+      files: ['**/*.test.js', '__mocks__/**/*.js'],
+      env: { jest: true },
+      rules: {
+        'class-methods-use-this': 'off',
+        'max-classes-per-file': 'off',
+        'no-useless-constructor': 'off',
+        'no-empty-function': 'off',
+      },
+    },
+  ],
 };

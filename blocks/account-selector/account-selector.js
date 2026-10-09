@@ -132,10 +132,10 @@ const SLUGS = [
   [/day to day|courant/i, 'day-to-day-banking'],
   [/advantage|avantage/i, 'advantage-banking'],
 ];
-const slugFor = (name) => SLUGS.find(([re]) => re.test(name))?.[1];
+export const slugFor = (name) => SLUGS.find(([re]) => re.test(name))?.[1];
 
 // ponytail: rule of thumb when the CGI is unreachable (previews); production uses the proxy
-function guess(a) {
+export function guess(a) {
   if (a.additionalAccounts === 'Yes') return 'vip-banking';
   if (a.creditCardFee === 'Yes' || a.safeDepositBox === 'Yes') return 'signature-no-limit';
   if (a.numDebits <= 12 && a.isStudent !== 'Yes' && a.isNewcomer !== 'Yes') return 'day-to-day-banking';

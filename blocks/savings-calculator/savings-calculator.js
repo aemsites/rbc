@@ -62,7 +62,7 @@ const TEMPLATE = `
 </div>
 `;
 
-function project(start, amount, perYear, years, rate) {
+export function project(start, amount, perYear, years, rate) {
   const daily = rate / 100 / 365;
   const totals = [];
   let balance = start;
@@ -84,7 +84,7 @@ function project(start, amount, perYear, years, rate) {
 }
 
 // axis: a clean tick (1, 2, 2.5 or 5 × 10^n) giving five to eight gridlines up to the top value
-function axisTicks(value) {
+export function axisTicks(value) {
   const raw = (value || 1) / 6;
   const mag = 10 ** Math.floor(Math.log10(raw));
   const tick = [1, 2, 2.5, 5, 10].map((m) => m * mag).find((t) => t >= raw);

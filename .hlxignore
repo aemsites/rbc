@@ -6,3 +6,7 @@ package.json
 package-lock.json
 test/*
 sync-block-collection.sh
+__mocks__/
+jest.config.cjs
+jest.setup.js
+**/*.test.js

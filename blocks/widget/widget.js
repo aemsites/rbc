@@ -5,7 +5,7 @@ import { loadCSS } from '../../scripts/aem.js';
  * @param {string} pathname URL pathname (e.g. `/widgets/path1/name.html`)
  * @returns {{ widgetPath: string, widgetName: string }}
  */
-function parseWidgetHref(pathname) {
+export function parseWidgetHref(pathname) {
   const pathSegments = pathname.split('/').filter((p) => p);
   const widgetName = pathSegments[pathSegments.length - 1].split('.')[0];
   const widgetPath = pathSegments.slice(1, -1).join('/');

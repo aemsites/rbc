@@ -56,7 +56,7 @@ async function loadCopy(block) {
     .map((r) => [r.Key.trim().toLowerCase(), r.Text]));
 }
 
-const numbers = (text, fallback) => {
+export const numbers = (text, fallback) => {
   const list = String(text || '').split(',')
     .map((n) => n.trim())
     .filter(Boolean)
