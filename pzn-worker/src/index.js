@@ -21,6 +21,9 @@ const TAG_HEADER = {
 
 const cdnType = (env) => (TAG_HEADER[env.BYO_CDN_TYPE] ? env.BYO_CDN_TYPE : 'cloudflare');
 
+// both /path and /path/ address the same page; the agents' URL lists match one form exactly
+const canonicalPath = (pathname) => pathname.replace(/(.)\/$/, '$1');
+
 const originHeaders = (url, env) => ({
   'x-forwarded-host': url.host,
   'x-byo-cdn-type': cdnType(env),
@@ -214,7 +217,7 @@ async function experimentArm(agent, clientId, {
 async function decideSegment(request, url, env, trace, jar, page, ssr, visitorUuid, prod) {
   const userAgent = request.headers.get('user-agent') || 'Mozilla/5.0';
   // the agents' URL targeting lists the public address, not whichever host the worker answers on
-  const loc = new URL(url.pathname + url.search, env.CANONICAL_ORIGIN || url.origin).href;
+  const loc = new URL(canonicalPath(url.pathname), env.CANONICAL_ORIGIN || url.origin).href;
   const traits = conductricsTraits(jar);
   trace.loc = loc;
   trace.traits = traits;
@@ -345,8 +348,7 @@ export default {
     const started = Date.now();
     const trace = {};
 
-    // the origin serves one form of the path, while the agents' URL lists may carry either
-    const path = url.pathname.replace(/(.)\/$/, '$1');
+    const path = canonicalPath(url.pathname);
 
     // The page shell is the same for everyone, so fetching it does not wait on the decision.
     const fetchShell = () => fetch(new URL(path + url.search, origin), {
