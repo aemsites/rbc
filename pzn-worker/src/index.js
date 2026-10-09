@@ -83,19 +83,27 @@ function traitSegment(jar) {
  * cookie; forwarding it lets the same targeting run server-side.
  */
 function conductricsTraits(jar) {
-  const raw = jar['c-traits-list'];
-  if (!raw) return null;
-  let decoded = raw;
-  try {
-    decoded = decodeURIComponent(raw);
-  } catch {
-    decoded = raw;
-  }
-  const traits = decoded.split(',')
-    .map((trait) => trait.trim())
-    .filter((trait) => trait && !trait.endsWith(':null'))
-    .map((trait) => `cust/${trait}`);
-  return traits.length ? traits.join(',') : null;
+  const decode = (raw) => {
+    if (!raw) return [];
+    let value = raw;
+    try {
+      value = decodeURIComponent(raw);
+    } catch {
+      value = raw;
+    }
+    return value.split(',').map((trait) => trait.trim()).filter(Boolean);
+  };
+  // RBC persists a configured subset unprefixed; scripts/consented.js mirrors the rest already
+  // prefixed. Later entries win, so the fresher mirror overrides a stale cookie value.
+  const merged = new Map();
+  [
+    ...decode(jar['c-traits-list']).map((trait) => `cust/${trait}`),
+    ...decode(jar['pzn-traits']),
+  ].forEach((trait) => {
+    const [name, ...rest] = trait.split(':');
+    if (rest.join(':') !== 'null') merged.set(name, trait);
+  });
+  return merged.size ? [...merged.values()].join(',') : null;
 }
 
 function decisionKey(jar) {
@@ -346,7 +354,7 @@ export default {
       cf: { cacheEverything: true, cacheTtl: SHARED_TTL },
     });
     const prod = /aem\.live|rbcroyalbank\.com/.test(env.ORIGIN || '');
-    const page = pages(prod)[path];
+    const page = pages(env.AGENT_SET)[path];
     if (!page) {
       const passthrough = await fetchShell();
       const headers = new Headers(passthrough.headers);

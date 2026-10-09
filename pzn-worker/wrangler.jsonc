@@ -3,21 +3,28 @@
   "main": "src/index.js",
   "compatibility_date": "2025-08-23",
 
-  // Conductrics wiring lives in scripts/pzn-config.js, shared with the client-side fallback so the
-  // two halves cannot disagree. Which agent set is used follows from ORIGIN.
+  // Conductrics wiring lives in scripts/pzn-config.js, shared with the client half so the two
+  // cannot disagree. AGENT_SET names which of RBC's agent sets covers this deployment's URLs, and
+  // CANONICAL_ORIGIN is the address those agents target, which is not the host the worker answers
+  // on. Both come from .dev.vars locally and from Cloudflare vars once deployed.
 
   "vars": {
-    "ORIGIN": "http://localhost:3000"
+    "ORIGIN": "http://localhost:3000",
+    "AGENT_SET": "dev"
   },
   "env": {
     "preview": {
       "vars": {
-        "ORIGIN": "https://main--rbc--aemsites.aem.page"
+        "ORIGIN": "https://main--rbc--aemsites.aem.page",
+        "AGENT_SET": "eds",
+        "CANONICAL_ORIGIN": "https://main--rbc--aemsites.aem.page"
       }
     },
     "production": {
       "vars": {
-        "ORIGIN": "https://main--rbc--aemsites.aem.live"
+        "ORIGIN": "https://main--rbc--aemsites.aem.live",
+        "AGENT_SET": "eds",
+        "CANONICAL_ORIGIN": "https://main--rbc--aemsites.aem.live"
       }
     }
   }

@@ -32,7 +32,19 @@ const PROD_AGENTS = {
 };
 
 const DECISION_LOGIC = 'AGrQuIjdEunH|pIXOKGSsEcqf';
-const SAVINGS_AGENT = { dev: 'a-EZTf1uvKTY', prod: 'a-k3uKXzolge' };
+
+/*
+ * Conductrics resolves an agent only when the request's location is in that agent's own URL list,
+ * and RBC maintains one agent set per front end. Measured against the live account: the PROD
+ * segment agents cover www and the EDS preview, while a-k3uKXzolge covers www alone and
+ * a-EZTf1uvKTY covers STE and the EDS preview. So an EDS deployment mixes the two sets, which is
+ * why this is named per deployment rather than inferred from the origin.
+ */
+const AGENT_SETS = {
+  eds: { agents: PROD_AGENTS, savings: 'a-EZTf1uvKTY' },
+  prod: { agents: PROD_AGENTS, savings: 'a-k3uKXzolge' },
+  dev: { agents: DEV_AGENTS, savings: 'a-EZTf1uvKTY' },
+};
 
 export const TRAIT_LOBS = {
   'international-student': 'prospect_student',
@@ -45,13 +57,13 @@ export const TRAIT_SEGMENTS = Object.keys(TRAIT_LOBS);
 
 export const PROD_HOSTS = ['main--rbc--aemsites.aem.live', 'www.rbcroyalbank.com'];
 
-export default function pages(prod = false) {
-  const agents = prod ? PROD_AGENTS : DEV_AGENTS;
+export default function pages(set = 'eds') {
+  const { agents, savings } = AGENT_SETS[set] || AGENT_SETS.eds;
   return {
     '/bank-accounts': { decisionLogic: DECISION_LOGIC, agents },
     '/bank-accounts/chequing-accounts': { decisionLogic: DECISION_LOGIC, agents },
     '/bank-accounts/savings-accounts': {
-      agent: prod ? SAVINGS_AGENT.prod : SAVINGS_AGENT.dev,
+      agent: savings,
       arms: { B: 'hisa', D: 'd2d', F: 'us-hisa' },
     },
   };
