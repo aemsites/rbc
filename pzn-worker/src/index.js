@@ -395,6 +395,32 @@ function resolveTab(rows, key) {
   return rows.find((r) => r.activatedBy.includes(key))?.tab || null;
 }
 
+/*
+ * A fragment never reaches the edge, so a visitor arriving on an authored #tab link would have
+ * the segment's tab painted and then corrected. These two pieces move that correction before the
+ * first paint: the map lets an inline head script name the tab the hash asks for, and the rules
+ * key visibility off that name rather than off classes only tabs.js can apply.
+ */
+function tabAliasMap(rows) {
+  const map = {};
+  rows.forEach(({ tab, activatedBy }) => {
+    activatedBy.forEach((keyword) => { if (!(keyword in map)) map[keyword] = tab; });
+  });
+  // a tab's own name outranks an alias another row claims, exactly as resolveTab orders them
+  rows.forEach(({ tab }) => { map[tab] = tab; });
+  return map;
+}
+
+function tabVisibilityCss(rows, values) {
+  const shows = (value, key) => value.split(',').map((t) => t.trim()).includes(key);
+  return [...new Set(['default', ...rows.map((r) => r.tab)])].map((key) => {
+    const visible = values.filter((value) => shows(value, key));
+    const kept = visible.map((value) => `[data-tab="${value}"]`).join(',');
+    const scope = `html[data-pzn-tab="${key}"] [data-tab]`;
+    return `${kept ? `${scope}:not(${kept})` : scope}{display:none}`;
+  }).join('');
+}
+
 async function pageHints(origin, path) {
   const res = await fetch(`${origin}${path}.plain.html`, {
     headers: { 'accept-encoding': 'identity' },
@@ -402,7 +428,8 @@ async function pageHints(origin, path) {
   });
   if (!res.ok) return {};
   const html = await res.text();
-  return { variants: slotVariants(html), rows: await tabRows(html) };
+  const values = [...new Set([...html.matchAll(/\sdata-tab="([^"]*)"/g)].map(([, v]) => v))];
+  return { variants: slotVariants(html), rows: await tabRows(html), values };
 }
 
 async function inlineFragment(origin, fragmentPath, env) {
@@ -488,7 +515,7 @@ export default {
       })(),
     ]);
 
-    const { variants, rows } = hints;
+    const { variants, rows, values } = hints;
     const fragmentPath = (segment && variants && variants[segment]) || null;
     // a tab-scoped page carries no slot, so the tab is the whole of how its decision lands
     const tab = trace.skipped ? null : resolveTab(rows, segment);
@@ -524,6 +551,8 @@ export default {
     // EDS sends a per-request CSP nonce as a header; without it the payload is refused as inline
     const [, csp] = /'nonce-([^']+)'/.exec(upstream.headers.get('content-security-policy') || '') || [];
     const nonce = csp ? ` nonce="${csp}"` : '';
+    const tabCss = rows && rows.length && values ? tabVisibilityCss(rows, values) : '';
+    const aliasJson = tabCss ? JSON.stringify(tabAliasMap(rows)) : '';
 
     const out = new HTMLRewriter()
       .on('[data-pzn-slot]', {
@@ -542,20 +571,14 @@ export default {
         },
       })
       /*
-       * Without `tab-js` the stylesheet shows the default sections alone, which is the right
-       * fallback when the block never decorates. Setting it here means the edge owes every
-       * `[data-tab]` section its own answer, so both attributes are written in the same pass.
+       * `tab-js` is what tells the stylesheet a tab is being chosen; without it the default
+       * sections show alone, which stays the right fallback when nothing decorates.
        */
       .on('html', {
         element(el) {
-          if (tab) el.setAttribute('class', addClass(el.getAttribute('class'), 'tab-js'));
-        },
-      })
-      .on('[data-tab]', {
-        element(el) {
           if (!tab) return;
-          const allowed = (el.getAttribute('data-tab') || '').split(',').map((t) => t.trim());
-          if (!allowed.includes(tab)) el.setAttribute('class', addClass(el.getAttribute('class'), 'tab-hidden'));
+          el.setAttribute('class', addClass(el.getAttribute('class'), 'tab-js'));
+          el.setAttribute('data-pzn-tab', tab);
         },
       })
       .on('head', {
@@ -564,6 +587,18 @@ export default {
           if (trace.skipped) return;
           el.append(
             `<script${nonce}>var serverSideRulesEngineResponse = ${JSON.stringify(ssr)};</script>`,
+            { html: true },
+          );
+          if (!tabCss) return;
+          /*
+           * The hash wins over the segment, as it does in tabs.js: it is the visitor's own
+           * choice. Running here means it wins before anything paints rather than after.
+           */
+          el.append(
+            `<style>${tabCss}</style><script${nonce}>(function(){var h=location.hash.slice(1);`
+            + 'if(!h)return;try{h=decodeURIComponent(h)}catch(e){}'
+            + `var d=document.documentElement;d.setAttribute('data-pzn-tab',(${aliasJson})[h]||'default');`
+            + "d.classList.add('tab-js')})();</script>",
             { html: true },
           );
         },
