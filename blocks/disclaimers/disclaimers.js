@@ -12,7 +12,8 @@ export default async function decorate(block) {
   const list = document.createElement('ul');
   [...block.children].forEach((row) => {
     const [labelCell, textCell, idCell] = [...row.children];
-
+    // one cell: a lone heading renames the toggle (e.g. an article's legal note), anything
+    // else is unlabelled legal copy
     if (!textCell) {
       const heading = labelCell?.querySelector(':scope > :is(h1, h2, h3, h4, h5, h6):only-child');
       if (heading) {

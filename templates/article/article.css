@@ -1,0 +1,573 @@
+/* shared by the article and newcomer-article templates */
+.article main {
+  --article-band: #fafafa;
+  --article-muted: #6f6f6f;
+  --article-toc-rule: #b3b3b3;
+
+  /* reading widths match production: 640px beside the rail, 690px on its own */
+  --article-width: 640px;
+  --article-width-single: 690px;
+  --rail-width: 340px;
+  --rail-gap: var(--space-4xl);
+
+  /* the body column sits slightly in from the title and date */
+  --article-inset: 15px;
+  --article-rule: #73b0e3;
+  --article-stripe: #e3f4ff;
+
+  /* production renders type with greyscale smoothing, which reads lighter */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* single-column articles (toc: off) follow production's widths: full width on phones,
+   420px on tablets, then half the window (to 1200px) less 30px of gutter */
+@media (width >= 768px) {
+  .article main {
+    --article-width-single: 420px;
+  }
+}
+
+@media (width >= 992px) {
+  .article main {
+    --article-width-single: calc(min(50vw, var(--content-width)) - 30px);
+  }
+}
+
+/* newcomer articles read wider, with a narrower rail */
+.article.newcomer-article main {
+  --article-width: 840px;
+  --rail-width: 300px;
+  --rail-gap: var(--space-xl);
+  --article-inset: 0px;
+}
+
+/* articles read left to right, unlike the centred landing pages */
+body.article main > .section > .default-content-wrapper :is(p, h2, h3, h4, h5, h6) {
+  margin-bottom: 0.25em;
+  text-align: left;
+}
+
+body.article main > .section > .default-content-wrapper p.button-wrapper {
+  justify-content: flex-start;
+}
+
+body.article main > .section.center > .default-content-wrapper :is(p, h2, h3, h4, h5, h6) {
+  text-align: center;
+}
+
+body.article main > .section.center > .default-content-wrapper p.button-wrapper {
+  justify-content: center;
+}
+
+.article main > .section.article-body strong {
+  font-weight: 500;
+}
+
+.article main > .section.article-body li::marker {
+  color: var(--rbc-blue);
+}
+
+/* formula lines ("Interest = Principal * Rate * Time"), flagged by article.js */
+body.article main > .section > .default-content-wrapper p.article-formula,
+.article main > .section.article-body .accordion p.article-formula {
+  text-align: center;
+}
+
+.article main > .section.article-body h2 {
+  margin-top: var(--space-2xl);
+}
+
+.article main > .section.article-body .default-content-wrapper > :first-child {
+  margin-top: 0;
+}
+
+/* without a contents rail the article is one narrower column */
+.article main.article-single > .section:is(.article-header, .article-body) > div {
+  max-width: var(--article-width-single);
+}
+
+.article main > .section.article-body.colored-background {
+  padding: var(--space-xl) var(--space-l);
+}
+
+.article main > .section.article-body.colored-background > div {
+  padding: 0;
+}
+
+/* in a single column the copy sits 15px in from the column's edges, as do tinted promo
+   boxes; the title, image, TLDR card and FAQ panel span the full column */
+.article main.article-single > .section.article-body:not(.callout, .colored-background) > div {
+  max-width: calc(var(--article-width-single) - 2 * var(--article-inset));
+}
+
+/* boxed sections (callouts, tinted panels) stay inside the reading column */
+.article main.article-single > .section.article-body:is(.callout, .colored-background) {
+  box-sizing: border-box;
+  max-width: var(--article-width-single);
+  margin-inline: var(--space-l);
+
+  @media (width >= 768px) {
+    margin-inline: auto;
+  }
+}
+
+.article main.article-single > .section.article-body.colored-background:not(.accordion-container) {
+  max-width: calc(var(--article-width-single) - 2 * var(--article-inset));
+}
+
+/* data tables: compact, light-blue rules; like production they fill about three-quarters
+   of the column, or more if the content needs it */
+.article main > .section.article-body .table {
+  width: fit-content;
+  min-width: 75%;
+  max-width: 100%;
+  margin: var(--space-s) 0 var(--space-xl);
+}
+
+.article main > .section.article-body :is(.table, .accordion-item-body) table {
+  width: 100%;
+  border-bottom: 2px solid var(--article-rule);
+  font-size: var(--body-font-size-xs);
+  line-height: 16px;
+}
+
+/* FAQ answer tables read at body size, like the copy around them */
+.article main > .section.article-body .accordion-item-body table {
+  background-color: var(--rbc-white);
+  font-size: var(--body-font-size-m);
+  line-height: var(--body-line-height);
+}
+
+.article main > .section.article-body .accordion-item-body .table-swipe {
+  margin: var(--space-l) 0 var(--space-s);
+}
+
+.article main > .section.article-body :is(.table, .accordion-item-body) table thead tr {
+  border-top: 0;
+  border-bottom: 2px solid var(--article-rule);
+}
+
+.article main > .section.article-body :is(.table, .accordion-item-body) table tbody tr {
+  border-bottom: 0;
+}
+
+.article main > .section.article-body :is(.table, .accordion-item-body) table :is(th, td) {
+  padding: 15px;
+}
+
+.article main > .section.article-body :is(.table, .accordion-item-body) table th {
+  font-weight: 500;
+  text-align: left;
+}
+
+/* FAQ answer tables are striped like the source */
+.article main > .section.article-body :is(.table.striped, .accordion-item-body) table tbody tr:nth-child(odd) {
+  background-color: var(--rbc-white);
+}
+
+.article main > .section.article-body :is(.table.striped, .accordion-item-body) table tbody tr:nth-child(even) {
+  background-color: var(--article-stripe);
+}
+
+/* stack tables read like production's comparison tables: full width, body-size text and a
+   stripe on odd rows, starting with the first account type */
+.article main > .section.article-body .table.stack {
+  width: 100%;
+}
+
+.article main > .section.article-body .table.stack table {
+  font-size: var(--body-font-size-m);
+  line-height: var(--body-line-height);
+}
+
+.article main > .section.article-body .table.stack table tbody tr:nth-child(odd) {
+  background-color: var(--article-stripe);
+}
+
+/* header */
+.article main > .section.article-header {
+  margin-bottom: var(--space-xl);
+}
+
+/* newcomer titles sit in a box, clear of the nav */
+.article.newcomer-article main > .section.article-header {
+  padding-top: var(--space-xl);
+}
+
+.article .article-header h1 {
+  margin: var(--space-s) 0;
+}
+
+.article .article-category,
+.article .article-topic {
+  display: inline-block;
+  border: 1px solid var(--rbc-blue);
+  border-radius: 30px;
+  padding: 3px 15px;
+  font-size: var(--body-font-size-xs);
+  line-height: 16px;
+  text-transform: uppercase;
+}
+
+.article .article-category:hover,
+.article .article-topic:hover {
+  background-color: var(--rbc-blue);
+  color: var(--rbc-white);
+  text-decoration: none;
+}
+
+body.article main > .section > .default-content-wrapper p.article-byline {
+  margin: 0;
+  font-size: var(--body-font-size-xs);
+}
+
+body.article main > .section > .default-content-wrapper p.article-image {
+  margin: var(--space-xl) 0 0;
+}
+
+.article .article-image img {
+  display: block;
+  width: 100%;
+  max-width: 670px;
+}
+
+.article .article-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-s);
+}
+
+.article .article-meta .article-date {
+  margin: var(--space-l) 0 0;
+  color: var(--article-muted);
+  font-size: var(--body-font-size-xs);
+  letter-spacing: 2px;
+}
+
+/* the grey band runs behind the title and stops partway down the image */
+.article:not(.newcomer-article) main > .section.article-header {
+  padding-top: var(--space-l);
+  background: linear-gradient(var(--article-band) calc(100% - 7rem), transparent 0);
+}
+
+.article:not(.newcomer-article) main > .section.article-header:not(:has(.article-image)) {
+  padding-bottom: var(--space-l);
+  background: var(--article-band);
+}
+
+.article:not(.newcomer-article) .article-header h1 {
+  color: var(--text-color);
+}
+
+/* share links */
+.article .article-share {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2xs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.article .article-share li {
+  margin: 0;
+}
+
+.article .article-share :is(a, button) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3xs);
+  border: 0;
+  padding: 0 6px;
+  background: none;
+  color: var(--link-color);
+  font-size: var(--body-font-size-xs);
+  line-height: 1.5;
+  cursor: pointer;
+}
+
+.article .article-share :is(a, button)::before {
+  content: "";
+  width: 18px;
+  height: 18px;
+  background-color: currentcolor;
+  mask: var(--share-icon) center / contain no-repeat;
+}
+
+.article .article-share-x { --share-icon: url("/icons/twitter.svg"); }
+.article .article-share-facebook { --share-icon: url("/icons/facebook.svg"); }
+.article .article-share-linkedin { --share-icon: url("/icons/linkedin.svg"); }
+.article .article-share-email { --share-icon: url("/icons/email.svg"); }
+.article .article-share-copy { --share-icon: url("/icons/copy-url.svg"); }
+
+.article .article-share-status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.article .article-meta .article-share {
+  margin-top: var(--space-l);
+}
+
+/* on this page */
+.article main > .section.article-rail {
+  margin-block: 0 var(--space-xl);
+}
+
+.article .article-rail .article-share {
+  margin-bottom: var(--space-l);
+}
+
+.article .article-toc summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid var(--border-color);
+  padding: var(--space-xs) var(--space-s);
+  cursor: pointer;
+  list-style: none;
+}
+
+.article .article-toc summary::-webkit-details-marker {
+  display: none;
+}
+
+.article .article-toc summary::after {
+  content: "";
+  width: 20px;
+  height: 20px;
+  background-color: var(--link-color);
+  mask: url("/icons/chevron-down.svg") center / contain no-repeat;
+  transition: transform 0.2s;
+}
+
+.article .article-toc details[open] summary::after {
+  transform: rotate(180deg);
+}
+
+.article .article-toc ul {
+  margin: 0;
+  border-left: 1px solid var(--article-toc-rule);
+  padding: 0;
+  list-style: none;
+}
+
+.article .article-toc li {
+  margin: 0 0 10px -1px;
+  border-left: 2px solid transparent;
+}
+
+.article .article-toc li:has(> a[aria-current]) {
+  border-left-color: var(--rbc-blue);
+}
+
+.article .article-toc a {
+  display: block;
+  padding: var(--space-2xs) var(--space-s);
+  color: #444;
+  font-size: var(--body-font-size-m);
+  line-height: 1.3;
+}
+
+.article .article-toc a[aria-current] {
+  color: var(--rbc-blue);
+}
+
+.article .article-toc details[open] ul {
+  margin-top: var(--space-s);
+}
+
+/* share and topics after the article, centred as on the source */
+.article .article-end .article-end-title {
+  margin: var(--space-3xl) 0 30px;
+  font-size: var(--body-font-size-l);
+  text-align: center;
+}
+
+.article .article-end .article-share {
+  justify-content: center;
+}
+
+.article .article-topics {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  margin-top: 60px;
+}
+
+/* room before whatever follows the article, e.g. the branch finder's map */
+.article main > .section.article-end {
+  padding-bottom: var(--space-2xl);
+}
+
+.article .article-topics p {
+  margin: 0 var(--space-3xs) 0 0;
+  font-size: var(--body-font-size-l);
+  font-weight: 500;
+}
+
+/* the legal toggle sits just below whatever precedes it, usually the FAQ panel */
+.article main > .section.article-body:has(+ .section.disclaimers-container) {
+  margin-bottom: 0;
+}
+
+.article main > .section.article-body + .section.disclaimers-container {
+  margin-top: 0;
+}
+
+.article .disclaimers summary {
+  padding-top: 15px;
+}
+
+/* inline links in the copy are underlined and keep the text's weight */
+.article main > .section.article-body:not(.article-end) a:any-link:not(.button) {
+  font-weight: inherit;
+  text-decoration: underline;
+}
+
+/* lists hang just inside the text edge, as on production (TLDR, body copy, FAQ answers) */
+.article main > .section.article-body :is(.default-content-wrapper, .accordion-item-body) ul {
+  padding-left: 15px;
+}
+
+.article main > .section.article-body :is(.default-content-wrapper, .accordion-item-body) ol {
+  padding-left: 20px;
+}
+
+.article main > .section.article-body .default-content-wrapper li + li {
+  margin-top: var(--space-2xs);
+}
+
+@media (width >= 900px) {
+  /* lines up with the header's content box: --content-width wide, --space-xl gutters */
+  .article main.article-has-rail {
+    display: grid;
+    grid-template-columns:
+      minmax(var(--space-xl), 1fr)
+      minmax(0, calc(var(--content-width) - var(--rail-width)))
+      var(--rail-width)
+      minmax(var(--space-xl), 1fr);
+  }
+
+  .article main.article-has-rail > .section {
+    grid-column: 1 / -1;
+  }
+
+  /* grid items don't collapse margins, so space sections from one side only */
+  .article main.article-has-rail > .section.article-body {
+    box-sizing: border-box;
+    grid-column: 2;
+    max-width: var(--article-width);
+    margin: 0 var(--rail-gap) var(--space-2xl) var(--article-inset);
+  }
+
+  .article main.article-has-rail > .section.article-body > div {
+    max-width: none;
+    padding: 0;
+  }
+
+  .article main.article-has-rail > .section.article-body:has(+ .section.disclaimers-container) {
+    margin-bottom: 0;
+  }
+
+  .article main > .section.article-rail {
+    grid-column: 3;
+    grid-row: var(--rail-row) / span var(--rail-span);
+    margin-block: 0;
+  }
+
+  .article main.article-has-rail > .section.article-rail > div {
+    position: sticky;
+    top: calc(var(--nav-height) + var(--space-l));
+    padding: 0;
+  }
+
+  .article main.article-has-rail > .section.article-body.callout > div {
+    padding: 0 var(--space-l);
+  }
+
+  .article .article-toc summary {
+    display: none;
+  }
+
+  .article .article-toc details[open] ul {
+    margin-top: 0;
+  }
+}
+
+/* newcomer articles: the title sits in a bordered box beside its image */
+.newcomer-article .article-header .default-content-wrapper {
+  display: flex;
+  flex-direction: column;
+  max-width: none;
+  margin-inline: var(--space-l);
+  border: 1px solid var(--border-color);
+  padding: 0;
+}
+
+.newcomer-article .article-header .article-header-text {
+  padding: var(--space-xl) var(--space-l);
+}
+
+body.article.newcomer-article main > .section > .default-content-wrapper p.article-image {
+  order: -1;
+  margin: 0;
+}
+
+.newcomer-article .article-image img {
+  max-width: none;
+  height: 100%;
+  object-fit: cover;
+}
+
+.newcomer-article .article-meta .article-date {
+  color: var(--rbc-grey-600);
+  font-size: var(--body-font-size-s);
+  letter-spacing: normal;
+}
+
+@media (width >= 768px) {
+  .newcomer-article .article-header .default-content-wrapper {
+    display: grid;
+    grid-template-columns: 1fr minmax(0, 34%);
+    margin-inline: max(var(--space-xl), (100% - var(--content-width)) / 2);
+  }
+
+  .newcomer-article .article-header .article-header-text {
+    align-self: center;
+    padding: var(--space-3xl) var(--space-3xl);
+  }
+
+  body.article.newcomer-article main > .section > .default-content-wrapper p.article-image {
+    order: 0;
+  }
+}
+
+/* a single column's hero image spans the column, as on production */
+.article main.article-single .article-image img {
+  max-width: none;
+}
+
+/* single column, wide screens: the share links stand in a column out in the left margin,
+   level with the date (10% of the window in, as on production) */
+@media (width >= 992px) {
+  .article main.article-single .article-meta .article-share {
+    position: absolute;
+    left: 10vw;
+    flex-direction: column;
+    align-self: flex-start;
+    gap: var(--space-m);
+    border-right: 1px solid var(--rbc-grey-300);
+    padding-right: var(--space-m);
+  }
+}

@@ -81,3 +81,46 @@
 .table.striped tbody td:first-child {
   font-weight: 500;
 }
+
+/* stack: under 768px each row becomes a card, its first cell the heading and every value
+   labelled with its column name */
+@media (width < 768px) {
+  .table.stack table,
+  .table.stack tbody,
+  .table.stack tr {
+    display: block;
+  }
+
+  .table.stack thead {
+    display: none;
+  }
+
+  .table.stack tbody tr {
+    border-bottom: 2px solid #dadada;
+  }
+
+  .table.stack td:first-child {
+    display: block;
+    border-bottom: 2px solid #dadada;
+    font-weight: 500;
+    text-align: center;
+  }
+
+  .table.stack td[data-label] {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    padding: 0;
+  }
+
+  .table.stack td[data-label]::before {
+    content: attr(data-label);
+    padding: var(--space-s);
+    background-color: var(--rbc-light-blue);
+    font-weight: 500;
+  }
+
+  .table.stack td[data-label] > * {
+    grid-column: 2;
+    padding: var(--space-s);
+  }
+}

@@ -725,6 +725,28 @@ main > .section.shadow {
   }
 }
 
+/* callout: a white card with a blue top rule, e.g. an article TLDR or a single CTA */
+main > .section.callout {
+  max-width: calc(var(--content-width) - 2 * var(--space-xl));
+  margin-inline: var(--space-l);
+  padding-block: var(--space-l);
+  background: var(--rbc-white);
+  box-shadow: inset 0 4px 0 0 var(--rbc-blue), 0 2px 24px 0 rgb(0 0 0 / 7%);
+
+  @media (width >= 768px) {
+    margin-inline: auto;
+    padding-block: var(--space-xl);
+  }
+}
+
+main > .section.callout .default-content-wrapper > :first-child {
+  margin-top: 0;
+}
+
+main > .section.callout .default-content-wrapper > :last-child {
+  margin-bottom: 0;
+}
+
 main > .section.contained {
   max-width: var(--content-width);
   margin-inline: var(--space-l);
@@ -968,4 +990,81 @@ body:not(.style-guide).library-page > main > .section > .default-content-wrapper
 body:not(.style-guide).library-page > main > .section > .default-content-wrapper :is(h2, h3) {
   background: var(--rbc-cool-white);
   padding: var(--space-m);
+}
+
+/* swipe tables (utils/table-swipe.js): as many columns as fit, arrows and dots for the rest */
+.table-swipe {
+  max-width: 100%;
+}
+
+.table-swipe-measure table {
+  width: max-content;
+}
+
+.table-swipe-measure :is(th, td) {
+  white-space: nowrap;
+}
+
+.table-swipe-measure-min table {
+  width: min-content;
+}
+
+.table-swipe-controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2xs);
+  margin-bottom: var(--space-xs);
+}
+
+.table-swipe-controls[hidden] {
+  display: none;
+}
+
+/* the browser keeps vertical scrolling; horizontal swipes page the columns */
+.table-swipe-controls:not([hidden]) + table {
+  touch-action: pan-y;
+  user-select: none;
+}
+
+.table-swipe-dots {
+  display: flex;
+  gap: 4px;
+  margin: 0 var(--space-2xs) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.table-swipe-dot {
+  width: 6px;
+  height: 6px;
+  border: 1px solid var(--link-color);
+  border-radius: 50%;
+}
+
+.table-swipe-dot.active {
+  background-color: var(--link-color);
+}
+
+.table-swipe-controls button {
+  width: 20px;
+  height: 20px;
+  border: 0;
+  padding: 0;
+  background-color: var(--link-color);
+  mask: url("/icons/chevron-down.svg") center / 16px no-repeat;
+  cursor: pointer;
+}
+
+.table-swipe-controls .table-swipe-prev {
+  transform: rotate(90deg);
+}
+
+.table-swipe-controls .table-swipe-next {
+  transform: rotate(-90deg);
+}
+
+.table-swipe-controls button:disabled {
+  background-color: var(--rbc-grey-300);
+  cursor: default;
 }

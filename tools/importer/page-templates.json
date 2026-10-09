@@ -1,0 +1,237 @@
+{
+  "templates": [
+    {
+      "name": "article",
+      "urls": [
+        "https://www.rbcroyalbank.com/bank-accounts/savings-accounts/how-does-interest-work-on-a-savings-account.html",
+        "https://www.rbcroyalbank.com/bank-accounts/savings-accounts/how-to-choose-the-best-savings-account-for-me.html",
+        "https://www.rbcroyalbank.com/bank-accounts/savings-accounts/what-are-the-different-types-of-savings-accounts-in-canada.html",
+        "https://www.rbcroyalbank.com/bank-accounts/savings-accounts/what-is-a-savings-account-and-how-do-i-use-it.html",
+        "https://www.rbcroyalbank.com/fr/comptes-bancaires/comptes-depargne/fonctionnement-des-interets-sur-un-compte-depargne.html",
+        "https://www.rbcroyalbank.com/fr/comptes-bancaires/comptes-depargne/choisir-le-meilleur-compte-depargne-pour-moi.html",
+        "https://www.rbcroyalbank.com/fr/comptes-bancaires/comptes-depargne/quels-sont-les-differents-types-de-compte-depargne-au-canada.html",
+        "https://www.rbcroyalbank.com/fr/comptes-bancaires/comptes-depargne/quest-ce-quun-compte-depargne-et-comment-lutiliser.html"
+      ],
+      "representativeUrl": "https://www.rbcroyalbank.com/bank-accounts/savings-accounts/how-does-interest-work-on-a-savings-account.html",
+      "description": "My Money Matters article (savings accounts): grey title band, TLDR callout, optional on-this-page rail, FAQ accordion, legal disclaimers, topics",
+      "blocks": [
+        {
+          "name": "table",
+          "instances": [
+            ".entry-content .wp-block-rbc-responsive-table-block",
+            ".entry-content .wp-block-rbc-stackable-table-block"
+          ]
+        },
+        {
+          "name": "accordion",
+          "instances": [
+            ".inner-section-cool-white .accordion",
+            ".inner-section-cool-white .wp-block-rbc-rbc-collapsible-accordion"
+          ]
+        },
+        {
+          "name": "disclaimers",
+          "instances": [
+            ".entry-content .wp-block-rbc-rbc-default-collapsible"
+          ]
+        }
+      ],
+      "urlPattern": "/bank-accounts/savings-accounts/*",
+      "sections": [
+        {
+          "id": "1",
+          "name": "article-title",
+          "selector": [
+            ".wp-block-rbc-single-article-header"
+          ],
+          "style": null,
+          "blocks": [],
+          "defaultContent": [
+            "h1",
+            "img"
+          ]
+        },
+        {
+          "id": "2",
+          "name": "tldr",
+          "selector": [
+            ".entry-content .block-wpr.top-line-blue:not(.mar-t)"
+          ],
+          "style": "callout",
+          "blocks": [],
+          "defaultContent": [
+            "h4",
+            "ul"
+          ]
+        },
+        {
+          "id": "3",
+          "name": "body-intro",
+          "selector": [
+            ".entry-content"
+          ],
+          "style": null,
+          "blocks": [],
+          "defaultContent": [
+            "p",
+            "h2",
+            "h3",
+            "ul",
+            "ol"
+          ]
+        },
+        {
+          "id": "4",
+          "name": "cta-callout",
+          "selector": [
+            ".entry-content .block-wpr.top-line-blue.mar-t"
+          ],
+          "style": "callout, center",
+          "blocks": [],
+          "defaultContent": [
+            "h3",
+            "p",
+            "a.btn"
+          ]
+        },
+        {
+          "id": "5",
+          "name": "body-main",
+          "selector": [
+            ".entry-content"
+          ],
+          "style": null,
+          "blocks": [
+            "table"
+          ],
+          "defaultContent": [
+            "p",
+            "h2",
+            "h3",
+            "ul",
+            "ol"
+          ]
+        },
+        {
+          "id": "6",
+          "name": "promo",
+          "selector": [
+            ".entry-content .block-wpr.bg-light-blue"
+          ],
+          "style": "center",
+          "blocks": [],
+          "defaultContent": [
+            "h2",
+            "p",
+            "a.btn",
+            "a"
+          ]
+        },
+        {
+          "id": "7",
+          "name": "faq",
+          "selector": [
+            ".entry-content .inner-section-cool-white"
+          ],
+          "style": null,
+          "blocks": [
+            "accordion"
+          ],
+          "defaultContent": [
+            "h3"
+          ]
+        },
+        {
+          "id": "8",
+          "name": "legal",
+          "selector": [
+            ".entry-content .wp-block-rbc-rbc-default-collapsible"
+          ],
+          "style": null,
+          "blocks": [
+            "disclaimers"
+          ],
+          "defaultContent": []
+        }
+      ]
+    },
+    {
+      "name": "newcomer-article",
+      "urls": [
+        "https://www.rbcroyalbank.com/new-to-canada/international-students/article/how-to-find-the-best-bank-account-for-international-students.html",
+        "https://www.rbcroyalbank.com/nouveaux-arrivants/etudiants-etrangers/article/trouver-le-meilleur-compte-bancaire-pour-etudiant-etranger.html"
+      ],
+      "representativeUrl": "https://www.rbcroyalbank.com/new-to-canada/international-students/article/how-to-find-the-best-bank-account-for-international-students.html",
+      "description": "Newcomer article: bordered title box with image, date + share row, TLDR callout, on-this-page rail, legal disclaimers",
+      "blocks": [
+        {
+          "name": "disclaimers",
+          "instances": [
+            "section.disclaimer"
+          ]
+        }
+      ],
+      "urlPattern": "/new-to-canada/international-students/article/*",
+      "sections": [
+        {
+          "id": "1",
+          "name": "article-title",
+          "selector": [
+            "section.banner.html-bnr"
+          ],
+          "style": null,
+          "blocks": [],
+          "defaultContent": [
+            "h1",
+            "p",
+            ".banner-img[data-img]"
+          ]
+        },
+        {
+          "id": "2",
+          "name": "tldr",
+          "selector": [
+            ".col-9 > .block-wpr.top-line-blue"
+          ],
+          "style": "callout",
+          "blocks": [],
+          "defaultContent": [
+            "h4",
+            "ul"
+          ]
+        },
+        {
+          "id": "3",
+          "name": "body",
+          "selector": [
+            ".col-9"
+          ],
+          "style": null,
+          "blocks": [],
+          "defaultContent": [
+            "h2",
+            "h3",
+            "p",
+            "ul",
+            "ol"
+          ]
+        },
+        {
+          "id": "4",
+          "name": "legal",
+          "selector": [
+            "section.disclaimer"
+          ],
+          "style": null,
+          "blocks": [
+            "disclaimers"
+          ],
+          "defaultContent": []
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "projectType": "da"
+  }
+}

@@ -3,6 +3,8 @@
  * Recreate a table
  * https://www.hlx.live/developer/block-collection/table
  */
+import fetchLocalPlaceholders from '../../utils/placeholders.js';
+import swipeTable from '../../utils/table-swipe.js';
 
 function buildCell(rowIndex) {
   const cell = rowIndex ? document.createElement('td') : document.createElement('th');
@@ -35,4 +37,17 @@ export default async function decorate(block) {
   });
   block.innerHTML = '';
   block.append(table);
+
+  // stack: on small screens each row becomes a card, so every value carries its column name
+  if (header && block.classList.contains('stack')) {
+    const labels = [...thead.querySelectorAll('th')].map((th) => th.textContent.trim());
+    tbody.querySelectorAll('tr').forEach((row) => [...row.cells].forEach((cell, i) => {
+      if (i && labels[i]) cell.dataset.label = labels[i];
+    }));
+  }
+
+  if (block.classList.contains('swipe')) {
+    const ph = await fetchLocalPlaceholders();
+    swipeTable(table, { previous: ph.previousColumn, next: ph.nextColumn });
+  }
 }
