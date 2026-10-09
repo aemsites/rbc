@@ -568,6 +568,23 @@ export default {
           // section-tabs reads this as RBC's Tab Pre-selection; a segment with no claiming
           // tab (e.g. prospect) just falls through to the default tab, same as no signal at all
           if (!trace.skipped && segment) el.setAttribute('data-preselect', segment);
+          if (trace.skipped || !tabCss) return;
+          /*
+           * The rules above exist only to get the first paint right. Once the sections are
+           * parsed, the same answer is written as the `tab-hidden` classes tabs.js owns and the
+           * rules are dropped, so the block stays the only thing deciding tabs afterwards and a
+           * worker newer than the deployed code cannot fight it.
+           */
+          el.onEndTag((end) => end.before(
+            `<script${nonce}>(function(){var d=document.documentElement,`
+            + "t=d.getAttribute('data-pzn-tab');if(!t)return;"
+            + "document.querySelectorAll('[data-tab]').forEach(function(s){"
+            + "s.classList.toggle('tab-hidden',(s.getAttribute('data-tab')||'').split(',')"
+            + '.map(function(x){return x.trim()}).indexOf(t)<0)});'
+            + "d.classList.add('tab-js');"
+            + "var c=document.getElementById('pzn-tab-css');if(c)c.remove()})();</script>",
+            { html: true },
+          ));
         },
       })
       /*
@@ -595,7 +612,7 @@ export default {
            * choice. Running here means it wins before anything paints rather than after.
            */
           el.append(
-            `<style>${tabCss}</style><script${nonce}>(function(){var h=location.hash.slice(1);`
+            `<style id="pzn-tab-css">${tabCss}</style><script${nonce}>(function(){var h=location.hash.slice(1);`
             + 'if(!h)return;try{h=decodeURIComponent(h)}catch(e){}'
             + `var d=document.documentElement;d.setAttribute('data-pzn-tab',(${aliasJson})[h]||'default');`
             + "d.classList.add('tab-js')})();</script>",

@@ -25,8 +25,6 @@ function currentTab(all) {
 function updateSections() {
   const all = sectionItems();
   const tab = currentTab(all);
-  // the edge pre-applies the same choice through this attribute, so it has to stay in step
-  document.documentElement.dataset.pznTab = tab;
   const revealed = [];
   document.querySelectorAll('[data-tab]').forEach((section) => {
     const allowed = section.dataset.tab.split(',').map((t) => t.trim()).filter(Boolean);
