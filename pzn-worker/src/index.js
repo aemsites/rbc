@@ -109,6 +109,24 @@ function conductricsTraits(jar) {
   return merged.size ? [...merged.values()].join(',') : null;
 }
 
+/*
+ * Conductrics' own preview override, base64 "agent:arm", as a query param or the cookie its JS
+ * sets from one. Its server-side API ignores it, so the worker applies it here and RBC's existing
+ * QA links preview a page this worker decides exactly as they preview an Express one.
+ */
+function previewArm(url, jar, agent) {
+  const raw = url.searchParams.get('c-conductrics-preview') || jar['c-conductrics-preview'];
+  if (!raw || !agent) return null;
+  let decoded;
+  try {
+    decoded = atob(decodeURIComponent(raw));
+  } catch {
+    return null;
+  }
+  const [previewAgent, arm] = decoded.split(':');
+  return previewAgent === agent && arm ? arm : null;
+}
+
 function decisionKey(jar) {
   const trait = traitSegment(jar);
   if (trait) return `t:${trait}`;
@@ -222,14 +240,6 @@ async function decideSegment(request, url, env, trace, jar, page, ssr, visitorUu
   trace.loc = loc;
   trace.traits = traits;
 
-  // Both params bypass consent below, so a real visitor could use either to peek at another
-  // segment's offer. Fine on .page for QA; not something to leave reachable on .live.
-  const preview = !prod && url.searchParams.get('variant');
-  if (preview) {
-    trace.source = 'preview';
-    return preview;
-  }
-
   if (/bot|crawler|spider|gptbot|chatgpt-user/i.test(userAgent)) {
     trace.skipped = 'bot';
     ssr.is_ai_crawler = 1;
@@ -250,12 +260,17 @@ async function decideSegment(request, url, env, trace, jar, page, ssr, visitorUu
   }
 
   if (page.arms) {
-    const { arm, agent, reason } = await experimentArm(page.agent, visitorUuid, {
-      qa: url.searchParams.has('qa'),
-      loc,
-      traits,
-      env,
-    });
+    // a preview bypasses consent, so it stays off production origins
+    const forcedArm = prod ? null : previewArm(url, jar, page.agent);
+    const { arm, agent, reason } = forcedArm
+      ? { arm: forcedArm, agent: page.agent, reason: null }
+      : await experimentArm(page.agent, visitorUuid, {
+        qa: url.searchParams.has('qa'),
+        loc,
+        traits,
+        env,
+      });
+    if (forcedArm) trace.source = 'preview';
     if (reason) trace.reason = reason;
     trace.agent = agent;
     trace.arm = arm;
