@@ -51,6 +51,7 @@ export const TRAIT_LOBS = {
   student: 'prospect_student',
   newcomer: 'prospect_newcomer',
   senior: 'prospect_senior',
+  mass: 'prospect_mass',
 };
 
 export const TRAIT_SEGMENTS = Object.keys(TRAIT_LOBS);
