@@ -7,7 +7,6 @@ import {
   getMetadata,
   loadHeader,
   loadFooter,
-  decorateIcons,
   decorateSections,
   decorateBlocks,
   decorateTemplateAndTheme,
@@ -157,8 +156,10 @@ function decorateButtons(main) {
       inner.querySelectorAll('a[href]').forEach((link) => link.remove());
       return !inner.textContent.trim();
     });
-    if (!buttons.length && !links.some(imageLink)) p.classList.add('link-wrapper');
-    if (buttons.length !== links.length) return;
+    if (!buttons.length) {
+      if (!links.some(imageLink)) p.classList.add('link-wrapper');
+      return;
+    }
 
     const variants = new Map(buttons.map((a) => {
       const strong = a.closest('strong');
@@ -169,6 +170,7 @@ function decorateButtons(main) {
 
     p.className = 'button-wrapper';
     buttons.forEach((a) => { a.className = `button ${variants.get(a)}`; });
+    links.filter((a) => !variants.has(a) && !imageLink(a)).forEach((a) => a.classList.add('link'));
     p.querySelectorAll('em, strong').forEach((w) => w.replaceWith(...w.childNodes));
   });
 }
@@ -225,22 +227,18 @@ function decorateFocalPoints(main) {
  */
 const iconCache = new Map();
 
-/**
- * Replaces the <img> the boilerplate inserts with an inline <svg>, so icons can take their
- * colour from CSS. aem.js is vendored, so this runs as a second pass over the same spans.
- * @param {Element} span The span.icon holding the image
- */
-async function inlineIcon(span) {
-  const img = span.querySelector(':scope > img');
-  if (!img) return;
-  const { src } = img;
+async function decorateIcon(span) {
+  if (span.childElementCount) return;
+  const iconName = [...span.classList].find((c) => c.startsWith('icon-'))?.slice(5);
+  if (!iconName) return;
+  const src = `${window.hlx.codeBasePath}/icons/${iconName}.svg`;
   if (!iconCache.has(src)) {
     iconCache.set(src, fetch(src)
       .then((resp) => (resp.ok ? resp.text() : ''))
       .catch(() => ''));
   }
   const markup = await iconCache.get(src);
-  if (!markup || !span.contains(img)) return;
+  if (!markup || span.childElementCount) return;
   const svg = new DOMParser().parseFromString(markup, 'image/svg+xml').querySelector('svg');
   if (!svg || svg.querySelector('parsererror')) return;
   const [width, height] = ['width', 'height'].map((attr) => parseFloat(svg.getAttribute(attr)));
@@ -251,7 +249,7 @@ async function inlineIcon(span) {
       .filter((attr) => attr.name.toLowerCase().startsWith('on'))
       .forEach((attr) => node.removeAttribute(attr.name));
   });
-  const prefix = img.dataset.iconName;
+  const prefix = iconName;
   svg.querySelectorAll('style').forEach((style) => {
     style.textContent = style.textContent.replace(/\.(-?[_a-zA-Z][\w-]*)/g, `.${prefix}-$1`);
   });
@@ -267,15 +265,11 @@ async function inlineIcon(span) {
   });
   svg.setAttribute('aria-hidden', 'true');
   svg.setAttribute('focusable', 'false');
-  img.replaceWith(svg);
+  span.append(svg);
 }
 
-/**
- * Inlines every authored icon in the element.
- * @param {Element} element The container element
- */
-function inlineIcons(element) {
-  element.querySelectorAll('span.icon').forEach(inlineIcon);
+export function decorateIcons(element) {
+  element.querySelectorAll('span.icon').forEach(decorateIcon);
 }
 
 function decorateStickyTitle(main) {
@@ -292,10 +286,8 @@ function decorateLabels(main) {
   });
 }
 
-// eslint-disable-next-line import/prefer-default-export
 export function decorateMain(main) {
   decorateIcons(main);
-  inlineIcons(main);
   buildAutoBlocks(main);
   decorateSections(main);
   decorateStickyTitle(main);
@@ -411,13 +403,17 @@ async function loadLazy(doc) {
 // GTM is the last thing the page needs; it stays out of the way of consent and personalization
 const MARTECH_DELAY_MS = 3000;
 
+// ?martech=off keeps OneTrust, Conductrics and GTM off the page, for performance testing.
+// Skipping consent-check.js is what removes the first two: it loads the OneTrust stub, and
+// Conductrics only ever loads from its consent callback.
+const MARTECH_OFF = new URLSearchParams(window.location.search).get('martech') === 'off';
+
 /**
  * Loads everything that happens a lot later,
  * without impacting the user experience.
  */
 function loadDelayed() {
-  // ?martech=off keeps GTM out of the page entirely, for performance testing
-  if (new URLSearchParams(window.location.search).get('martech') !== 'off') import('./gtm.js');
+  if (!MARTECH_OFF) import('./gtm.js');
   // load anything that can be postponed to the latest here
 }
 
@@ -425,7 +421,7 @@ async function loadPage() {
   await loadEager(document);
   await loadLazy(document);
   // consent gates personalization, so it resolves ahead of the martech delay rather than inside it
-  import('./consent-check.js');
+  if (!MARTECH_OFF) import('./consent-check.js');
   setTimeout(loadDelayed, MARTECH_DELAY_MS);
 }
 

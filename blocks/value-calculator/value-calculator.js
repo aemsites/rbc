@@ -1,5 +1,6 @@
 import applyConfig from '../../scripts/config.js';
-import { decorateIcons, getMetadata } from '../../scripts/aem.js';
+import { getMetadata } from '../../scripts/aem.js';
+import { decorateIcons } from '../../scripts/scripts.js';
 import { getProduct } from '../../utils/products.js';
 import { footnoteSup, expandRefs, resolveRefLinks } from '../../utils/footnotes.js';
 import { escapeHtml } from '../../utils/dom.js';
