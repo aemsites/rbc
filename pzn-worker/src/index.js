@@ -444,7 +444,13 @@ export default {
 
     const jar = cookies(request.headers.get('cookie'));
     const key = decisionKey(jar);
-    const preview = !prod && url.searchParams.has('variant');
+    /*
+     * Any override from the URL is a preview: it must not persist a decision or fill the page
+     * cache, or one preview visit pins that variant for every clean visit until the cookie
+     * expires - which reads as the forced segment having become the default experience.
+     */
+    const overrides = ['variant', 'segment', 'c-conductrics-preview'];
+    const preview = !prod && overrides.some((param) => url.searchParams.has(param));
     const cached = preview ? null : cachedDecision(jar, key);
     const vid = visitorId(jar);
     const ssr = { design_test_vid: vid.uuid };
