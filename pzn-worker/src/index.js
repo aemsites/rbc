@@ -432,6 +432,10 @@ export default {
      * and the client JS API, so the page publishes the decision and scripts/gtm.js turns it into
      * experience_impression and model_result events.
      */
+    // EDS sends a per-request CSP nonce as a header; without it the payload is refused as inline
+    const [, csp] = /'nonce-([^']+)'/.exec(upstream.headers.get('content-security-policy') || '') || [];
+    const nonce = csp ? ` nonce="${csp}"` : '';
+
     const out = new HTMLRewriter()
       .on('[data-pzn-slot]', {
         element(el) {
@@ -453,7 +457,7 @@ export default {
           // Bots and unconsented visitors get the page untouched, so it stays cacheable.
           if (trace.skipped) return;
           el.append(
-            `<script>var serverSideRulesEngineResponse = ${JSON.stringify(ssr)};</script>`,
+            `<script${nonce}>var serverSideRulesEngineResponse = ${JSON.stringify(ssr)};</script>`,
             { html: true },
           );
         },

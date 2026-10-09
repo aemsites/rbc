@@ -18,7 +18,9 @@
     "preview": {
       "workers_dev": true,
       "vars": {
-        "ORIGIN": "https://main--rbc--aemsites.aem.page",
+        // content and code come from the branch, which carries scripts/pzn-traits.js; the
+        // location reported to Conductrics stays on main, which is what its agents target
+        "ORIGIN": "https://pzn--rbc--aemsites.aem.page",
         "AGENT_SET": "eds",
         "CANONICAL_ORIGIN": "https://main--rbc--aemsites.aem.page",
         "RULES_URL": "https://ssgtmactivation.rbc.com/rules-engine"

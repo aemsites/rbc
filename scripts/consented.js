@@ -13,6 +13,11 @@ const target = PROD_HOSTS.includes(window.location.hostname)
   ? DEPLOY_TARGETS.prod
   : DEPLOY_TARGETS.stage;
 
+// the savings product being viewed is knowable without Conductrics, so recording it must not
+// depend on Conductrics loading; a failure there would otherwise lose the trait entirely
+recordTraits();
+window.addEventListener('pagehide', recordTraits);
+
 getPublicConfig().then(({ conductricsApiKey }) => {
   if (typeof conductricsApiKey !== 'string' || !conductricsApiKey.trim()) {
     throw new Error('Could not obtain a valid public.conductricsApiKey from /config.json');
@@ -21,9 +26,8 @@ getPublicConfig().then(({ conductricsApiKey }) => {
   url.searchParams.set('apikey', conductricsApiKey.trim());
   return loadScript(url.href, { async: true });
 }).then(() => {
+  // Conductrics has now computed its own traits, so fold those in as well
   recordTraits();
-  // the trait that matters is usually set by the page being left, so catch its final state too
-  window.addEventListener('pagehide', recordTraits);
 }).catch((error) => {
   // eslint-disable-next-line no-console
   console.error('Conductrics loading failed', error);
