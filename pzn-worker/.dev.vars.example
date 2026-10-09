@@ -1,0 +1,8 @@
+# Copy to .dev.vars (gitignored) and fill from the RBC handover web.config.
+RULES_URL=https://ssgtmactivation.rbc.com/rules-engine
+RULES_KEY=
+# Public: the same agent-api base and apikey the browser uses, from /config.json.
+CONDUCTRICS_URL=https://api-rbc.conductrics.com/ac-VyDHnrdzqf/v3/agent-api?apikey=
+# The address the Conductrics agents target, which is not the host the worker answers on.
+# It must match an entry in the agent's URL list exactly or nothing is ever selected.
+CANONICAL_ORIGIN=

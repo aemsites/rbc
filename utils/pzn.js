@@ -3,7 +3,8 @@
 async function fill(name, variant) {
   const section = document.querySelector(`main .section[data-pzn-slot="${CSS.escape(name)}"]`);
   const path = section?.getAttribute(`data-pzn-${variant || 'fragment'}`);
-  if (!path) return;
+  // the edge worker marks what it already inlined, so a late Express event is not a second swap
+  if (!path || section.dataset.pznApplied === path) return;
   // eslint-disable-next-line import/no-cycle
   const { loadFragment } = await import('../blocks/fragment/fragment.js');
   const fragment = await loadFragment(path);
