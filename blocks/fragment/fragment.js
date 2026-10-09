@@ -6,6 +6,7 @@
 
 // eslint-disable-next-line import/no-cycle
 import {
+  decorateExternalLinks,
   decorateMain,
 } from '../../scripts/scripts.js';
 
@@ -36,6 +37,7 @@ export async function loadFragment(path) {
 
       decorateMain(main);
       await loadSections(main);
+      decorateExternalLinks(main);
       return main;
     }
   }

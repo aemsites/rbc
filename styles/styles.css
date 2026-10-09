@@ -522,6 +522,18 @@ main .default-content-wrapper :is(a, button) > .icon svg [stroke]:not([stroke="n
   stroke: currentcolor;
 }
 
+a > .icon-external,
+main .default-content-wrapper a > .icon-external {
+  width: 0.8em;
+  height: 0.8em;
+  margin-inline: 0.3em 0;
+  vertical-align: -0.05em;
+}
+
+a > .icon-external svg path {
+  fill: currentcolor;
+}
+
 /* sections */
 main > .section {
   margin: var(--space-2xl) 0;

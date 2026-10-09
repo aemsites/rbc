@@ -1,8 +1,9 @@
-import { labelKind, watchStuck } from '../utils/dom.js';
+import { createElement, labelKind, watchStuck } from '../utils/dom.js';
 import { decorateRateCode, decorateRates } from '../utils/rates.js';
 import linkFootnotes, { revealLegalHash } from '../utils/footnotes.js';
 import decorateTooltips from '../utils/tooltips.js';
 import decorateDisclosures from '../utils/disclosures.js';
+import fetchLocalPlaceholders from '../utils/placeholders.js';
 import {
   getMetadata,
   loadHeader,
@@ -272,6 +273,55 @@ export function decorateIcons(element) {
   element.querySelectorAll('span.icon').forEach(decorateIcon);
 }
 
+// hosts (and their subdomains) that count as the same site, even when served from another origin
+const INTERNAL_DOMAINS = ['rbcroyalbank.com'];
+
+function isExternalLink(a) {
+  let url;
+  try {
+    url = new URL(a.href, window.location.href);
+  } catch {
+    return false;
+  }
+  if (!/^https?:$/.test(url.protocol)) return false;
+  const host = url.hostname;
+  if (host === window.location.hostname) return false;
+  return !INTERNAL_DOMAINS.some((domain) => host === domain || host.endsWith(`.${domain}`));
+}
+
+/**
+ * Opens off-site links in a new window, flagging text links (not buttons) with an icon.
+ * Safe to run repeatedly, so links that blocks render later can be picked up.
+ * @param {Element} element The container to decorate
+ */
+export function decorateExternalLinks(element) {
+  const links = [...element.querySelectorAll('a[href]:not([data-external])')]
+    .filter(isExternalLink);
+  const icons = [];
+  links.forEach((a) => {
+    a.dataset.external = '';
+    a.target = '_blank';
+    const rel = new Set(a.rel.split(/\s+/).filter(Boolean));
+    rel.add('noopener');
+    a.rel = [...rel].join(' ');
+
+    if (a.matches('.button, .button-wrapper a') || a.querySelector('img, svg, .icon')) return;
+    if (!a.textContent.trim()) return;
+    // the label lives in aria-label, not text, so link text stays clean for analytics and titles
+    const icon = createElement('span', {
+      class: 'icon icon-external', role: 'img', 'aria-label': 'opens in a new window',
+    });
+    a.append(icon);
+    icons.push(icon);
+    decorateIcon(icon);
+  });
+  if (!icons.length) return;
+  fetchLocalPlaceholders().then((ph) => {
+    if (!ph.opensInNewWindow) return;
+    icons.forEach((icon) => icon.setAttribute('aria-label', ph.opensInNewWindow));
+  });
+}
+
 function decorateStickyTitle(main) {
   const section = main.querySelector('.section:has(h1)');
   if (!section || !getMetadata('sticky-title')) return;
@@ -298,6 +348,7 @@ export function decorateMain(main) {
   decorateTooltips(main);
   decorateDisclosures(main);
   decorateButtons(main);
+  decorateExternalLinks(main);
   decorateRateCode(main);
   linkFootnotes(main);
 }
@@ -387,6 +438,7 @@ async function loadLazy(doc) {
   const main = doc.querySelector('main');
   import('../utils/pzn.js');
   await loadSections(main);
+  decorateExternalLinks(main);
   decorateRates(main);
 
   const { hash } = window.location;
