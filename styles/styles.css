@@ -394,6 +394,10 @@ p.button-wrapper {
   margin: var(--space-xs) 0;
 }
 
+p.button-wrapper:has(a.link) {
+  align-items: center;
+}
+
 a.button:any-link,
 button.button {
   box-sizing: border-box;
@@ -561,7 +565,7 @@ main > .section:first-of-type > :where(.default-content-wrapper) h1 {
   }
 }
 
-main > .section p.link-wrapper a {
+main > .section :is(p.link-wrapper a, a.link) {
   text-decoration: none;
 
   &:hover {
@@ -569,7 +573,7 @@ main > .section p.link-wrapper a {
   }
 }
 
-main > .section p.link-wrapper a::after {
+main > .section :is(p.link-wrapper a, a.link)::after {
   content: "";
   mask: url("/icons/chevron-down.svg") no-repeat center;
   position: relative;
@@ -587,7 +591,8 @@ main > .section[data-pzn-slot]:empty {
 }
 
 @media (width < 768px) {
-  main .hide-mobile {
+  main .hide-mobile,
+  main .default-content-wrapper:has(+ * > .hide-mobile):not(:has(p, ul, ol, table)) {
     display: none;
   }
 }

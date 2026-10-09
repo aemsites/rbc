@@ -1,1 +1,13 @@
 /* add global styles that can be loaded post LCP here */
+
+/* OneTrust's policy text out-paints page content and becomes the LCP element. Only the text is
+   constrained: clipping the banner itself would hide the consent buttons where they stack.
+   !important is needed because OneTrust injects its own stylesheet after this one */
+#onetrust-banner-sdk #onetrust-policy-text,
+#onetrust-banner-sdk .ot-b-addl-desc {
+  display: block !important;
+  max-height: 4.5em !important;
+  overflow-y: auto !important;
+  font-size: 12px !important;
+  line-height: 1.35 !important;
+}
