@@ -13,11 +13,15 @@
     "AGENT_SET": "dev"
   },
   "env": {
+    // Conductrics has the EDS URLs enabled on .page, not .live, so the demo fronts preview.
+    // RULES_KEY and CONDUCTRICS_URL carry keys and are set with `wrangler secret put`, never here.
     "preview": {
+      "workers_dev": true,
       "vars": {
         "ORIGIN": "https://main--rbc--aemsites.aem.page",
         "AGENT_SET": "eds",
-        "CANONICAL_ORIGIN": "https://main--rbc--aemsites.aem.page"
+        "CANONICAL_ORIGIN": "https://main--rbc--aemsites.aem.page",
+        "RULES_URL": "https://ssgtmactivation.rbc.com/rules-engine"
       }
     },
     "production": {

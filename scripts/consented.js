@@ -1,5 +1,6 @@
 import { loadScript } from './aem.js';
 import getPublicConfig from '../utils/config.js';
+import recordTraits from './pzn-traits.js';
 
 const CONDUCTRICS_BASE = 'https://client-rbc.cdn-v3.conductrics.com/ac-VyDHnrdzqf/v3/agent-api/js/f-BXnDgyehSJ';
 const DEPLOY_TARGETS = {
@@ -12,26 +13,6 @@ const target = PROD_HOSTS.includes(window.location.hostname)
   ? DEPLOY_TARGETS.prod
   : DEPLOY_TARGETS.stage;
 
-const TRAIT_COOKIE_TTL = 86400;
-
-/*
- * Conductrics keeps the visitor profile in localStorage, which the edge worker cannot read, so a
- * server-side decision would see no traits and never select. This mirrors the traits Conductrics
- * computed into a cookie it can read. Remove once RBC persists them to c-traits-list themselves.
- */
-function mirrorTraits() {
-  let traits;
-  try {
-    ({ traits } = JSON.parse(localStorage.getItem('cp-sess') || '{}'));
-  } catch (e) {
-    return;
-  }
-  if (!Array.isArray(traits)) return;
-  const value = traits.filter((t) => t.startsWith('cust/') && !t.endsWith(':null')).join(',');
-  if (!value) return;
-  document.cookie = `pzn-traits=${encodeURIComponent(value)}; path=/; max-age=${TRAIT_COOKIE_TTL}; samesite=lax`;
-}
-
 getPublicConfig().then(({ conductricsApiKey }) => {
   if (typeof conductricsApiKey !== 'string' || !conductricsApiKey.trim()) {
     throw new Error('Could not obtain a valid public.conductricsApiKey from /config.json');
@@ -40,9 +21,9 @@ getPublicConfig().then(({ conductricsApiKey }) => {
   url.searchParams.set('apikey', conductricsApiKey.trim());
   return loadScript(url.href, { async: true });
 }).then(() => {
-  mirrorTraits();
+  recordTraits();
   // the trait that matters is usually set by the page being left, so catch its final state too
-  window.addEventListener('pagehide', mirrorTraits);
+  window.addEventListener('pagehide', recordTraits);
 }).catch((error) => {
   // eslint-disable-next-line no-console
   console.error('Conductrics loading failed', error);
