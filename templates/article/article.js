@@ -180,7 +180,12 @@ function buildEnd(ph) {
       ...topics.map((t) => topicLink(t, 'article-topic')),
     ]));
   }
-  return createElement('div', { class: 'section article-end' }, createElement('div', {}, children));
+  const end = createElement('div', { class: 'section article-end' }, createElement('div', {}, children));
+  // hidden like the authored sections until loadSections reaches it, or it would show under
+  // the title and then be pushed down the page as the body loads in (layout shift)
+  end.dataset.sectionStatus = 'initialized';
+  end.style.display = 'none';
+  return end;
 }
 
 /**
@@ -229,6 +234,15 @@ export async function decorateArticle(main, options = {}) {
   // the jump menu reads first on mobile, right under the title
   header.after(rail);
   main.classList.add('article-has-rail');
+  // the rail shows with the title: shown sooner, the title would load in above it and push it down
+  if (header.dataset.sectionStatus !== 'loaded') {
+    rail.style.display = 'none';
+    new MutationObserver((_, observer) => {
+      if (header.dataset.sectionStatus !== 'loaded') return;
+      rail.style.display = null;
+      observer.disconnect();
+    }).observe(header, { attributes: true, attributeFilter: ['data-section-status'] });
+  }
 }
 
 export default async function decorate(main) {
