@@ -64,14 +64,32 @@ export function consentOverride() {
   return ['accept', 'true', '1', 'yes'].includes(override.toLowerCase());
 }
 
+// OneTrust sets this only once the visitor dismisses the banner or saves preferences.
+// OptanonConsent alone is not enough: the SDK writes it on first view, before any choice.
+export function bannerDismissed() {
+  return /(?:^|;\s*)OptanonAlertBoxClosed=/.test(document.cookie);
+}
+
 let resolveOneTrustReady;
 const oneTrustReady = new Promise((resolve) => { resolveOneTrustReady = resolve; });
+let oneTrustRequested = false;
 
 window.OptanonWrapper = () => {
   resolveOneTrustReady();
   const active = window.OnetrustActiveGroups || '';
   onConsentUpdate(active.split(',').includes(CONSENT_GROUPS.personalization));
 };
+
+export function loadOneTrust() {
+  if (!oneTrustRequested) {
+    oneTrustRequested = true;
+    loadScript('https://cdn.cookielaw.org/scripttemplates/otSDKStub.js', {
+      async: '',
+      'data-domain-script': OT_DOMAIN_SCRIPT,
+    });
+  }
+  return oneTrustReady;
+}
 
 // Authors can't add OneTrust's .ot-sdk-show-settings class in DA, so a link to
 // #cookie-settings opens the preference center instead.
@@ -81,7 +99,7 @@ document.addEventListener('click', (event) => {
   event.preventDefault();
   // repeat clicks before the SDK is ready would toggle the preference center open and shut
   if (pendingOpen) return;
-  pendingOpen = oneTrustReady.then(() => {
+  pendingOpen = loadOneTrust().then(() => {
     pendingOpen = undefined;
     window.OneTrust?.ToggleInfoDisplay();
   });
@@ -95,11 +113,7 @@ if (override !== null) {
   if (groups) onConsentUpdate(hasConsentGroup(groups));
 }
 
-// OneTrust reaches the EDS site through GTM today, which never fires its tag here and would
-// land after the martech delay anyway; loading the stub ourselves is what resolves consent
-// for a first-time visitor. Returning visitors resolve from the cookie above, ahead of it; the
-// stub still loads for them, since OneTrust also serves the preference center.
-loadScript('https://cdn.cookielaw.org/scripttemplates/otSDKStub.js', {
-  async: '',
-  'data-domain-script': OT_DOMAIN_SCRIPT,
-});
+// The SDK is the main-thread cost, so it loads only when it has work to do: showing the
+// banner to visitors who have not made a choice. Visitors who have resolve from the cookie
+// above and fetch the SDK on demand when they open cookie settings.
+if (!bannerDismissed()) loadOneTrust();
