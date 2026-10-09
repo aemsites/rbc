@@ -1,7 +1,7 @@
 import pages, { TRAIT_LOBS, TRAIT_SEGMENTS } from '../../scripts/pzn-config.js';
 
 const SHARED_TTL = 300;
-const PAGE_TTL = 60;
+const PAGE_TTL = 300;
 const DECISION_TTL = 1800;
 const DECISION_COOKIE = 'pzn-decision';
 const VID_COOKIE = 'design_test_vid';
@@ -129,9 +129,14 @@ function previewArm(url, jar, agent) {
   return previewAgent === agent && arm ? arm : null;
 }
 
+/*
+ * Everything the decision was made from, so acquiring or changing any trait retires the cached
+ * one. Keying on the segment alone outlived a change to lastviewedsavings, which pins a visitor
+ * who had no trait on arrival to the default hero for the rest of the cookie's life.
+ */
 function decisionKey(jar) {
-  const trait = traitSegment(jar);
-  if (trait) return `t:${trait}`;
+  const traits = conductricsTraits(jar);
+  if (traits) return `t:${traits}`;
   const clientId = gaClientId(jar);
   return clientId ? `g:${clientId}` : null;
 }
