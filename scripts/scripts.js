@@ -156,8 +156,10 @@ function decorateButtons(main) {
       inner.querySelectorAll('a[href]').forEach((link) => link.remove());
       return !inner.textContent.trim();
     });
-    if (!buttons.length && !links.some(imageLink)) p.classList.add('link-wrapper');
-    if (buttons.length !== links.length) return;
+    if (!buttons.length) {
+      if (!links.some(imageLink)) p.classList.add('link-wrapper');
+      return;
+    }
 
     const variants = new Map(buttons.map((a) => {
       const strong = a.closest('strong');
@@ -168,6 +170,7 @@ function decorateButtons(main) {
 
     p.className = 'button-wrapper';
     buttons.forEach((a) => { a.className = `button ${variants.get(a)}`; });
+    links.filter((a) => !variants.has(a) && !imageLink(a)).forEach((a) => a.classList.add('link'));
     p.querySelectorAll('em, strong').forEach((w) => w.replaceWith(...w.childNodes));
   });
 }
