@@ -64,10 +64,28 @@ export function consentOverride() {
   return ['accept', 'true', '1', 'yes'].includes(override.toLowerCase());
 }
 
+let resolveOneTrustReady;
+const oneTrustReady = new Promise((resolve) => { resolveOneTrustReady = resolve; });
+
 window.OptanonWrapper = () => {
+  resolveOneTrustReady();
   const active = window.OnetrustActiveGroups || '';
   onConsentUpdate(active.split(',').includes(CONSENT_GROUPS.personalization));
 };
+
+// Authors can't add OneTrust's .ot-sdk-show-settings class in DA, so a link to
+// #cookie-settings opens the preference center instead.
+let pendingOpen;
+document.addEventListener('click', (event) => {
+  if (!event.target.closest?.('a[href$="#cookie-settings"]')) return;
+  event.preventDefault();
+  // repeat clicks before the SDK is ready would toggle the preference center open and shut
+  if (pendingOpen) return;
+  pendingOpen = oneTrustReady.then(() => {
+    pendingOpen = undefined;
+    window.OneTrust?.ToggleInfoDisplay();
+  });
+});
 
 const override = consentOverride();
 if (override !== null) {
