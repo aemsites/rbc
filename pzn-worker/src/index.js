@@ -24,6 +24,8 @@ const cdnType = (env) => (TAG_HEADER[env.BYO_CDN_TYPE] ? env.BYO_CDN_TYPE : 'clo
 // both /path and /path/ address the same page; the agents' URL lists match one form exactly
 const canonicalPath = (pathname) => pathname.replace(/(.)\/$/, '$1');
 
+const addClass = (existing, name) => `${existing || ''} ${name}`.trim();
+
 const originHeaders = (url, env) => ({
   'x-forwarded-host': url.host,
   'x-byo-cdn-type': cdnType(env),
@@ -331,14 +333,13 @@ async function decideSegment(request, url, env, trace, jar, page, ssr, visitorUu
  * A slot's variants are authored as section metadata: `pzn-slot` names the slot, and one
  * `pzn-<variant>` row per variant holds its fragment. Conductrics Express reads those same rows
  * client-side through utils/pzn.js, so both paths resolve the same authored content.
+ *
+ * The same fetch yields the tab strip, because a page can personalize either way: a slot swaps a
+ * section's content, while a tab-scoped page authors one section per segment and reveals the
+ * matching ones. Resolving the tab here ships it already applied, so no section paints only to be
+ * hidden once tabs.js decorates.
  */
-async function slotVariants(origin, path) {
-  const res = await fetch(`${origin}${path}.plain.html`, {
-    headers: { 'accept-encoding': 'identity' },
-    cf: { cacheEverything: true, cacheTtl: SHARED_TTL },
-  });
-  if (!res.ok) return null;
-  const html = await res.text();
+function slotVariants(html) {
   const [tag] = /<div\b[^>]*\sdata-pzn-slot="[^"]*"[^>]*>/.exec(html) || [];
   if (!tag) return null;
   const variants = {};
@@ -346,6 +347,62 @@ async function slotVariants(origin, path) {
     if (name !== 'slot') variants[name] = value.trim().replace(/\/$/, '');
   });
   return Object.keys(variants).length ? variants : null;
+}
+
+/*
+ * The tab strip's rows, as blocks/tabs/tabs.js reads them: a row's link names the tab it opens
+ * and its second cell lists the keys that activate it, defaulting to the tab's own name. A
+ * segment is one of those keys, so these rows are what turns a decision into a selected tab.
+ */
+async function tabRows(html) {
+  const rows = [];
+  let cell = null;
+  await new HTMLRewriter()
+    .on('div[class~="tabs"][class~="sections"] > div > div', {
+      element(el) {
+        cell = { tab: null, keys: '' };
+        el.onEndTag(() => {
+          if (cell.tab) rows.push({ tab: cell.tab, activatedBy: [cell.tab] });
+          else if (rows.length) {
+            const keys = cell.keys.split(',').map((k) => k.trim()).filter((k) => k && k !== 'scroll');
+            if (keys.length) rows[rows.length - 1].activatedBy = keys;
+          }
+          cell = null;
+        });
+      },
+      text(chunk) {
+        if (cell && !cell.tab) cell.keys += chunk.text;
+      },
+    })
+    .on('div[class~="tabs"][class~="sections"] > div > div > a[href^="#"]', {
+      element(el) {
+        if (cell) cell.tab = decodeURIComponent((el.getAttribute('href') || '').slice(1));
+      },
+    })
+    .transform(new Response(html))
+    .arrayBuffer();
+  return rows;
+}
+
+/*
+ * The tab tabs.js would select for this key, or null when no row claims it. tabs.js falls back to
+ * the default tab, which the stylesheet already shows on its own, so an unclaimed key leaves the
+ * page exactly as authored rather than committing the edge to a state it has no decision for.
+ */
+function resolveTab(rows, key) {
+  if (!rows || !key) return null;
+  if (rows.some((r) => r.tab === key)) return key;
+  return rows.find((r) => r.activatedBy.includes(key))?.tab || null;
+}
+
+async function pageHints(origin, path) {
+  const res = await fetch(`${origin}${path}.plain.html`, {
+    headers: { 'accept-encoding': 'identity' },
+    cf: { cacheEverything: true, cacheTtl: SHARED_TTL },
+  });
+  if (!res.ok) return {};
+  const html = await res.text();
+  return { variants: slotVariants(html), rows: await tabRows(html) };
 }
 
 async function inlineFragment(origin, fragmentPath, env) {
@@ -408,8 +465,8 @@ export default {
     const shell = fetchShell();
 
     // The page's own variant list and the decision are independent, so resolve them together.
-    const [variants, segment] = await Promise.all([
-      slotVariants(origin, path).catch(() => null),
+    const [hints, segment] = await Promise.all([
+      pageHints(origin, path).catch(() => ({})),
       (async () => {
         if (cached) {
           trace.cache = 'hit';
@@ -425,9 +482,14 @@ export default {
       })(),
     ]);
 
+    const { variants, rows } = hints;
     const fragmentPath = (segment && variants && variants[segment]) || null;
-    if (segment && !variants) trace.reason = 'page-declares-no-pzn-slot';
-    else if (segment && !fragmentPath) trace.reason = `no-pzn-row-for-${segment}`;
+    // a tab-scoped page carries no slot, so the tab is the whole of how its decision lands
+    const tab = trace.skipped ? null : resolveTab(rows, segment);
+    if (tab) trace.tab = tab;
+    if (segment && !fragmentPath && !tab) {
+      trace.reason = variants ? `no-pzn-row-for-${segment}` : 'page-personalizes-nothing';
+    }
     trace.decisionMs = Date.now() - started;
 
     const [upstream, hero] = await Promise.all([
@@ -471,6 +533,23 @@ export default {
           // section-tabs reads this as RBC's Tab Pre-selection; a segment with no claiming
           // tab (e.g. prospect) just falls through to the default tab, same as no signal at all
           if (!trace.skipped && segment) el.setAttribute('data-preselect', segment);
+        },
+      })
+      /*
+       * Without `tab-js` the stylesheet shows the default sections alone, which is the right
+       * fallback when the block never decorates. Setting it here means the edge owes every
+       * `[data-tab]` section its own answer, so both attributes are written in the same pass.
+       */
+      .on('html', {
+        element(el) {
+          if (tab) el.setAttribute('class', addClass(el.getAttribute('class'), 'tab-js'));
+        },
+      })
+      .on('[data-tab]', {
+        element(el) {
+          if (!tab) return;
+          const allowed = (el.getAttribute('data-tab') || '').split(',').map((t) => t.trim());
+          if (!allowed.includes(tab)) el.setAttribute('class', addClass(el.getAttribute('class'), 'tab-hidden'));
         },
       })
       .on('head', {
