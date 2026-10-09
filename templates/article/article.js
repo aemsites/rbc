@@ -1,6 +1,7 @@
 import { getMetadata, toClassName } from '../../scripts/aem.js';
 import { createElement } from '../../utils/dom.js';
-import fetchLocalPlaceholders from '../../utils/placeholders.js';
+import fetchLocalPlaceholders, { SHEETS } from '../../utils/placeholders.js';
+import { fetchTaxonomy, resolveTopic } from '../../utils/taxonomy.js';
 
 const TOPIC_BASE = 'https://www.rbcroyalbank.com/en-ca/my-money-matters/topic/';
 // calibrated against the stated read times on the source articles
@@ -9,7 +10,14 @@ const DESKTOP = window.matchMedia('(width >= 900px)');
 const OFF = ['off', 'false', 'no', 'none'];
 
 const list = (value) => value.split(',').map((v) => v.trim()).filter(Boolean);
-const topicLink = (topic, cls) => createElement('a', { class: cls, href: `${TOPIC_BASE}${toClassName(topic)}/` }, topic);
+
+// topics are tagger keys resolved against the taxonomy sheet. Unknown values keep the old
+// derived link on English pages, where the label slug matches the topic page
+function topicLink(taxonomy, value, cls) {
+  const { label, url } = resolveTopic(taxonomy, value);
+  const href = url || (SHEETS[getMetadata('lang')] ? null : `${TOPIC_BASE}${toClassName(label)}/`);
+  return href ? createElement('a', { class: cls, href }, label) : createElement('span', { class: cls }, label);
+}
 
 function formatDate(value) {
   const iso = /^\d{4}-\d{2}-\d{2}$/.test(value) ? `${value}T00:00` : value;
@@ -123,14 +131,14 @@ function buildToc(sections, ph) {
   return nav;
 }
 
-function decorateHeader(header, sections, ph, options) {
+function decorateHeader(header, sections, ph, taxonomy, options) {
   const content = header.querySelector('.default-content-wrapper') || header.firstElementChild;
   const h1 = header.querySelector('h1');
   if (!content || !h1) return null;
   header.classList.add('article-header');
 
   const category = getMetadata('category');
-  if (options.category && category) h1.before(topicLink(category, 'article-category'));
+  if (options.category && category) h1.before(topicLink(taxonomy, category, 'article-category'));
 
   const author = getMetadata('author');
   if (options.byline && author) {
@@ -168,7 +176,7 @@ function isAfterArticle(section) {
   return section.children.length === 1 && !!section.querySelector(':scope > .fragment-wrapper');
 }
 
-function buildEnd(ph) {
+function buildEnd(ph, taxonomy) {
   const children = [
     createElement('p', { class: 'article-end-title' }, createElement('strong', {}, ph.shareThisArticle || 'Share This Article')),
     buildShare(ph),
@@ -177,7 +185,7 @@ function buildEnd(ph) {
   if (topics.length) {
     children.push(createElement('div', { class: 'article-topics' }, [
       createElement('p', {}, ph.topics || 'Topics:'),
-      ...topics.map((t) => topicLink(t, 'article-topic')),
+      ...topics.map((t) => topicLink(taxonomy, t, 'article-topic')),
     ]));
   }
   const end = createElement('div', { class: 'section article-end' }, createElement('div', {}, children));
@@ -199,19 +207,23 @@ export async function decorateArticle(main, options = {}) {
   const opts = {
     category: true, byline: true, endShare: true, shareInRail: true, ...options,
   };
-  const ph = await fetchLocalPlaceholders();
+  const tagged = getMetadata('topics') || (opts.category && getMetadata('category'));
+  const [ph, taxonomy] = await Promise.all([
+    fetchLocalPlaceholders(),
+    tagged ? fetchTaxonomy() : [],
+  ]);
   const all = [...main.querySelectorAll(':scope > .section')];
   const header = all.find((s) => s.querySelector('h1'));
   if (!header) return;
   const sections = all.slice(all.indexOf(header) + 1);
   while (sections.length && isAfterArticle(sections.at(-1))) sections.pop().classList.add('article-after');
 
-  const meta = decorateHeader(header, sections, ph, opts);
+  const meta = decorateHeader(header, sections, ph, taxonomy, opts);
   sections.forEach((s) => s.classList.add('article-body'));
   markFormulas(sections);
 
   if (opts.endShare) {
-    const end = buildEnd(ph);
+    const end = buildEnd(ph, taxonomy);
     end.classList.add('article-body');
     (sections.at(-1) || header).after(end);
     sections.push(end);
