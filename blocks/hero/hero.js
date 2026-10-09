@@ -150,18 +150,17 @@ export default function decorate(block) {
   offerBox(block);
   introVideo(block);
 
-  block.querySelectorAll('p > em:only-child').forEach((em) => {
-    if (em.textContent.trim() === em.parentElement.textContent.trim()) em.parentElement.classList.add('hero-note');
-  });
-
-  // a line with part of it in <em>: the tagline under the buttons, <em> in the accent font
-  block.querySelectorAll('p:has(> em):not(.hero-note, .button-wrapper)').forEach((p) => {
-    if (!p.querySelector('a')) p.classList.add('hero-tagline');
-  });
-
   const eyebrow = block.querySelector('h1, h2, h3, h4, h5, h6')?.previousElementSibling;
   if (eyebrow?.tagName === 'P' && !eyebrow.querySelector('a, picture, img')) {
     eyebrow.classList.add('hero-eyebrow');
   }
+
+  block.querySelectorAll('p:not(.hero-eyebrow) > em:only-child').forEach((em) => {
+    if (em.textContent.trim() === em.parentElement.textContent.trim()) em.parentElement.classList.add('hero-note');
+  });
+
+  block.querySelectorAll('p:has(> em):not(.hero-note, .hero-eyebrow, .button-wrapper)').forEach((p) => {
+    if (!p.querySelector('a')) p.classList.add('hero-tagline');
+  });
   trackHeroPromotion(block);
 }
